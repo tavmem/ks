@@ -1,0 +1,26 @@
+K enlist(K x);
+K demote(K a);
+K cd(K a);
+K ci(K a);
+K promote(K a);
+K dollar(K a,K b);
+I FC(F a,F b);
+F FF(F f);
+I charpos(S s,C c);
+extern I PP;
+K kcloneI(K a,const char*f,int n);
+#define kclone(a) kcloneI(a,__FILE__,__LINE__)
+K at(K x,K y);
+K format(K a);
+K newK(I t,I n);
+K Kf(F x);
+extern F ni[];
+K formKfCS(S s);
+K Ki(I x);
+extern I NI[];
+K formKiCS(S s);
+K Ks(S x);
+S sp(S k);
+S CSK(K x);
+C verbsChar(V p);
+C adverbsChar(V p);
