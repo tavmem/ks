@@ -1,0 +1,12 @@
+a.out
+kbuild.h
+k
+k_test
+kona
+kona_test
+*.[oa]
+*.exe
+*.*~
+*~
+TAGS
+ggg

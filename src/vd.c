@@ -155,6 +155,7 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
   else R NYI;
   if(y) {yn0=countI(y);}
 
+  O("\ns:%lld  fn:%lld  ft:%lld\n",s,fn,ft);
   if(-1==s && 0==fn && -3!=ft)
   {
     I argc = y?2:1;
