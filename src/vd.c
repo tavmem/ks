@@ -141,13 +141,13 @@ K dot(K a, K b) //NB: b can be a cheating 0-type with NULLs .. ?
 //TODO: k-tree elements with subelements whose refcount is >1 will bork????
 //TODO: catch oom errors etc.
 K dot_ref(K *p, K *x, K *z, I s, K c, K y)
-{ O("BEG drf\n"); //O("(*p)->t:%lld  (*p)->n:%lld  (*p)->_c:%lld  count:%lld  lane:%lld  p:%p\n",(*p)->t,(*p)->n,(*p)->_c,((*p)->_c)>>8, 0xFF & (unsigned long long)(*p)->_c, p);
+{ O("BEG dot_ref\n"); //O("(*p)->t:%lld  (*p)->n:%lld  (*p)->_c:%lld  count:%lld  lane:%lld  p:%p\n",(*p)->t,(*p)->n,(*p)->_c,((*p)->_c)>>8, 0xFF & (unsigned long long)(*p)->_c, p);
   O("    p:%p      sd(*p):",p);sd(*p);
   O("    x:%p      sd(*x):",x);sd(*x);
   O("    sd(*z):");if(z)sd(*z);else O("     is 0\n");
   O("    s:          %lld\n",s);
   O("    sd(c): ");sd(c);
-  O("    sd(y): ");sd(y);O("\n");
+  O("    sd(y): ");sd(y);
   K d=*p, f=x?*x:0;
   I dt=d->t, dn=countI(d), ft=999, fn, yn0=0;
 
@@ -161,7 +161,9 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
     K args=newK(0,argc);U(args)//Cheating 0-type w/ NULLs
     kK(args)[0]=ci(*p);
     if(argc > 1) kK(args)[1] = ci(y);
+    O("~BP specialAmendDot(c,args)      K specialAmendDot(K c, K args) <- K dot_ref(K *p, K *x, K *z, I s, K c, K y)      ");
     K r = specialAmendDot(c,args);
+    O("#BP dot_ref :: specialAmendDot(c,args)\n"); O("...BP:");sd(r); O("\nsd(prnt):");sd(prnt);O("\n");
     cd(args);
     U(r)
     //O("        r->t:%lld   r->n:%lld   r->_c:%lld   count:%lld   lane:%lld   &r:%p   ",r->t,r->n,r->_c,(r->_c)>>8, 0xFF & (unsigned long long)r->_c, &r); O("show(r): "); show(r);
@@ -181,7 +183,7 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
         *p=r;
         //O("B-chk NIL->t:%lld   NIL->n:%lld   NIL->_c:%lld   count:%lld   lane:%lld   &NIL:%p\n",NIL->t,NIL->n,NIL->_c,(NIL->_c)>>8, 0xFF & (unsigned long long)NIL->_c, &NIL);
       }
-    O("    at end:\n");
+    O("    at end of dot_ref:\n");
     O("    p:%p      sd(*p):",p);sd(*p);
     O("    x:%p      sd(*x):",x);sd(*x);
     O("    sd(*z):");if(z)sd(*z);else O("     is 0\n");
@@ -269,7 +271,7 @@ K dot_tetradic_2(K *g, K b, K c, K y)
   {
     O("~AH: dot_ref(g,&b,0,bn-1,c,y)      K dot_ref(K *p, K *x, K *z, I s, K c, K y) <- K dot_tetradic_2(K *g, K b, K c, K y)      ");
     dot_ref(g,&b,0,bn-1,c,y); //could factor further by promoting everything...
-    O("#AH dt2 :: dot_ref(g,&b,0,bn-1,c,y)\n"); O("...AH:  returns NULL\n");
+    O("#AH dot_tetradic_2 :: dot_ref(g,&b,0,bn-1,c,y)\n"); O("...AH:  returns NULL\n"); O("\nsd(prnt):");sd(prnt);O("\n");
   }
   else if(0==bt || 1==ABS(bt) || 4==ABS(bt))
   {

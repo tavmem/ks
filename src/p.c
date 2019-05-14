@@ -601,7 +601,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                         S a=strchr(s+k+1,'['); S b=strchr(a,']');
                         O("wd_<-cap-brc1   ");
                         j=wd_(a+1,b-a-1,zdict,z); //Grab only params. This must create entries in *zdict
-                        O("wd_::cap-brc1   ");
+                        O("wd_::cap-brc1\n");
                         M(z,j) //not g
                         cd(j);
                       }
@@ -611,7 +611,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                         M(z,t)
                         O("wd_<-cap-brc2   ");
                         j=wd_(s+k+1,r-2,&t,0); //Grab all local names
-                        O("wd_::cap-brc2   ");
+                        O("wd_::cap-brc2\n");
                         M(z,t,j);
                         I n=0;
                         DO(3, if(DE(t,IFP[2-i])){n=3-i;break;})
@@ -619,7 +619,8 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                         cd(t); cd(j);
                       }
 
-                      O("wd_<-cap-brc3   ");
+                      O("wd_(s+k+1,r-2,ydict,z) <- cap-brc3      K wd_(S s, int n, K*dict, K func) <- I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
+                      //O("sd_(z,9):");sd_(z,9);O("      ");
                       j=wd_(s+k+1,r-2,ydict,z);
                       O("wd_::cap-brc3\n");
                       M(z,j)

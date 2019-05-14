@@ -280,12 +280,13 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     perror("Lock mutex in line()"); abort();}
 
   //O("BEG ex: ex(wd(*a,*n))      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      sd(a):",);sd(a);
-  O("\nBEG wd: wd(*a,*n)      K wd(S s, int n) <- I line(FILE*f, S*a, I*n, PDA*p)      s:%s   n:%lld\n",*a,*n);
+  O("\n~BQ wd(*a,*n)      K wd(S s, int n) <- I line(FILE*f, S*a, I*n, PDA*p)      s:%s   n:%lld\n",*a,*n);
   K zz=wd(*a,*n);
-  O("END wd: line :: wd(*a,*n)\n\n");
+  O("#BQ line :: wd(*a,*n)\n\n");
   //O("BEG ex: ex(wd(*a,*n))      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      sd(a):");sd(zz);
+  O("~BR ex(zz)      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      s:%s   n:%lld      ",*a,*n);
   RTIME(d,k=ex(zz))
-  O("END ex: line :: ex\n");
+  O("#BR line :: ex(zz)\n");
   //RTIME(d,k=ex(wd(*a,*n)))
   //O("NIL->t:%lld   NIL->n:%lld   NIL->_c:%lld   count:%lld   lane:%lld   &NIL:%p\n",NIL->t,NIL->n,NIL->_c,(NIL->_c)>>8, 0xFF & (unsigned long long)NIL->_c, &NIL);
   sd_(KTREE,9);

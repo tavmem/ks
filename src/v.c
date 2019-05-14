@@ -36,7 +36,7 @@ K glue(K a, K b) { R Ks(sp(glueSS(*kS(a),*kS(b)))); } //oom
 K DI(K d, I i){R kK(d)[i];}         //dictionary index, yields entry
 S ES(K d){ R *kS(kK(d)[0]);}        //dictionary entry's symbol
 K DE(K d,S b){
-   //O("beg DE\n");
+   //O("BEG DE\n");
    DO(d->n,
       K x=DI(d,i);
       if(b==ES(x)){
@@ -221,6 +221,7 @@ Z I updateIndex(K *p,I x, K r) //assert (*p)->t is <= 0 and valid x
 
 K specialAmendDot(K c, K args) //If c is like colon_dyadic return args@1, else dot
 {
+  O("BEG specialAmendDot\n");
   if(isColonDyadic(c) && !kV(c)[CONJ]) R 2==args->n?ci(kK(args)[1]):_n();
   R vf_ex(&c,args);
 }
