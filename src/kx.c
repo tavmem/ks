@@ -67,7 +67,7 @@ K sd_(K x,I f) { V *v;
     CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[xn-i-1],2); )) }
   R 0; }
 
-K sd(K x){R sd_(x,9);}     //was 0.  Shows the details of a K-structure. Useful in debugging.
+K sd(K x){R sd_(x,0);}     //Shows the details of a K-structure. Useful in debugging.
 
 Z K cjoin(K x,K y) {
   P(3!=xt,TE)
@@ -523,7 +523,7 @@ K dv_ex(K a, V *p, K b)
 //K3.2 Bug - {b:1_,/";a",/:$a:!x; "{[",b,"]a3}[" ,(1_,/";",/:$a ),"]" } 67890  --> Sometimes works, sometimes stack error, sometimes crash
 K vf_ex(V q, K g)
 { O("BEG vf_ex\n");
-  if(q>(V)DT_SIZE){O("   sd_((K)(*(V*)q,9):");sd_((K)(*(V*)q),9);}
+  if(q>(V)DT_SIZE){O("   sd_((K)(*(V*)q,9):");sd((K)(*(V*)q));}
   O("   sd(g):");sd(g);
   if (interrupted) {interrupted=0; R BE;}
 
@@ -693,11 +693,11 @@ K vf_ex(V q, K g)
       if(!(tree=kV(f)[CACHE_TREE])) {  //could merge this and and CACHE_WD check by duplicating the arg merge DO
         O("BEG build tree from locals & params\n");
         tree=newK(5,p->n+s->n); if(!tree) {stk--; GC;} //note: cleanup is unusual -- could turn into double labels
-        O("tree1:");sd_(tree,9);
+        //O("tree1:");sd_(tree,9);
         DO(tree->n, if(!(kK(tree)[i]=newK(0,3))){cd(tree); stk--; GC;}) //shallow dict copy -- dictionary entry pool?
-        O("tree2:");sd_(tree,9);
+        //O("tree2:");sd_(tree,9);
         DO(tree->n, DO2(3,  kK(DI(tree,i))[j] = ci(kK((i<p->n?DI(p,i):DI(s,i-p->n)))[j])))//shallow copy
-        O("tree3:");sd_(tree,9);
+        //O("tree3:");sd_(tree,9);
         kV(f)[CACHE_TREE]=tree; }
       if(fsf){
         K j0=dot_monadic(kV(prnt)[LOCALS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]);
@@ -718,16 +718,16 @@ K vf_ex(V q, K g)
         O("sd(fc):");sd(fc);O("\n");
         O("sd(tree):");sd(tree);O("\n");
 
-        //fw=wd_(kC(o),o->n,&tree,fc);
+        fw=wd_(kC(o),o->n,&tree,fc);
 
-        tc=newK(5,tree->n); //O("tc1: %p",tc);sd_(tc,9);
-        DO(tc->n, if(!(kK(tc)[i]=newK(0,3))){cd(tc); stk--; GC;}) //O("tc2: %p",tc);sd_(tc,9);
-        DO(tc->n, DO2(3,  kK(DI(tc,i))[j] = ci(kK(DI(tree,i))[j]))) //O("tc3: %p",tc);sd_(tc,9);
-        O("sd(tc):");sd(tc);O("\n");
-        fw=wd_(kC(o),o->n,&tc,fc);
+        //tc=newK(5,tree->n); //O("tc1: %p",tc);sd_(tc,9);
+        //DO(tc->n, if(!(kK(tc)[i]=newK(0,3))){cd(tc); stk--; GC;}) //O("tc2: %p",tc);sd_(tc,9);
+        //DO(tc->n, DO2(3,  kK(DI(tc,i))[j] = ci(kK(DI(tree,i))[j]))) //O("tc3: %p",tc);sd_(tc,9);
+        //O("sd(tc):");sd(tc);O("\n");
+        //fw=wd_(kC(o),o->n,&tc,fc);
 
-        O("#AW: vfx :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n"); O("...AW:");sd_(fw,9);
-        O("fw->t:%lld  fw->n:%lld\n",fw->t,fw->n); O("sd(res): ");sd_(fw,9);
+        O("#AW: vfx :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n"); O("...AW:   sd(fw):     %p",&fw);sd(fw);
+        O("fw->t:%lld  fw->n:%lld\n",fw->t,fw->n); O("sd(res): ");sd(fw);
         kV(f)[CACHE_WD]=fw;
         cd(fc); }
 
@@ -740,11 +740,9 @@ K vf_ex(V q, K g)
       ci(fw);
       stk1++; z=ex(fw); stk1--;
               O("#AN vfx :: ex(fw)     RRR-4\n"); O("...AN:");sd(z);
-              O("sd_(fw,9):");sd_(fw,9);
+              O("sd(fw):");sd(fw);
       DO(p->n,e=EVP(DI(tree,i)); cd(*e); *e=0; )
-      O("tc1:\n");sd_(tc,9);
-      if(tc)cd(tc);
-      O("tc2:\n");sd_(tc,9);
+      if(tc){ O("tc1:\n");sd(tc); cd(tc); O("tc2:\n");sd(tc); }
       stk--;
     )
   }
@@ -823,7 +821,7 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets
 
 K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
   O("BEG ex\n");
-  O("sd(a):");sd_(a,9);
+  O("sd(a):");sd(a);
   U(a); if(a->t==7 && kVC(a)>(K)DT_SIZE && 7==kVC(a)->t && 6==kVC(a)->n)fwh=1;
   if(a->t==7){
     if(prnt==0){
@@ -850,7 +848,7 @@ K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
 Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
                      //Reverse execution/return multiple (paren not function or script) "list notation"  {4,5,6,7} -> {:,if,while,do}
 { O("BEG ex0\n");
-  I ii; for(ii=0;v[ii];ii++){O("     ex0 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd_(*(K*)v[ii],1); else O("\n"); }  //Rex0
+  I ii; for(ii=0;v[ii];ii++){O("     ex0 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }  //Rex0
   I n=0, e=1, i,a,b;
   while(v[n])if(bk(v[n++]))e++;
   b=e>1;
@@ -867,8 +865,8 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
             //cd(z);        //RRR-3  added line   can just comment this out to reverse
               cd(z); frg++;
               O("~AC: ex1(v+1+i,0,&i,n,1)      K ex1(V*w,K k,I*i,I n,I f) <- K ex0(V*v,K k,I r)   i=%lld  n=%lld  f=1    ",i,n);
-                            x=ex1(v+1+i,0,&i,n,1);
-                            for(ii=0;v[ii];ii++){O("AC v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }
+              x=ex1(v+1+i,0,&i,n,1);
+              //for(ii=0;v[ii];ii++){O("AC v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }
               O("#AC: ex0 :: ex1(v+1+i,0,&i,n,1)\n");
               O("...AC:");sd(x);
               O("Bsd(z):");sd(z);

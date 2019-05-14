@@ -329,9 +329,9 @@ K wd(S s, int n){
   lineA=s;
   fdc=0;
   O("  d_:%s   &NIL:%p   sd(NIL):",d_,&NIL);sd(NIL);
-  O("~AC: wd_<-wd   R wd_(s,n,denameD(&KTREE,d_,1),0);\n");
+  O("~BS: wd_<-wd   R wd_(s,n,denameD(&KTREE,d_,1),0);\n");
   K res=wd_(s,n,denameD(&KTREE,d_,1),0);
-  O("#AC: wd :: wd_     sd(res):\n"); sd_(res,9);
+  O("#BS: wd :: wd_     sd(res):\n"); sd(res);
   R res;
 }
 K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
