@@ -258,7 +258,7 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
 }
 
 K dot_tetradic_2(K *g, K b, K c, K y)
-{ O("BEG dt2\n");
+{ O("BEG dot_tetradic_2\n");
   //O("(*g)->t:%lld  (*g)->n:%lld  (*g)->_c:%lld  count:%lld  lane:%lld  g:%p\n",(*g)->t,(*g)->n,(*g)->_c,((*g)->_c)>>8, 0xFF & (unsigned long long)(*g)->_c, g);
   O("    sd(*g):");sd(*g);
   O("    sd(b): ");sd(b);
