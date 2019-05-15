@@ -331,7 +331,7 @@ K wd(S s, int n){
   O("  d_:%s   &NIL:%p   sd(NIL):",d_,&NIL);sd(NIL);
   O("~BS: wd_<-wd   R wd_(s,n,denameD(&KTREE,d_,1),0);\n");
   K res=wd_(s,n,denameD(&KTREE,d_,1),0);
-  O("#BS: wd :: wd_     sd(res):\n"); sd(res);
+  O("#BS: wd :: wd_     sd(res):\n"); O(" %p",&res); sd(res);
   R res;
 }
 K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
@@ -491,9 +491,10 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
   switch(-M)
   {
     CS(MARK_CONDITIONAL, O("conditional\n"); z=offsetColon)//dummy value
-    CS(MARK_PAREN  ,  O("wd_<-cap-prn   \n");
-                      fbr=1;
+    CS(MARK_PAREN  ,  fbr=1;
+                      O("~BT: wd_<-cap-prn    wd_(s+k+1,r-2,dict,func);\n");
                       z=wd_(s+k+1,r-2,dict,func);
+                      O("#BT: wd_ :: cap-prn   \n");
                       O("wd_::cap-prn   \n");
                       if(!z)R (L)PE;) //oom. currently z->t==7 z->n==0.
                       //Execution will know this is paren (for rev order) because of its depth
@@ -516,9 +517,9 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
 
                       V*o = kW(g);
 
-                      O("wd_<-cap-brk   \n");
+                      O("~BU: wd_<-cap-brk    wd_(s+k+1,r-2,dict,func);\n");
                       z=wd_(s+k+1,r-2,dict,func);
-                      O("wd_::cap-brk   \n");
+                      O("#BU: wd_ :: cap-brk   \n");
                       if(!z){cd(g); R (L)PE;}
                       //g o z   oom: you can return 0 but catch above?
 
@@ -588,8 +589,8 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
 
                       kV(z)[CONTeXT] = func?kV(func)[CONTeXT]:d_;
 
-                      K* zdict = (K*)kV(z)+PARAMS;
-                      K* ydict = (K*)kV(z)+LOCALS;
+                      K* zdict = (K*)kV(z)+PARAMS; O("sd(*zdict):    %p",zdict);sd(*zdict);
+                      K* ydict = (K*)kV(z)+LOCALS; O("sd(*ydict):    %p",ydict);sd(*ydict);
                       K j;
 
                       //Validate brackets in {[..]...} : 0-Absent, 1-OK, 2-Fail
@@ -599,9 +600,9 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                       if(state) //Bracketed parameters exist and are well-formed
                       {
                         S a=strchr(s+k+1,'['); S b=strchr(a,']');
-                        O("wd_<-cap-brc1   ");
+                        O("~BV: wd_<-cap-brc1    wd_(a+1,b-a-1,zdict,z);\n");
                         j=wd_(a+1,b-a-1,zdict,z); //Grab only params. This must create entries in *zdict
-                        O("wd_::cap-brc1\n");
+                        O("#BV: wd_ :: cap-brc1   \n");
                         M(z,j) //not g
                         cd(j);
                       }
@@ -609,9 +610,10 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                       {
                         K t=Kd();
                         M(z,t)
-                        O("wd_<-cap-brc2   ");
+                        O("~BW: wd_<-cap-brc2    wd_(s+k+1,r-2,&t,0);\n");
                         j=wd_(s+k+1,r-2,&t,0); //Grab all local names
-                        O("wd_::cap-brc2\n");
+                        O("#BW: wd_ :: cap-brc2   \n");
+                        O("sd(*ydict):    %p",ydict);sd(*ydict);
                         M(z,t,j);
                         I n=0;
                         DO(3, if(DE(t,IFP[2-i])){n=3-i;break;})
@@ -619,10 +621,9 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                         cd(t); cd(j);
                       }
 
-                      O("wd_(s+k+1,r-2,ydict,z) <- cap-brc3      K wd_(S s, int n, K*dict, K func) <- I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
-                      //O("sd_(z,9):");sd_(z,9);O("      ");
+                      O("~BX: wd_(s+k+1,r-2,ydict,z) <- cap-brc3      K wd_(S s, int n, K*dict, K func) <- I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
                       j=wd_(s+k+1,r-2,ydict,z);
-                      O("wd_::cap-brc3\n");
+                      O("#BX: wd_::cap-brc3\n");
                       M(z,j)
                       cd(j);
 
@@ -683,10 +684,11 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                           // see "getrusage" or http://stackoverflow.com/questions/53827/checking-available-stack-size-in-c
                         else {O("n1b   "); z=((K(*)())vn_[charpos(n_s,u[1])])();}
                       else if(func)
-                      { O("n2\n"); //O("KTREE:\n"); sd(KTREE);
-                        //O("sd(*dict):\n");sd(*dict);
-                        //O("sd(KTREE):\n");sd(KTREE);
+                      { O("n2\n"); //if(ydict){O("sd(*ydict):    %p",ydict);sd(*ydict);} else O("nothing\n");
+                        //O("sd(*dict):    %p",dict);sd(*dict);
+                        //O("sd(KTREE):    %p",&KTREE);sd(KTREE);
                         O("u: %s\n",u);
+                        //O("(K*)kV(func)+LOCALS:  %p\n",(K*)kV(func)+LOCALS);
                         if(dict==(K*)kV(func)+PARAMS)
                         { O("n2a\n");
                           V q=newEntry(u);
