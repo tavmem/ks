@@ -384,7 +384,13 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   K kw=newK(-4,1+oc); M(v,km,ks2,kw) V*w=(V*)kK(kw);//words. Assumes terminal extra NULL
 
   I c=0,j=0;  if(!fll)fll=strlen(s2); else fll=-1;
-  DO(y, i+=-1+(j=capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)); if(!j){M(0,v,km,ks2,kw)} )
+  O("y: %lld\n",y);
+  DO(y,
+       O("~BY: capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)      I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K dict,K func) <- K wd_(S s, int n, K dict, K func)     ");
+       j=capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func);
+       O("#BY: wd_ :: K wd_(S s, int n, K dict, K func)\n");
+       i+=-1+j;
+       if(!j){M(0,v,km,ks2,kw)} )
   //O("sl:");DO(n  ,if(!s2[i])break;O("%4c" ,s2[i]))O("\n"); O("ml:");DO(n  ,O("%4ld",m[i]))O("\n"); O("##:");DO(n  ,O("%4ld",  i ))O("\n");
   cd(km);cd(ks2);
 
@@ -467,6 +473,7 @@ Z K* inKtreeR(K*p,S t,I create) {
 }
 
 K* inKtree(K*d, S t, I create) {
+  O("BEG inKtree\n"); O("sd(*d):");sd(*d); O("t: %s\n",t);
   if(!simpleString(t)) R 0; //some kind of error
   R inKtreeR('.'==*t||!*t?&KTREE:d,t,create);
 }
@@ -475,7 +482,7 @@ K* inKtree(K*d, S t, I create) {
 I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
   //IN string, string length, pos in string, markings;
   //OUT words, current #words; IN locals-storage, names-storage, charfunc/NULL
-{ O("cap   ");
+{ O("BEG capture\n"); O("s: %s    n: %lld    k: %lld\n",s,n,k); O("sd(*dict):");sd(*dict);
   if(fll && fll!=n)fll=-1;
   V z=0,*p=w+*d; *p=0;
   I r=1,v=0,y=0,a,b=0,c;S u="",e;K g;I l;
@@ -713,18 +720,23 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                           O("kK(z): %p   ",kK(z));}//Otherwise check the context (refactor with above?)
                       }
                       else {
-                        O("n3\n");
+                        O("n3\n"); O("s: %s    n: %lld    k: %lld\n",s,n,k);
                         if(fll>0)fdc=0;
                         I i;for(i=k;i<strlen(s);i++){
                                if(!fbr && s[i]==';')break;
                                else if(s[i]==':'|| (fbr && (s[i]=='x'||s[i]=='y'||s[i]=='z'))){fdc=1;break;}}
+                        O("~BZ: inKtree(dict,u,0)      K* inKtree(K*d, S t, I create) <- I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)     ");
                         z=inKtree(dict,u,0);
+                        O("#BZ: capture :: inKtree(dict,u,0)\n");
+                        O("fdc: %lld    z: %p\n",fdc,z);
                         if((!fdc)&&!z){L err=(L)VLE;
                            #ifndef DEBUG
                            oerr(); O("%s\n%c\n",u,'^');
                            #endif
                            R err;}
-                        z=denameD(dict,u,fll&&fdc); }
+                        O("~CA: denameD(dict,u,fll&&fdc)      K* denameD(K*d, S t, I create) <- I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)     ");
+                        z=denameD(dict,u,fll&&fdc);
+                        O("#CA: denameD(dict,u,fll&&fdc)\n"); }
       )
     CS(MARK_VERB   ,  // "+" "4:" "_bin"  ;  grab "+:", "4::"
                       O("verb\n");
@@ -816,8 +828,9 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
     CS (MARK_SYMBOL , z=newE(LS,z); P(!z,(L)ME) kap(locals,&z); cd(z); z=EVP(z) ) //oom
   }
 
-  *p=z; O("p: %p   z: %p\n",p,z);
+  *p=z;
   ++*d;
 
+  O("p: %p    z: %p    r: %lld\n",p,z,r); O("sd(*dict):");sd(*dict);
   R r;
 }

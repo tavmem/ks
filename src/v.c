@@ -95,11 +95,11 @@ Z K* denameRecurse(K*p,S t,I create) {
 
 K* denameD(K*d, S t, I create) {
   O("beg denameD(K*d, S t, I create)  t:%s  create:%lld\n",t,create);
-  O("  d:%p   sd(*d):\n",d);sd(*d);
+  O("  d:%p   sd(*d):",d);sd(*d);
   if(!simpleString(t)) R 0; //some kind of error
   K* v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
-  O("  v:%p   sd(*v):\n",v); if(v)sd(*v);
-  O("  &NIL:%p   sd(NIL):",&NIL);sd(NIL);
+  O("  v:%p   sd(*v):",v); if(v)sd(*v); else O("\n");
+  //O("  &NIL:%p   sd(NIL):",&NIL);sd(NIL);
   O("end denameD K*v:%p\n",v);
   R v;
 }

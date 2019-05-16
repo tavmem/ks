@@ -67,7 +67,7 @@ K sd_(K x,I f) { V *v;
     CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[xn-i-1],2); )) }
   R 0; }
 
-K sd(K x){R sd_(x,0);}     //Shows the details of a K-structure. Useful in debugging.
+K sd(K x){R sd_(x,9);}     //Shows the details of a K-structure. Useful in debugging.
 
 Z K cjoin(K x,K y) {
   P(3!=xt,TE)
