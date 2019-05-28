@@ -44,13 +44,12 @@ __thread I frg=0;    // Flag reset globals
 
          I calf=-1;  // counter for alf
          C* alf="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"; // for recursive member display in sd_()
-         I sdc=1;    // sd counter for levels (prvents runaway sd_.) Typically set in the range 1 thru 9.  Not set in sd_ due to recursion.
 
 K sd_(K x,I f) { V *v;
   if(x) {
     if(!bk(x)) {
-      if(xt==4)O("     %p %p %p  %lld %lld %lld   ",    x,kK(x),*kK(x),x->_c>>8,xt,xn);
-      else     O("     %p %p            %lld %lld %lld   ",x,kK(x),	  x->_c>>8,xt,xn);
+      if(xt==4)O("     %p %p %p  %lld-%lld %lld %lld   ",    x,kK(x),*kK(x),x->_c>>8,(x->_c<<56)>>56,xt,xn);
+      else     O("     %p %p            %lld-%lld %lld %lld   ",x,kK(x),x->_c>>8,(x->_c<<56)>>56,xt,xn);
       if(xt!=6)show(x); else O("\n"); }
     else {O(" is ; or \\n\n"); R x; } }
   else {O("     "); show(x); O("\n"); R x;}
@@ -67,7 +66,7 @@ K sd_(K x,I f) { V *v;
     CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[xn-i-1],2); )) }
   R 0; }
 
-K sd(K x){R sd_(x,9);}     //Shows the details of a K-structure. Useful in debugging.
+K sd(K x){R sd_(x,0);}     //Shows the details of a K-structure. Useful in debugging.
 
 Z K cjoin(K x,K y) {
   P(3!=xt,TE)

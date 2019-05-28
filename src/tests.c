@@ -91,7 +91,9 @@ Z I testsIO()
 
 Z I tests02()
 {
-  TC( 3, {b:3; g:{b}; b:4; g[]}0)
+  TC( 3, {b:3; g:{b}; b:4; g[]}0)                   //passes
+  TC( 1 2 3, A.I:1 2 3; A.I)                        //passes
+  TC((.,(`a;2;)), d:.();  (.[`d;`a;:;])2; d)        //passes
 R 0;
 /*
   TC(`b,(`a`b)[1])
