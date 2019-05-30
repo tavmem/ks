@@ -271,7 +271,7 @@ Z K scanMonad(K a, V *p, K b)
       K*aa=&a;
       fdvx=1; O("~BN dv_ex(0,(V)&aa,d)      K dv_ex(K a, V *p, K b) <- K scanMonad(K a, V *p, K b)      ");
       K g=dv_ex(0,(V)&aa,d);
-      O("#BN dv_ex::dv_ex(0,(V)&aa,d)\n");
+      O("#BN scanMonad :: dv_ex(0,(V)&aa,d)\n");
       U(g)
       t=(1==g->t && *kI(g));
       cd(g);
@@ -477,16 +477,16 @@ K dv_ex(K a, V *p, K b)
       K p2=*p1;
       if(7!=p2->t && -1!=p2->t && 5!=p2->t) flag=1; } }
   if(flag) {
-    O("vfx<-dvx-xx   ");
+    O("~CC: vf_ex(*p,b)      vf_ex(V q, K g) <- dv_ex(K a, V *p, K b)      ");
     tmp=vf_ex(*p,b);
-    O("dvx::vfx-xx\n");
+    O("#CC: dv_ex :: vf_ex(*p,b)\n");
   }
   else {
     if(stk>2e6) R kerr("stack"); stk++;
 //        **** Next 2 lines removed to fix #432. They may be needed when returning to #244 and #247
 //  if(encp && (encp!=2 || (strchr(kC(kK(encf)[CODE]),"z"[0]))) && encp!=3 && DT_SIZE<(UI)*p)tmp=vf_ex(&encf,g);
 //  else
-    O("~AM vf_ex(*p,g)      K vf_ex(V q, K g) <- K dv_ex(K a, V *p, K b)   ");
+    O("~AM vf_ex(*p,g)      vf_ex(V q, K g) <- dv_ex(K a, V *p, K b)      ");
     O("\nsd(prnt):");sd(prnt);O("\n");
     tmp=vf_ex(*p,g);
     O("#AM dv_ex :: vf_ex(*p,g)\n"); O("...AM:");sd(tmp);
@@ -597,9 +597,9 @@ K vf_ex(V q, K g)
     kK(kb)[0]=q;
     kK(kb)[1]=0;
     kV(v)[CODE] = kb;
-    O("~AV vfx <- vfx   ");
+    O("~AV: vf_ex(&v,g)      vf_ex(V q, K g) <- vf_ex(V q, K g)      ");
     z = vf_ex(&v,g); //Punt and let another call to vf_ex handle projecting. Probably could build the projected-verb here instead.
-    O("#AV vfx :: vfx\n"); O("...V:");sd(z);
+    O("#AV: vf_ex :: vf_ex(&v,g)\n"); O("...V:");sd(z);
     cd(v);
     GC;
   } //old comment: Projection? '(1+)' -> 1+  Build 7-verb? (Refactor with 'c' from []+: ex and maybe another place?)
@@ -725,7 +725,7 @@ K vf_ex(V q, K g)
         //O("sd(tc):");sd(tc);O("\n");
         //fw=wd_(kC(o),o->n,&tc,fc);
 
-        O("#AW: vfx :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n"); O("...AW:   sd(fw):     %p",&fw);sd(fw);
+        O("#AW: vf_ex :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n"); O("...AW:   sd(fw):     %p",&fw);sd(fw);
         O("fw->t:%lld  fw->n:%lld\n",fw->t,fw->n); O("sd(res): ");sd(fw);
         kV(f)[CACHE_WD]=fw;
         cd(fc); }
@@ -738,7 +738,7 @@ K vf_ex(V q, K g)
               O("~AN ex(fw)      K ex(K a) <- K vf_ex(V q, K g)      RRR-3      ");
       ci(fw);
       stk1++; z=ex(fw); stk1--;
-              O("#AN vfx :: ex(fw)     RRR-4\n"); O("...AN:");sd(z);
+              O("#AN vf_ex :: ex(fw)     RRR-4\n"); O("...AN:");sd(z);
               O("sd(fw):");sd(fw);
       DO(p->n,e=EVP(DI(tree,i)); cd(*e); *e=0; )
       if(tc){ O("tc1:\n");sd(tc); cd(tc); O("tc2:\n");sd(tc); }
@@ -889,9 +889,9 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
               z=delist(x); if(ABS(z->t)!=1 || z->n!=1){cd(z); O("CS-4\n"); R TE;}
               a=*kI(z); cd(z);
               if(a){
-                O("~AU ex1 <- ex0   ");
+                O("~AU ex1(v+i+1,0,&i,n,1)      ex1(V*w,K k,I*i,I n,I f) <- ex0(V*v,K k,I r)      ");
                 x=ex1(v+i+1,0,&i,n,1);
-                O("#AU ex0 :: ex1\n"); O("...U:");sd(x);
+                O("#AU ex0 :: ex1(v+i+1,0,&i,n,1)\n"); O("...U:");sd(x);
                 R x=bk(x)?_n():x;}
               else while(i<n&&!bk(v[i]))i++; }
             R _n() )
@@ -905,7 +905,7 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
             if(ABS(z->t)!=1 || z->n!=1){cd(z); O("CS-7\n"); R TE;} a=*kI(z);cd(z); i=0;
             if(b){while(++i<n&&!bk(v[i])); if(i>=n)break;}
             SW(r){CSR(5,)
-                  CS(6,if(a&&b){O("~AZ ex0(v+i+1,0,0) <- ex0      "); 
+                  CS(6,if(a&&b){O("~AZ ex0(v+i+1,0,0)      ex0(V*v,K k,I r) <- ex0(V*v,K k,I r)      ");
                                 x=ex0(v+i+1,0,0);
                                 O("#AZ ex0 :: ex0(v+i+1,0,0)\n");
                                 O("...AZ:");sd(x);
@@ -1134,9 +1134,9 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
     U(a=*w);
     if(7==a->t && 0==a->n && (b=kV(a)[CONJ]) && 7==b->t && 0==b->n )
     {
-      O("ex_<-ex2-j   ");
+      O("~CB: ex_(kV(a)+CONJ,((L)*kW(b)==1 || (L)*(kW(b)+1)==1)?1:2))      ex_(V a, I r) <- ex2(V*v, K k)      ");
       U(b=ex_(kV(a)+CONJ,((L)*kW(b)==1 || (L)*(kW(b)+1)==1)?1:2))
-      O("ex2::ex_-j\n");
+      O("#CB: ex2 :: ex_(kV(a)+CONJ,((L)*kW(b)==1 || (L)*(kW(b)+1)==1)?1:2))\n");
       w=*kW(a); //K temp=a;  //a=ci(*kW(a)); w=*kW(a); cd(temp);
       if(b->t==0 && b->n==0) {
         if(1e6<(UI)w) {

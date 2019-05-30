@@ -289,7 +289,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   O("#BR line :: ex(zz)\n");
   //RTIME(d,k=ex(wd(*a,*n)))
   //O("NIL->t:%lld   NIL->n:%lld   NIL->_c:%lld   count:%lld   lane:%lld   &NIL:%p\n",NIL->t,NIL->n,NIL->_c,(NIL->_c)>>8, 0xFF & (unsigned long long)NIL->_c, &NIL);
-  sd_(KTREE,9);
+  O("sd_(KTREE,9): ");sd_(KTREE,9);
 
   if(pthread_mutex_unlock(&execute_mutex)){
     perror("Unlock mutex in line()"); abort();}
@@ -298,7 +298,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
 
-  if(o && fam && !feci)show(k);
+  if(o && fam && !feci){O("\nresult:\n");show(k);}
 
   cd(k);
  cleanup:
