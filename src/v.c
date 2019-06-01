@@ -46,7 +46,8 @@ K DE(K d,S b){
    //O("end DE\n");
    R 0;} //dictionary entry lookup
 Z K* EIA(K a,I i){R kK(a)+i;}         //dictionary entry's address of i-th index
-K* EVP(K e){O("BEG EVP\n"); R EIA(e,1);}            //dictionary entry's value-pointer address (K*)
+K* EVP(K e){ O("BEG EVP\n"); O("    sd(e): ");sd(e);
+             R EIA(e,1);}            //dictionary entry's value-pointer address (K*)
 K* EAP(K e){R EIA(e,2);}            //dictionary entry's attribute_dictionary-pointer address (K*)
 K   EV(K e){R *EVP(e);}             //dictionary entry's stored value
 
@@ -59,6 +60,7 @@ K   EV(K e){R *EVP(e);}             //dictionary entry's stored value
 //Not sure how to reproduce
 
 K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
+  O("BEG lookupEntryOrCreate\n");
   K a=*p, x;
   if(5==a->t) if((x=DE(a,k))) R x;
   P(!strlen(k),TE) //TODO verify this noting `. is not `
@@ -71,7 +73,8 @@ K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
 }
 
 Z K* denameRecurse(K*p,S t,I create) {
-  //O("beg denameR  %s  %lld\n",t,create);
+  O("BEG denameRecurse\n");
+  O("    p: %p      sd(*p):",p);sd(*p);  O("    t: %s     create: %lld\n",t,create);
   if(!*t)R p;
   if('.'==*t)t++;
   I c=0,a=(*p)->t;
@@ -86,35 +89,63 @@ Z K* denameRecurse(K*p,S t,I create) {
   //and LOC should have the potential to return 0 (indicating other errors as well, e.g. out of memory)
   P(!(6==a || 5==a),(K*)TE)
   K e=0;
-  if(create) { e=lookupEntryOrCreate(p,k); P(!e,(K*)ME) }
+  if(create) { O("~CN lookupEntryOrCreate(p,k)      lookupEntryOrCreate(K *p, S k) <- denameRecurse(K*p,S t,I create)      ");
+               e=lookupEntryOrCreate(p,k);
+               O("#CN denameRecurse :: lookupEntryOrCreate(p,k)\n");
+               P(!e,(K*)ME) }
   else { K a=*p; if(5==a->t)e=DE(a,k); P(!e,&NIL) }
   if('.'==*t && (!t[1] || '.'==t[1])) { t++; p=EAP(e); }    //attribute dict
-  else p=EVP(e); //value
-  R denameRecurse(p,t,create);
+  else { O("~CL EVP(e)      EVP(K e) <- denameRecurse(K*p,S t,I create)      ");
+         p=EVP(e);
+         O("#CL denameRecurse :: EVP(e)\n"); } //value
+  O("~CM denameRecurse(p,t,create)      denameRecurse(K*p,S t,I create) <- denameRecurse(K*p,S t,I create)      ");
+  K* z=denameRecurse(p,t,create);
+  O("#CM denameRecurse :: denameRecurse(p,t,create)\n");
+  R z;
 }
 
 K* denameD(K*d, S t, I create) {
-  O("beg denameD(K*d, S t, I create)  t:%s  create:%lld\n",t,create);
-  O("  d:%p   sd(*d):",d);sd(*d);
+  O("BEG denameD\n");
+  O("    d: %p      sd(*d):",d);sd(*d);  O("    t: %s     create: %lld\n",t,create);
   if(!simpleString(t)) R 0; //some kind of error
+  O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      denameRecurse(K*p,S t,I create) <- denameD(K*d, S t, I create)      ");
   K* v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
-  O("  v:%p   sd(*v):",v); if(v)sd(*v); else O("\n");
-  //O("  &NIL:%p   sd(NIL):",&NIL);sd(NIL);
-  O("end denameD K*v:%p\n",v);
+  O("#CK denameD :: denameRecurse('.'==*t||!*t?&KTREE:d,t,create)\n");
+  O("...CK:"); O("  v: %p   sd(*v):",v); if(v)sd(*v); else O("\n");
   R v;
 }
 
 K* denameS(S dir_string, S t, I create) {
-  O("beg denameS  t:%s  create:%lld\n",t,create);
-  K* v= denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create);
-  O("end denameS\n");
+  O("BEG denameS\n");
+  O("    dir_string: %s      t: %s      create: %lld\n",dir_string,t,create);
+  //K* v= denameD('.'==*t||!*t ? &KTREE : denameD(&KTREE,dir_string,create) ,t,create);
+  K* z;
+  if('.'==*t||!*t)z=&KTREE;
+  else { O("~CJ denameD(&KTREE,dir_string,create)      denameD(K*d, S t, I create) <- denameS(S dir_string, S t, I create)      ");
+         z=denameD(&KTREE,dir_string,create);
+         O("#CJ denameS :: denameD(&KTREE,dir_string,create)\n"); }
+  O("~CO denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)      denameD(K*d, S t, I create) <- denameS(S dir_string, S t, I create)     ");
+  K* v= denameD(z,t,create);
+  O("#CO denameS :: denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)\n");
   R v;
   //duplicates '.' functionality in denameD to avoid dictionary initialization
 }
 
 //K* denameBig(K dir_sym,K name_sym){R denameS(*kS(dir_sym),*kS(name_sym));} //[unnecessary?] wrapper for K-object inputs
 
-K* lookupEVOrCreate(K *p, S k){K x=lookupEntryOrCreate(p,k); R x?EVP(x):0; } //mm/o
+//K* lookupEVOrCreate(K *p, S k){K x=lookupEntryOrCreate(p,k); R x?EVP(x):0; } //mm/o
+K* lookupEVOrCreate(K *p, S k){
+  O("BEG lookupEVOrCreate\n");
+   O("~CT lookupEntryOrCreate(p,k)      K lookupEntryOrCreate(K *p, S k) <- K* lookupEVOrCreate(K *p, S k)      ");
+   K x=lookupEntryOrCreate(p,k);
+   O("#CT lookupEVOrCreate :: K x=lookupEntryOrCreate(p,k)\n");
+   //R x?EVP(x):0;
+   if(x){ O("~CU EVP(x)      K* EVP(K e) <- K* lookupEVOrCreate(K *p, S k)      ");
+          K* z=EVP(x);
+          O("#CU lookupEVOrCreate :: K* z=EVP(x)\n");
+          R z; }
+   else R 0;
+ } //mm/o
 K lookup(K a, S b){K x=DE(a,b); R x?EV(x):_n();}
 Z I isVerbDyadic(K x,V v){R xt==7 && kW(x)[0]==v && !kW(x)[1];}
 I isColonDyadic(K x){R isVerbDyadic(x,offsetColon);}
@@ -234,7 +265,7 @@ K atom(K a){R Ki(atomI(a));}//_n is atom
 //TODO: k-tree elements with subelements whose refcount is >1 will bork????
 //TODO: add ability to return error, catch errors in calling functions
 K at_ref(K *p, K b, K c, K y) // @[`a;0 1;+;10 20]
-{
+{ O("BEG at_ref\n");
   I pt = (*p)->t, pn = (*p)->n;
   P(pt > 0 && pt != 5 && pt != 6,RE)
 
@@ -272,11 +303,18 @@ K at_ref(K *p, K b, K c, K y) // @[`a;0 1;+;10 20]
       K args=newK(0,argc);U(args)//Cheating 0-type w/ NULLs
       S u = kS(b)[i%bn];
       if(!strlen(u))R DOE;
+      O("~CS lookupEVOrCreate(p,u)      K* lookupEVOrCreate(K *p, S k) <- K at_ref(K *p, K b, K c, K y)      ");
       kK(args)[0]= ci(*lookupEVOrCreate(p,u)); // ... mm/o? tricky
+      O("#CS at_ref :: K* lookupEVOrCreate(K *p, S k)\n");
+      //kK(args)[0]= ci(*z);
       if(argc > 1) kK(args)[1] = atomI(b)?ci(y):itemAtIndex(y,i%yn);
+      O("~CV specialAmendDot(c,args)      K specialAmendDot(K c, K args) <- K at_ref(K *p, K b, K c, K y)      ");
       K r = specialAmendDot(c,args);
+      O("#CV at_ref :: K specialAmendDot(c,args)\n");
       M(r,args)
+      O("~CW EVP(DE(*p,u))      K* EVP(K e) <- K at_ref(K *p, K b, K c, K y)      ");
       K *v = EVP(DE(*p,u));
+      O("#CW at_ref :: EVP(DE(*p,u))");
       cd(*v);
       *v=r;
       cd(args);
@@ -305,6 +343,7 @@ K at_ref(K *p, K b, K c, K y) // @[`a;0 1;+;10 20]
 //TODO: test here: the "enlist" shortcut had a bug in at(x,y)
 K at_tetradic(K a, K b, K c, K y)
 {
+  O("BEG at_tetradic\n");
   K d=enlist(b); U(d)
   K e=dot_tetradic(a,d,c,y);
   cd(d);

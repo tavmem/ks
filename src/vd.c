@@ -200,7 +200,12 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
   if(5==dt && 123 == ft) R NULL; //TODO: Fill in dict errors
   //TODO: full error chart. at_ref will account for some of it
 
-  if(0>=s) at_ref(p,f,c,y); //what errors will this take care of ?
+  if(0>=s)
+  {
+    O("~CR at_ref(p,f,c,y)       K at_ref(K *p, K b, K c, K y) <- K dot_ref(K *p, K *x, K *z, I s, K c, K y)      ");
+    at_ref(p,f,c,y);
+    O("#CR dot_ref :: K at_ref(p,f,c,y)\n");
+  } //what errors will this take care of ?
   else if(0==ft)
   {
     if(!atomI(f) && y && !atomI(y) && fn != yn0) R LE;
@@ -260,10 +265,7 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
 K dot_tetradic_2(K *g, K b, K c, K y)
 { O("BEG dot_tetradic_2\n");
   //O("(*g)->t:%lld  (*g)->n:%lld  (*g)->_c:%lld  count:%lld  lane:%lld  g:%p\n",(*g)->t,(*g)->n,(*g)->_c,((*g)->_c)>>8, 0xFF & (unsigned long long)(*g)->_c, g);
-  O("    sd(*g):");sd(*g);
-  O("    sd(b): ");sd(b);
-  O("    sd(c): ");sd(c);
-  O("    sd(y): ");sd(y);
+  O("    sd(*g):");sd(*g);  O("    sd(b): ");sd(b);  O("    sd(c): ");sd(c);  O("    sd(y): ");sd(y);
   if(c->t==7 && kK(c)[CODE]->t==-4){V q=kV(kS(c)[CODE])[0]; fnc=DT[(L)q].text; if(fnci<127){fncp[fnci]=q; fnci++;}}
 
   I bt=b->t, bn=countI(b);
@@ -272,12 +274,15 @@ K dot_tetradic_2(K *g, K b, K c, K y)
   {
     O("~AH: dot_ref(g,&b,0,bn-1,c,y)      K dot_ref(K *p, K *x, K *z, I s, K c, K y) <- K dot_tetradic_2(K *g, K b, K c, K y)      ");
     dot_ref(g,&b,0,bn-1,c,y); //could factor further by promoting everything...
-    O("#AH dot_tetradic_2 :: dot_ref(g,&b,0,bn-1,c,y)\n"); O("...AH:  returns NULL\n"); O("\nsd(prnt):");sd(prnt);O("\n");
+    O("#AH dot_tetradic_2 :: K dot_ref(g,&b,0,bn-1,c,y)\n"); O("...AH:  returns NULL\n"); O("\nsd(prnt):");sd(prnt);O("\n");
   }
   else if(0==bt || 1==ABS(bt) || 4==ABS(bt))
   {
     b=promote(b); bt=0; bn=countI(b); //oom
-    K *f=kK(b); dot_ref(g,f,bn>0?1+f:0,bn-1,c,y); //bn!=0 ???? copy/paste comment
+    K *f=kK(b);
+    O("~CQ dot_ref(g,f,bn>0?1+f:0,bn-1,c,y)      K dot_ref(K *p, K *x, K *z, I s, K c, K y) <- K dot_tetradic_2(K *g, K b, K c, K y)      ");
+    dot_ref(g,f,bn>0?1+f:0,bn-1,c,y); //bn!=0 ???? copy/paste comment
+    O("#CQ dot_tetradic_2 :: dot_ref(g,f,bn>0?1+f:0,bn-1,c,y)\n");
     cd(b);
   }
   else R TE; //Type Error  7,5,+-3,+-2 TODO: Move inside if possible... ?
@@ -288,6 +293,8 @@ K dot_tetradic_2(K *g, K b, K c, K y)
 //TODO: All this must be rewritten to handle function-local-dictionaries and global
 K dot_tetradic(K a, K b, K c, K y)//Handles triadic and tetradic case
 {
+  O("BEG dot_tetradic\n");
+  O("    sd(a): ");sd(a);  O("    sd(b): ");sd(b);  O("    sd(c): ");sd(c);  O("    sd(y): ");sd(y);
   if(isColonDyadic(c) && !y && !kV(c)[CONJ]) //'Error Trap'
   {
     K d = newK(0,2);
@@ -323,7 +330,9 @@ K dot_tetradic(K a, K b, K c, K y)//Handles triadic and tetradic case
 
     //triadic & tetradic create dict path if not existing (even on errors). dyadic/monadic create nothing
 
+    O("~CI denameS(d_,*kS(a),1)      denameS(S dir_string, S t, I create) <- dot_tetradic(K a, K b, K c, K y)      ");
     p = denameS(d_,*kS(a),1);
+    O("#CI dot_tetradic :: denameS(d_,*kS(a),1)\n");
     U(p) //oom
     // if(1<rc(*p)){K x=*p;*p=kclone(x);cd(x);} // XXX
   }
@@ -331,8 +340,11 @@ K dot_tetradic(K a, K b, K c, K y)//Handles triadic and tetradic case
 
   K *g = q?&q:p;
 
-  if(!dot_tetradic_2(g,b,c,y)) R 0; // bubble up err
-
+  //if(!dot_tetradic_2(g,b,c,y)) R 0; // bubble up err
+  O("~CP dot_tetradic_2(g,b,c,y)      dot_tetradic_2(K *g, K b, K c, K y) <- dot_tetradic(K a, K b, K c, K y)      ");
+  K z=dot_tetradic_2(g,b,c,y);
+  O("#CP dot_tetradic :: dot_tetradic_2(g,b,c,y)\n");
+  if(!z) R 0;
 
   //monadic @[1;();:] -> (1;"rank")
   //        @[_n;1 2;:] -> (0; 1 2)

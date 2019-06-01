@@ -280,11 +280,12 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     perror("Lock mutex in line()"); abort();}
 
   //O("BEG ex: ex(wd(*a,*n))      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      sd(a):",);sd(a);
-  O("\n~BQ wd(*a,*n)      K wd(S s, int n) <- I line(FILE*f, S*a, I*n, PDA*p)      s:%s   n:%lld\n",*a,*n);
+  O("\nsd_(KTREE,9):");sd_(KTREE,9);
+  O("\n~BQ wd(*a,*n)      wd(S s, int n) <- line(FILE*f, S*a, I*n, PDA*p)      s:%s   n:%lld\n",*a,*n);
   K zz=wd(*a,*n);
   O("#BQ line :: wd(*a,*n)\n\n");
   //O("BEG ex: ex(wd(*a,*n))      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      sd(a):");sd(zz);
-  O("~BR ex(zz)      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      s:%s   n:%lld      ",*a,*n);
+  O("~BR ex(zz)      ex(K a) <- line(FILE*f, S*a, I*n, PDA*p)      s:%s   n:%lld      ",*a,*n);
   RTIME(d,k=ex(zz))
   O("#BR line :: ex(zz)\n");
   //RTIME(d,k=ex(wd(*a,*n)))
@@ -298,7 +299,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
 
-  if(o && fam && !feci){O("\nresult:\n");show(k);}
+  if(o && fam && !feci){ O("\nresult:\n");show(k);O("\n"); }
 
   cd(k);
  cleanup:

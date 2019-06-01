@@ -2,6 +2,7 @@ I rp2(I v);
 K newE(S s,K k);
 K newEntry(S s);
 extern S d_;
+extern K sd(K x);
 K Kv();
 K Kn();
 K Kd();

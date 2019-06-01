@@ -63,7 +63,8 @@ K mrc(K x,I c){I k=sz(xt,xn);I r=lsz(k);x->_c=(c<<8)|r;R x;}
 //Arthur not using malloc is probably true. No strdup & related functions in binary's strings. Note: Skelton references "different allocator" not in \w report
 //This source would be improved by getting ridding of remaing malloc/calloc/realloc
 K cd(K x)
-{
+{ if(x){O("      cd            ");sd(x);}          //BEG cd
+  else  O("      cd -- !x\n");
   #ifdef DEBUG
   if(x && rc(x) <=0 ) { er(Tried to cd() already freed item) dd(tests) dd((L)x) dd(rc(x)) dd(x->t) dd(x->n) show(x); }
   #endif
@@ -109,8 +110,10 @@ K cd(K x)
 }
 
 K ci(K x)
-{
-  P(!x,0)
+{ O("  BEG ci   ");
+  //P(!x,0)
+  if(!x){ O("  END ci -- !x\n"); R 0; }
+  if(xt==0)O("\n");
   ic(x);
 
   SW(xt)
@@ -118,7 +121,8 @@ K ci(K x)
     CSR(5,)
     CS(0, DO(xn, ci(kK(x)[i])))
   }
-
+  if(xt==0)O("           ");
+  O("  END ci "); sd(x);
   R x;
 }
 

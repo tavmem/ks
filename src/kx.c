@@ -486,8 +486,8 @@ K dv_ex(K a, V *p, K b)
 //        **** Next 2 lines removed to fix #432. They may be needed when returning to #244 and #247
 //  if(encp && (encp!=2 || (strchr(kC(kK(encf)[CODE]),"z"[0]))) && encp!=3 && DT_SIZE<(UI)*p)tmp=vf_ex(&encf,g);
 //  else
-    O("~AM vf_ex(*p,g)      vf_ex(V q, K g) <- dv_ex(K a, V *p, K b)      ");
     O("\nsd(prnt):");sd(prnt);O("\n");
+    O("~AM vf_ex(*p,g)      vf_ex(V q, K g) <- dv_ex(K a, V *p, K b)      ");
     tmp=vf_ex(*p,g);
     O("#AM dv_ex :: vf_ex(*p,g)\n"); O("...AM:");sd(tmp);
     stk--; if(grnt && !prnt)prnt=ci(grnt); }
@@ -574,7 +574,14 @@ K vf_ex(V q, K g)
 
   //valence overloaded verbs
   if(gn > 2 && (q==offsetWhat || q==offsetSSR)){ z=(q==offsetWhat?what_triadic:_ssr)(a,b,c); GC; }
-  if(gn > 2 && (q==offsetAt   || q==offsetDot )){ z= (q==offsetAt?at_tetradic:dot_tetradic)(a,b,c,d); GC;}
+  if(gn > 2 && (q==offsetAt   || q==offsetDot )){
+     if(q==offsetAt){ O("~CG at_tetradic(a,b,c,d)      at_tetradic(K a, K b, K c, K y) <- vf_ex(V q, K g)      ");
+                      z=at_tetradic(a,b,c,d);
+                      O("#CG vf_ex :: at_tetradic(a,b,c,d)\n"); }
+     else           { O("~CH dot_tetradic(a,b,c,d)      dot_tetradic(K a, K b, K c, K y) <- vf_ex(V q, K g)      ");
+                      z=dot_tetradic(a,b,c,d);
+                      O("#CH vf_ex :: dot_tetradic(a,b,c,d)\n"); }
+     GC;}
   //common verbs
 
   if(2==k && a && b){ fnc=DT[(L)q].text;
@@ -647,7 +654,10 @@ K vf_ex(V q, K g)
     DO((*m)->n, if(!q[i] && j<gn) q[i]=ci(kK(g)[j++]))
     if(ae) {
       V w[5]; w[0]=(V)kS(kK(z)[CODE])[0]; w[1]=(V)offsetAt; w[2]=(V)offsetEach; w[3]=(V)kK(kK(z)[CONJ]); w[4]=0;
-      K zz= ex2(&w[0],0); cd(g); cd(z); R zz; }
+      O("~CD ex2(&w[0],0)      ex2(V*v, K k) <- vf_ex(V q, K g)      \n");
+      K zz=ex2(&w[0],0);
+      O("#CD vf_ex :: ex2(&w[0],0)\n");
+      cd(g); cd(z); R zz; }
     GC;
   }//K3.2 Projection {[a;b;c]}[;1][1;] returns self. Indicates different (7-0 style?) method
 
@@ -661,7 +671,9 @@ K vf_ex(V q, K g)
       K *q=kK(m);
       DO(m->n, q[i]=ci(kK(r)[i]); if(!q[i] && j<gn) q[i]=ci(kK(g)[j++]))
       if(prj){V*w=&kW(f)[1]; z=bv_ex(w,m);}
-      else z=ex2(kW(f),m);
+      else { O("~CE ex2(kW(f),m)      ex2(V*v, K k) <- vf_ex(V q, K g)      ");
+             z=ex2(kW(f),m);
+             O("#CE vf_ex :: ex2(kW(f),m)\n"); }
       cd(m);
     )
     CS(2, //Executing a dynamically loaded library function from 2:
@@ -735,7 +747,7 @@ K vf_ex(V q, K g)
       #else
       if(stk1>1e3) {cd(g); kerr("stack"); if(tc)cd(tc); R _n();}
       #endif
-              O("~AN ex(fw)      K ex(K a) <- K vf_ex(V q, K g)      RRR-3      ");
+              O("~AN ex(fw)      ex(K a) <- vf_ex(V q, K g)      RRR-3      ");
       ci(fw);
       stk1++; z=ex(fw); stk1--;
               O("#AN vf_ex :: ex(fw)     RRR-4\n"); O("...AN:");sd(z);
@@ -820,7 +832,7 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets
 
 K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
   O("BEG ex\n");
-  O("sd(a):");sd(a);
+  O("sd_(a,9):");sd_(a,9);
   U(a); if(a->t==7 && kVC(a)>(K)DT_SIZE && 7==kVC(a)->t && 6==kVC(a)->n)fwh=1;
   if(a->t==7){
     if(prnt==0){
@@ -1035,7 +1047,7 @@ K ex1(V*w,K k,I*i,I n,I f)//convert verb pieces (eg 1+/) to seven-types, default
   I c=0; while(w[c] && !bk(w[c])){c++; if(offsetColon==w[c-1])break;} //must break or assignment is n^2  (a:b:c:1)
 
   if(!c || !VA(w[c-1]) || (c>1 && offsetColon==w[c-1] ) ){
-     O("~AD ex2(w,k)      K ex2(V*v, K k) <- K ex1(V*w,K k,I*i,I n,I f)      ");
+     O("~AD ex2(w,k)      ex2(V*v, K k) <- ex1(V*w,K k,I*i,I n,I f)      ");
      //O("list before execution\n");
      //for(ii=0;w[ii];ii++){O("     ex2 w[%lld]: %p",ii,w[ii]); if(w[ii]>(V)DT_SIZE) {O(" %p",*(K*)w[ii]); sd(*(K*)w[ii]);} else O("\n"); }
      K vv=ex2(w,k); //typical list for execution
@@ -1106,7 +1118,10 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
       else {cd(z); R prnt;} }
     R z; }
 
-  if(!v[1] && sva(*v)) R vf_ex(*v,k);     //TODO: (,/:) and (,\:) both valence 2
+  if(!v[1] && sva(*v)) {O("~CF vf_ex(*v,k)      vf_ex(V q, K g) <- ex2(V*v, K k)      ");
+                        K zz=vf_ex(*v,k);
+                        O("#CF ex2 :: vf_ex(*v,k)\n");
+                        R zz; }     //TODO: (,/:) and (,\:) both valence 2
   //TODO: brackets may also appear as:     +/\/\[]    {x}/\/\[]    a/\/\[]    (!200)\\[10;20]
 
   if(bk(v[1])) {

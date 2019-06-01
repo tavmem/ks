@@ -6,5 +6,6 @@ extern K of(K x, K y);                      //vd.c
 extern V offsetSSR,offsetWhat,offsetAt,offsetDot,offsetColon;  //k.c
 extern K KTREE;                      //k.c
 extern K sd(K x);                    //kx.c
+extern K sd_(K x,I f);               //kx.c
 extern I fdvx;                       //kx.c
 extern K wd_(S s,int n,K*dict,K func);      //p.c
