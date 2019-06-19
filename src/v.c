@@ -61,12 +61,22 @@ K   EV(K e){R *EVP(e);}             //dictionary entry's stored value
 
 K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
   O("BEG lookupEntryOrCreate\n");
+  O("p: %p      sd(*p):",p);sd(*p); O("k: %s\n",k);
   K a=*p, x;
   if(5==a->t) if((x=DE(a,k))) R x;
   P(!strlen(k),TE) //TODO verify this noting `. is not `
   P(strchr(k,'.'),DOE)
+  O("~CX ewEntry(k)      K newEntry(S s) <- K lookupEntryOrCreate(K *p, S k)      ");
   x=newEntry(k);
-  if(6==a->t){cd(*p); *p=newK(5,0);} //mm/o is this done right?
+  O("#CX lookupEntryOrCreate :: newEntry\n");
+  if(6==a->t){ cd(*p);
+               O("&KTREE: %p      sd_(KTREE,9):",&KTREE);sd_(KTREE,9);
+               O("~CY newK(5,0)      K newK(I t, I n) <- K lookupEntryOrCreate(K *p, S k)      ");
+               *p=newK(5,0);
+               O("#CY lookupEntryOrCreate :; newK(5,0)\n");
+               O("p: %p",p);sd_(*p,9);
+               O("&KTREE: %p      sd_(KTREE,9):",&KTREE);sd_(KTREE,9);
+             } //mm/o is this done right?
   kap(p,&x); //oom
   cd(x);
   R x;
@@ -89,16 +99,16 @@ Z K* denameRecurse(K*p,S t,I create) {
   //and LOC should have the potential to return 0 (indicating other errors as well, e.g. out of memory)
   P(!(6==a || 5==a),(K*)TE)
   K e=0;
-  if(create) { O("~CN lookupEntryOrCreate(p,k)      lookupEntryOrCreate(K *p, S k) <- denameRecurse(K*p,S t,I create)      ");
+  if(create) { O("~CN lookupEntryOrCreate(p,k)      lookupEntryOrCreate(K *p, S k) <- K* denameRecurse(K*p,S t,I create)      ");
                e=lookupEntryOrCreate(p,k);
-               O("#CN denameRecurse :: lookupEntryOrCreate(p,k)\n");
+               O("#CN denameRecurse :: lookupEntryOrCreate(p,k)\n"); O("sd(KTREE):");sd(KTREE);
                P(!e,(K*)ME) }
   else { K a=*p; if(5==a->t)e=DE(a,k); P(!e,&NIL) }
   if('.'==*t && (!t[1] || '.'==t[1])) { t++; p=EAP(e); }    //attribute dict
   else { O("~CL EVP(e)      EVP(K e) <- denameRecurse(K*p,S t,I create)      ");
          p=EVP(e);
          O("#CL denameRecurse :: EVP(e)\n"); } //value
-  O("~CM denameRecurse(p,t,create)      denameRecurse(K*p,S t,I create) <- denameRecurse(K*p,S t,I create)      ");
+  O("~CM denameRecurse(p,t,create)      K* denameRecurse(K*p,S t,I create) <- K* denameRecurse(K*p,S t,I create)      ");
   K* z=denameRecurse(p,t,create);
   O("#CM denameRecurse :: denameRecurse(p,t,create)\n");
   R z;
@@ -108,7 +118,7 @@ K* denameD(K*d, S t, I create) {
   O("BEG denameD\n");
   O("    d: %p      sd(*d):",d);sd(*d);  O("    t: %s     create: %lld\n",t,create);
   if(!simpleString(t)) R 0; //some kind of error
-  O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      denameRecurse(K*p,S t,I create) <- denameD(K*d, S t, I create)      ");
+  O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      K* denameRecurse(K*p,S t,I create) <- K* denameD(K*d, S t, I create)      ");
   K* v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
   O("#CK denameD :: denameRecurse('.'==*t||!*t?&KTREE:d,t,create)\n");
   O("...CK:"); O("  v: %p   sd(*v):",v); if(v)sd(*v); else O("\n");
@@ -121,10 +131,10 @@ K* denameS(S dir_string, S t, I create) {
   //K* v= denameD('.'==*t||!*t ? &KTREE : denameD(&KTREE,dir_string,create) ,t,create);
   K* z;
   if('.'==*t||!*t)z=&KTREE;
-  else { O("~CJ denameD(&KTREE,dir_string,create)      denameD(K*d, S t, I create) <- denameS(S dir_string, S t, I create)      ");
+  else { O("~CJ denameD(&KTREE,dir_string,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)      ");
          z=denameD(&KTREE,dir_string,create);
          O("#CJ denameS :: denameD(&KTREE,dir_string,create)\n"); }
-  O("~CO denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)      denameD(K*d, S t, I create) <- denameS(S dir_string, S t, I create)     ");
+  O("~CO denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)     ");
   K* v= denameD(z,t,create);
   O("#CO denameS :: denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)\n");
   R v;

@@ -138,7 +138,8 @@ Z I nearPG(I i){ I k=((size_t)i)&(PG-1);R k?i+PG-k:i;}//up 0,8,...,8,16,16,...
 //Keyword "backingstore" in old k mailing list archives - extra KSWAP beyond regular swap space
 
 K newK(I t, I n)
-{
+{ O("BEG newK\n");
+  O("t: %lld      n:%lld\n",t,n);
   K z;
   if(n>0 && n>MAX_OBJECT_LENGTH)R ME;//coarse (ignores bytes per type). but sz can overflow
   I k=sz(t,n),r;
@@ -337,9 +338,11 @@ K Kn(   ){R   newK(6,1);}//Should n instead be 0? (Won't affect #:) in k3.2 yes 
 K Kv(   ){K z=newK(7,TYPE_SEVEN_SIZE);U(z) z->n=1;kV(z)[CONTeXT]=d_; M(z,kV(z)[PARAMS]=Kd(),kV(z)[LOCALS]=Kd()) R z;} //z->n == 0-wd 1-wordfunc 2-cfunc 3-charfunc 4-:[] 5-if[] 6-while[] 7-do[]
 //Optimization: It's better if Kv() doesn't set PARAMS and LOCALS. Only charfuncs should set params
 
-K newEntry(S s){R newE(s,_n());}//assumes s came from sp()
+K newEntry(S s){
+  O("BEG NewEntry\n");
+  R newE(s,_n());}//assumes s came from sp()
 K newE(S s, K k) //oom
-{
+{ O("BEG newE\n");
   K z=newK(0,3); U(z)
   kK(z)[0]=Ks(s); // be careful -- s must have come from sp()
   kK(z)[1]=k;

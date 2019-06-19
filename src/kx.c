@@ -50,6 +50,7 @@ K sd_(K x,I f) { V *v;
     if(!bk(x)) {
       if(xt==4)O("     %p %p %p  %lld-%lld %lld %lld   ",    x,kK(x),*kK(x),x->_c>>8,(x->_c<<56)>>56,xt,xn);
       else     O("     %p %p            %lld-%lld %lld %lld   ",x,kK(x),x->_c>>8,(x->_c<<56)>>56,xt,xn);
+      if((xt==0) || (xt==5))O("\n");
       if(xt!=6)show(x); else O("\n"); }
     else {O(" is ; or \\n\n"); R x; } }
   else {O("     "); show(x); O("\n"); R x;}
@@ -59,14 +60,14 @@ K sd_(K x,I f) { V *v;
        O("     %c1:    %p     %p\n",alf[calf],&kV(x)[DEPTH],kV(x)[DEPTH]);
        DO(-2+TYPE_SEVEN_SIZE, O("     %c%lld:   ",alf[calf],2+i); O(" %p",&kV(x)[2+i]); sd_(kV(x)[2+i],3);)
        calf--; )
-    CS(-4,  if(f>2){ v=(kV(x)); if(v[0]<(V)0x5000000) R 0; //stop, if have string of interned symbols
+    CS(-4,  if(f>2){ v=(kV(x)); if((v[0]>(V)0x10) & (v[0]<(V)0x5000000)) R 0; //stop, if have string of interned symbols
             I ii; for(ii=0;v[ii];ii++){ O("     .2%c[%lld]: %p",alf[calf],ii,v[ii]);
                                         if(v[ii]>(V)DT_SIZE)sd_(*(K*)v[ii],9); else O("\n"); } } )
     CSR(5,)
-    CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[xn-i-1],2); )) }
+    CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[xn-i-1],0); )) }
   R 0; }
 
-K sd(K x){R sd_(x,0);}     //Shows the details of a K-structure. Useful in debugging.
+K sd(K x){R sd_(x,1);}     //Shows the details of a K-structure. Useful in debugging.
 
 Z K cjoin(K x,K y) {
   P(3!=xt,TE)
@@ -724,10 +725,10 @@ K vf_ex(V q, K g)
         K fc = kclone(f); //clone the function to pass for _f
         cd(kV(fc)[CONJ]); kV(fc)[CONJ]=0;
         kV(fc)[DEPTH]++;
-        O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K*dict, K func) <- K vf_ex(V q, K g)\n");
-        O("\nsd(prnt):");sd(prnt);O("\n");
-        O("sd(fc):");sd(fc);O("\n");
-        O("sd(tree):");sd(tree);O("\n");
+        O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K*dict, K func) <- K vf_ex(V q, K g)      ");
+        //O("\nsd(prnt):");sd(prnt);O("\n");
+        //O("sd(fc):");sd(fc);O("\n");
+        //O("sd(tree):");sd(tree);O("\n");
 
         fw=wd_(kC(o),o->n,&tree,fc);
 
@@ -831,8 +832,8 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets
 }
 
 K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
-  O("BEG ex\n");
-  O("sd_(a,9):");sd_(a,9);
+  O("BEG ex \n");
+  O("sd(a):");sd(a);O("\n");
   U(a); if(a->t==7 && kVC(a)>(K)DT_SIZE && 7==kVC(a)->t && 6==kVC(a)->n)fwh=1;
   if(a->t==7){
     if(prnt==0){
@@ -853,6 +854,7 @@ K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
   fwh=stk=stk1=prj=prj2=fsf=0;
   if(prnt)cd(prnt);
   prnt=0;
+  O("res:");sd_(z,9);O("\n");
   R z;
 }
 
