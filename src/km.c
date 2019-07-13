@@ -138,8 +138,7 @@ Z I nearPG(I i){ I k=((size_t)i)&(PG-1);R k?i+PG-k:i;}//up 0,8,...,8,16,16,...
 //Keyword "backingstore" in old k mailing list archives - extra KSWAP beyond regular swap space
 
 K newK(I t, I n)
-{ O("BEG newK\n");
-  O("t: %lld      n:%lld\n",t,n);
+{ O("BEG newK   t: %lld   n:%lld   ",t,n);
   K z;
   if(n>0 && n>MAX_OBJECT_LENGTH)R ME;//coarse (ignores bytes per type). but sz can overflow
   I k=sz(t,n),r;
@@ -148,6 +147,7 @@ K newK(I t, I n)
   ic(slsz(z,r)); z->t=t; z->n=n;
   if(t==6)z->n=0;
   if(z->_c==0)z->_c=256;
+  O("&z: %p   sd_(z,1): ",&z);sd_(z,1);
   #ifdef DEBUG
   krec[kreci++]=z;
   #endif
@@ -335,7 +335,20 @@ K Kc(C x){K z=newK(3,1);*kC(z)=x;R z;}
 K Ks(S x){U(x) K z=newK(4,1);*kS(z)=x;R z;}//KDB+ >= 2.4 tries interning [sp()]  by default when generating sym atoms
 K Kd(   ){R   newK(5,0);}
 K Kn(   ){R   newK(6,1);}//Should n instead be 0? (Won't affect #:) in k3.2 yes  //In K3.2 _n->n is overridden for error messages.
-K Kv(   ){K z=newK(7,TYPE_SEVEN_SIZE);U(z) z->n=1;kV(z)[CONTeXT]=d_; M(z,kV(z)[PARAMS]=Kd(),kV(z)[LOCALS]=Kd()) R z;} //z->n == 0-wd 1-wordfunc 2-cfunc 3-charfunc 4-:[] 5-if[] 6-while[] 7-do[]
+K Kv(   ){O("BEG Kv\n");
+  O("~DN newK(7,TYPE_SEVEN_SIZE)   K newK(I t, I n) <- K Kv()      ");
+  K z=newK(7,TYPE_SEVEN_SIZE);
+  O("#DN Kv :: newK(7,TYPE_SEVEN_SIZE)\n");
+  U(z) z->n=1;
+  kV(z)[CONTeXT]=d_;
+  O("~DO Kd()   K Kd() <- K Kv()      ");
+  kV(z)[PARAMS]=Kd();
+  O("#DO Kv :: Kd()  --  PARAMS\n");
+  O("~DP Kd()   K Kd() <- K Kv()      ");
+  kV(z)[LOCALS]=Kd();
+  O("#DP Kv :: Kd()  --  LOCALS\n");
+  M(z,kV(z)[PARAMS],kV(z)[LOCALS])
+  R z;} //z->n == 0-wd 1-wordfunc 2-cfunc 3-charfunc 4-:[] 5-if[] 6-while[] 7-do[]
 //Optimization: It's better if Kv() doesn't set PARAMS and LOCALS. Only charfuncs should set params
 
 K newEntry(S s){

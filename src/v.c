@@ -46,7 +46,7 @@ K DE(K d,S b){
    //O("end DE\n");
    R 0;} //dictionary entry lookup
 Z K* EIA(K a,I i){R kK(a)+i;}         //dictionary entry's address of i-th index
-K* EVP(K e){ O("BEG EVP\n"); O("    sd(e): ");sd(e);
+K* EVP(K e){ O("BEG EVP\n"); O("    &e: %p      sd_(e,0): ",&e);sd_(e,0);
              R EIA(e,1);}            //dictionary entry's value-pointer address (K*)
 K* EAP(K e){R EIA(e,2);}            //dictionary entry's attribute_dictionary-pointer address (K*)
 K   EV(K e){R *EVP(e);}             //dictionary entry's stored value
@@ -61,7 +61,8 @@ K   EV(K e){R *EVP(e);}             //dictionary entry's stored value
 
 K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
   O("BEG lookupEntryOrCreate\n");
-  O("p: %p      sd(*p):",p);sd(*p); O("k: %s\n",k);
+  O("    p: %p      k: %s\n",p,k);
+  //O("sd(*p):");sd(*p);
   K a=*p, x;
   if(5==a->t) if((x=DE(a,k))) R x;
   P(!strlen(k),TE) //TODO verify this noting `. is not `
@@ -84,7 +85,8 @@ K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
 
 Z K* denameRecurse(K*p,S t,I create) {
   O("BEG denameRecurse\n");
-  O("    p: %p      sd(*p):",p);sd(*p);  O("    t: %s     create: %lld\n",t,create);
+  O("      p: %p    t: %s     create: %lld\n",p,t,create);
+  //O("sd(*p):");sd(*p);
   if(!*t)R p;
   if('.'==*t)t++;
   I c=0,a=(*p)->t;
@@ -99,29 +101,33 @@ Z K* denameRecurse(K*p,S t,I create) {
   //and LOC should have the potential to return 0 (indicating other errors as well, e.g. out of memory)
   P(!(6==a || 5==a),(K*)TE)
   K e=0;
-  if(create) { O("~CN lookupEntryOrCreate(p,k)      lookupEntryOrCreate(K *p, S k) <- K* denameRecurse(K*p,S t,I create)      ");
+  if(create) { O("~CN lookupEntryOrCreate(p,k)      K lookupEntryOrCreate(K *p,S k) <- K* denameRecurse(K *p,S t,I create)      ");
                e=lookupEntryOrCreate(p,k);
-               O("#CN denameRecurse :: lookupEntryOrCreate(p,k)\n"); O("sd(KTREE):");sd(KTREE);
+               O("#CN denameRecurse :: lookupEntryOrCreate(p,k)\n");   //O("sd(KTREE):");sd(KTREE);
+               O("   CN: &e: %p      sd_(e,0): ",&e);sd_(e,0);
                P(!e,(K*)ME) }
   else { K a=*p; if(5==a->t)e=DE(a,k); P(!e,&NIL) }
   if('.'==*t && (!t[1] || '.'==t[1])) { t++; p=EAP(e); }    //attribute dict
-  else { O("~CL EVP(e)      EVP(K e) <- denameRecurse(K*p,S t,I create)      ");
+  else { O("~CL EVP(e)      K* EVP(K e) <- K* denameRecurse(K *p,S t,I create)      ");
          p=EVP(e);
          O("#CL denameRecurse :: EVP(e)\n"); } //value
+         O("   CL:  p: %p      sd_(*p,0):",p);sd_(*p,0);
   O("~CM denameRecurse(p,t,create)      K* denameRecurse(K*p,S t,I create) <- K* denameRecurse(K*p,S t,I create)      ");
   K* z=denameRecurse(p,t,create);
   O("#CM denameRecurse :: denameRecurse(p,t,create)\n");
+  O("   CM:  z: %p      sd_(*z,0):",p);sd_(*z,0);
   R z;
 }
 
 K* denameD(K*d, S t, I create) {
   O("BEG denameD\n");
-  O("    d: %p      sd(*d):",d);sd(*d);  O("    t: %s     create: %lld\n",t,create);
+  O("    d: %p      t: %s     create: %lld\n",d,t,create);
+  //O("    sd(*d):");sd(*d);
   if(!simpleString(t)) R 0; //some kind of error
-  O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      K* denameRecurse(K*p,S t,I create) <- K* denameD(K*d, S t, I create)      ");
+  O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      K* denameRecurse(K *p,S t,I create) <- K* denameD(K *d,S t,I create)      ");
   K* v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
   O("#CK denameD :: denameRecurse('.'==*t||!*t?&KTREE:d,t,create)\n");
-  O("...CK:"); O("  v: %p   sd(*v):",v); if(v)sd(*v); else O("\n");
+  O("   CK:"); O("  v: %p   sd_(*v,0):",v); if(v)sd_(*v,0); else O("\n");
   R v;
 }
 

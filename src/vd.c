@@ -164,7 +164,7 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
     if(argc > 1) kK(args)[1] = ci(y);
     O("~BP specialAmendDot(c,args)      K specialAmendDot(K c, K args) <- K dot_ref(K *p, K *x, K *z, I s, K c, K y)      ");
     K r = specialAmendDot(c,args);
-    O("#BP dot_ref :: specialAmendDot(c,args)\n"); O("...BP:");sd(r); O("\nsd(prnt):");sd(prnt);O("\n");
+    O("#BP dot_ref :: specialAmendDot(c,args)\n"); O("   BP:");sd(r); O("\nsd(prnt):");sd(prnt);O("\n");
     cd(args);
     U(r)
     //O("        r->t:%lld   r->n:%lld   r->_c:%lld   count:%lld   lane:%lld   &r:%p   ",r->t,r->n,r->_c,(r->_c)>>8, 0xFF & (unsigned long long)r->_c, &r); O("show(r): "); show(r);
@@ -274,7 +274,7 @@ K dot_tetradic_2(K *g, K b, K c, K y)
   {
     O("~AH: dot_ref(g,&b,0,bn-1,c,y)      K dot_ref(K *p, K *x, K *z, I s, K c, K y) <- K dot_tetradic_2(K *g, K b, K c, K y)      ");
     dot_ref(g,&b,0,bn-1,c,y); //could factor further by promoting everything...
-    O("#AH dot_tetradic_2 :: K dot_ref(g,&b,0,bn-1,c,y)\n"); O("...AH:  returns NULL\n"); O("\nsd(prnt):");sd(prnt);O("\n");
+    O("#AH dot_tetradic_2 :: K dot_ref(g,&b,0,bn-1,c,y)\n"); O("   AH:  returns NULL\n"); O("\nsd(prnt):");sd(prnt);O("\n");
   }
   else if(0==bt || 1==ABS(bt) || 4==ABS(bt))
   {

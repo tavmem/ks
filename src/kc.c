@@ -255,7 +255,7 @@ I lines(FILE*f) {
   S a=0; I z,n=0; PDA p=0; fln=1;
   //while(-1!=line(f,&a,&n,&p)){fln=0;}
   for(;;){
-    O("\n~DC line(f,&a,&n,&p)      I line(FILE*f, S*a, I*n, PDA*p) <- I lines(FILE*f)      ");
+    O("\n~DC line(f,&a,&n,&p)      I line(FILE *f,S *a,I *n,PDA *p) <- I lines(FILE *f)      ");
     z=line(f,&a,&n,&p);
     O("#DC lines :: line(f,&a,&n,&p)\n");
     if(z==-1)GC;
@@ -266,6 +266,7 @@ cleanup:
 
 I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,  intermediate is non-zero
   O("BEG line\n");
+  O("f: %p      stdin: %p      *a: %s      *n: %lld      p: %p\n",f,stdin,*a,*n,p);
   S s=0; I b=0,c=0,m=0,o=1; K k; F d; fbr=fer=feci=0; fam=1;
 
   if(-1==(c=getline_(&s,&m,f))) GC;
@@ -291,18 +292,12 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   if(pthread_mutex_lock(&execute_mutex)){
     perror("Lock mutex in line()"); abort();}
 
-  //O("BEG ex: ex(wd(*a,*n))      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      sd(a):",);sd(a);
-  O("\nsd_(KTREE,9):");sd_(KTREE,9);
-  O("\n~BQ wd(*a,*n)      K wd(S s, int n) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
+  O("\n~BQ wd(*a,*n)      K wd(S s, int n) <- I line(FILE *f, S *a, I *n, PDA *p)      ");
   K zz=wd(*a,*n);
   O("#BQ line :: wd(*a,*n)\n\n");
-  //O("BEG ex: ex(wd(*a,*n))      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      sd(a):");sd(zz);
   O("~BR ex(zz)      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
   RTIME(d,k=ex(zz))
   O("#BR line :: ex(zz)\n");
-  //RTIME(d,k=ex(wd(*a,*n)))
-  //O("NIL->t:%lld   NIL->n:%lld   NIL->_c:%lld   count:%lld   lane:%lld   &NIL:%p\n",NIL->t,NIL->n,NIL->_c,(NIL->_c)>>8, 0xFF & (unsigned long long)NIL->_c, &NIL);
-  O("sd_(KTREE,9): ");sd_(KTREE,9);
 
   if(pthread_mutex_unlock(&execute_mutex)){
     perror("Unlock mutex in line()"); abort();}
@@ -311,7 +306,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
 
-  if(o && fam && !feci){ O("\nresult:\n");show(k);O("\n"); }
+  if(o && fam && !feci){ O("\nresult:\n");sd(k);O("\n"); }
 
   cd(k);
  cleanup:
@@ -455,7 +450,8 @@ I attend() {  //K3.2 uses fcntl somewhere
     for(i = 0; i <= fdmax; i++)
       if (FD_ISSET(i, &read_fds)) {
         if(i==STDIN) {
-          O("\n~DA line(stdin,&a,&n,&q)      I line(FILE*f, S*a, I*n, PDA*p) <- I attend()      ");
+          O("&KTREE: %p      sd(KTREE):",&KTREE);sd(KTREE);
+          O("\n~DA line(stdin,&a,&n,&q)      I line(FILE *f,S *a,I *n,PDA *p) <- I attend()      ");
           nbytes=line(stdin,&a,&n,&q);
           O("\n#DA attend :: line(stdin,&a,&n,&q)\n\n");
           fln=0;
