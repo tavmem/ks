@@ -329,13 +329,15 @@ K wd(S s, int n){
   O("BEG wd \n");
   O("  s: %s      n: %d    ",s,n);
   O("  d_:%s   &NIL:%p   sd(NIL):",d_,&NIL);sd(NIL);
+  O("  sd(KTREE):");sd(KTREE);
+  //O("  sd(kK((kK(KTREE))[0])[1]):");sd(kK((kK(KTREE))[0])[1]);
   lineA=s;
   fdc=0;
   O("~CZ denameD(&KTREE,d_,1)      K* denameD(K *d,S t,I create) <-  K wd(S s, int n)      ");
   K* z=denameD(&KTREE,d_,1);
   O("#CZ wd :: denameD(&KTREE,d_,1)\n");
   O("   CZ:                   "); O("  z: %p                       sd_(*z,0):",z); if(z)sd_(*z,0); else O("\n");
-  O("        &kK(kK(KTREE)[0])[1]: %p      sd_(kK(kK(KTREE)[0])[1],0):",&kK(KTREE)[0]);sd_(kK(kK(KTREE)[0])[1],0);O("\n");
+  O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
   O("~BS wd_(s,n,*z,0)      K wd_(S s, int n, K dict, K func) <- K wd(S s, int n)      ");
   K res=wd_(s,n, z,0);
   O("#BS wd :: wd_(s,n, denameD(&KTREE,d_,1),0)      sd(res):\n"); O(" %p",&res); sd(res);
@@ -345,8 +347,8 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
                                 //assumes: s does not contain a }])([{ mismatch, s is a "complete" expression
 { O("BEG wd_\n");
   //O("   s:%s\n   n:%d\n",s,n); O("    dict:%p   sd(*dict):",dict);if(dict)sd(*dict); O("   sd(func):"); if(func==0)O("0\n"); else sd(func);
-  O("    s: %s      n: %d      sd(func):",s,n);if(func)sd(func);
-  O("    dict: %p      sd_(*dict,0):",dict);sd_(*dict,0);
+  O("    s: %s\n",s); O("    n: %d\n",n); O("    sd(func):"); if(func)sd(func); else O("\n");
+  O("    dict: %p      sd_(*dict,0):",dict);sd(*dict);
   if(!s) R 0;
   if(strstr(s,":\\t")) { show(kerr("\\t  syntax")); R 0; }
   //I z=0; if((z=syntaxChk(s))) {O("%lld\n",z); R SYE;}
@@ -403,7 +405,7 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
 
   I c=0,j=0;  if(!fll)fll=strlen(s2); else fll=-1;
   DO(y,
-       O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)      capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func) <- wd_(S s, int n, K*dict, K func)      ");
+       O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)      capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func) <- wd_(S s, int n, K*dict, K func)      ");
        j   =capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func);
        O("#BY wd_ :: capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)\n");
        i+=-1+j;
@@ -506,10 +508,10 @@ K* inKtree(K *d, S t, I create) {
 }
 
 //TODO: capture - oom all
-I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
+I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
   //IN string, string length, pos in string, markings;
   //OUT words, current #words; IN locals-storage, names-storage, charfunc/NULL
-{ O("BEG capture\n"); O("    s: %s    n: %lld    k: %lld",s,n,k); O("    dict: %p      sd_(*dict,0):",dict);sd_(*dict,0);
+{ O("BEG capture\n"); O("    s: %s    n: %lld    k: %lld",s,n,k); O("    dict: %p      sd_(*dict,1):",dict);sd_(*dict,1);
   if(fll && fll!=n)fll=-1;
   V z=0,*p=w+*d; *p=0;
   I r=1,v=0,y=0,a,b=0,c;S u="",e;K g;I l;
@@ -527,7 +529,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
     CS(MARK_CONDITIONAL, O("conditional\n"); z=offsetColon)//dummy value
     CS(MARK_PAREN  ,  O("paren\n");
                       fbr=1;
-                      O("~BT wd_(s+k+1,r-2,dict,func)      wd_(S s, int n, K*dict, K func) <- capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
+                      O("~BT wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K*dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
                       O("#BT capture :: wd_(s+k+1,r-2,dict,func)\n");
                       if(!z)R (L)PE;)                   //oom. currently z->t==7 z->n==0.
@@ -550,7 +552,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
 
                       V*o = kW(g);
 
-                      O("~BU wd_(s+k+1,r-2,dict,func)      wd_(S s, int n, K*dict, K func) <- capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
+                      O("~BU wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
                       O("#BU capture :: wd_(s+k+1,r-2,dict,func)\n");
                       if(!z){cd(g); R (L)PE;}
@@ -633,7 +635,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                       if(state) //Bracketed parameters exist and are well-formed
                       {
                         S a=strchr(s+k+1,'['); S b=strchr(a,']');
-                        O("~BV wd_(a+1,b-a-1,zdict,z)      wd_(S s, int n, K*dict, K func) <- capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
+                        O("~BV wd_(a+1,b-a-1,zdict,z)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                         j=wd_(a+1,b-a-1, zdict,z); //Grab only params. This must create entries in  zdict
                         O("#BV capture :: wd_(a+1,b-a-1, zdict,z)\n");
                         M(z,j) //not g
@@ -643,7 +645,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                       {
                         K t=Kd();
                         M(z,t)
-                        O("~BW wd_(s+k+1,r-2,&t,0)      wd_(S s, int n, K*dict, K func) <- capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
+                        O("~BW wd_(s+k+1,r-2,&t,0)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                         j=wd_(s+k+1,r-2,&t,0); //Grab all local names
                         O("#BW capture :: wd_(s+k+1,r-2,&t,0)\n");
                         O("sd(*ydict):    %p",ydict);sd(*ydict);
@@ -654,7 +656,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                         cd(t); cd(j);
                       }
 
-                      O("~BX wd_(s+k+1,r-2, ydict,z)      wd_(S s, int n, K*dict, K func) <- capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)      ");
+                      O("~BX wd_(s+k+1,r-2, ydict,z)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       j=wd_(s+k+1,r-2, ydict,z);
                       O("#BX capture :: wd_(s+k+1,r-2, ydict,z)\n");
                       M(z,j)
@@ -736,13 +738,19 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                         //else if(':'==s[k+r] && ':'==s[k+r+1] && -MARK_VERB==m[k+r+1])
                         //  {m[k+r]=MARK_NAME; r++; z=denameS(kV(func)[CONTeXT],u);} //m[]=  probably superfluous
                         else if(-MARK_VERB==m[k+r] && ':'==s[k+r+1] && -MARK_VERB==m[k+r+1])
-                          {O("n2c\n"); if(':'==s[k+r])r++; z=denameS(kV(func)[CONTeXT],u,1);}
+                          {O("n2c\n");
+                           O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
+                           if(':'==s[k+r])r++;
+                           O("~DX denameS(kV(func)[CONTeXT],u,1)      K* denameS(S dir_string, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func)      ");
+                           z=denameS(kV(func)[CONTeXT],u,1);
+                           O("#DX capture :: denameS(kV(func)[CONTeXT],u,1)\n");
+                           O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n"); }
                         else if(dict==  (K*)kV(func)+LOCALS  && ':'==s[k+r] && -MARK_VERB==m[k+r]){O("n2d   "); z=denameD( dict,u,1);}
                           //K3.2:  a+:1 format applies to context-globals not locals
                         else
                           {O("n2e\n");
                           z=denameS(kV(func)[CONTeXT],u,0);   //RRRR-4 (chg 0 to 1)
-                          O("kK(z): %p   ",kK(z));}//Otherwise check the context (refactor with above?)
+                          O("kK(z): %p   ",kK(z)); }//Otherwise check the context (refactor with above?)
                       }
                       else {
                         //O("n3\n"); O("s: %s    n: %lld    k: %lld\n",s,n,k);
@@ -750,7 +758,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                         I i;for(i=k;i<strlen(s);i++){
                                if(!fbr && s[i]==';')break;
                                else if(s[i]==':'|| (fbr && (s[i]=='x'||s[i]=='y'||s[i]=='z'))){fdc=1;break;}}
-                        O("~BZ inKtree( dict,u,0)      K* inKtree(K*d, S t, I create) <- I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)     ");
+                        O("~BZ inKtree( dict,u,0)      K* inKtree(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=inKtree( dict,u,0);
                         O("#BZ capture :: inKtree( dict,u,0)\n");
                         O("      fdc: %lld    z: %p\n",fdc,z);
@@ -759,7 +767,7 @@ I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)
                            oerr(); O("%s\n%c\n",u,'^');
                            #endif
                            R err;}
-                        O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K*d, S t, I create) <- I capture(S s,I n,I k,I*m,V*w,I*d,K*locals,K*dict,K func)     ");
+                        O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=denameD( dict,u,fll&&fdc);
                         O("#CA denameD( dict,u,fll&&fdc)\n");
                       }

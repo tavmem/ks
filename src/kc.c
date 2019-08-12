@@ -294,7 +294,8 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
 
   O("\n~BQ wd(*a,*n)      K wd(S s, int n) <- I line(FILE *f, S *a, I *n, PDA *p)      ");
   K zz=wd(*a,*n);
-  O("#BQ line :: wd(*a,*n)\n\n");
+  O("#BQ line :: wd(*a,*n)\n"); O("   BQ: sd(zz):");sd(zz); O("\n");
+  O("       &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
   O("~BR ex(zz)      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
   RTIME(d,k=ex(zz))
   O("#BR line :: ex(zz)\n");
@@ -306,7 +307,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
 
-  if(o && fam && !feci){ O("\nresult:\n");sd(k);O("\n"); }
+  if(o && fam && !feci){ O("\nresult:\n");sd_(k,2);O("\n"); }
 
   cd(k);
  cleanup:

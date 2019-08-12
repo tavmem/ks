@@ -488,7 +488,7 @@ K dv_ex(K a, V *p, K b)
       K p2=*p1;
       if(7!=p2->t && -1!=p2->t && 5!=p2->t) flag=1; } }
   if(flag) {
-    O("~CC vf_ex(*p,b)      vf_ex(V q, K g) <- dv_ex(K a, V *p, K b)      ");
+    O("~CC vf_ex(*p,b)      K vf_ex(V q, K g) <- K dv_ex(K a, V *p, K b)      ");
     tmp=vf_ex(*p,b);
     O("#CC dv_ex :: vf_ex(*p,b)\n");
   }
@@ -498,9 +498,9 @@ K dv_ex(K a, V *p, K b)
 //  if(encp && (encp!=2 || (strchr(kC(kK(encf)[CODE]),"z"[0]))) && encp!=3 && DT_SIZE<(UI)*p)tmp=vf_ex(&encf,g);
 //  else
     O("\nsd(prnt):");sd(prnt);O("\n");
-    O("~AM vf_ex(*p,g)      vf_ex(V q, K g) <- dv_ex(K a, V *p, K b)      ");
+    O("~AM vf_ex(*p,g)      K vf_ex(V q, K g) <- K dv_ex(K a, V *p, K b)      ");
     tmp=vf_ex(*p,g);
-    O("#AM dv_ex :: vf_ex(*p,g)\n"); O("   AM:");sd(tmp);
+    O("#AM dv_ex :: vf_ex(*p,g)\n"); O("   AM:");sd_(tmp,2);
     stk--; if(grnt && !prnt)prnt=ci(grnt); }
 
   memset(kK(g),0,g->n*sizeof(K)); cd(g); //Special privileges here...don't ci() members beforehand
@@ -533,7 +533,7 @@ K dv_ex(K a, V *p, K b)
 //K3.2 Bug - {b:1_,/";a",/:$a:!x; "{[",b,"]a3}[" ,(1_,/";",/:$a ),"]" } 67890  --> Sometimes works, sometimes stack error, sometimes crash
 K vf_ex(V q, K g)
 { O("BEG vf_ex\n");
-  if(q>(V)DT_SIZE){O("   sd_((K)(*(V*)q,9):");sd((K)(*(V*)q));}
+  if(q>(V)DT_SIZE){O("   sd_((K)(*(V*)q,2):");sd_((K)(*(V*)q),2);}
   O("   sd(g):");sd(g);
   if (interrupted) {interrupted=0; R BE;}
 
@@ -714,12 +714,14 @@ K vf_ex(V q, K g)
 
       if(!(tree=kV(f)[CACHE_TREE])) {  //could merge this and and CACHE_WD check by duplicating the arg merge DO
         O("BEG build tree from locals & params\n");
+        O("earlier:    K f=(K)(*(V*)q);   K o=kV(f)[CODE]; K p=kV(f)[PARAMS]; K s=kV(f)[LOCALS]; K r=kV(f)[CONJ];  3=locals  4=params\n");
+        O("sd(f):");sd(f);
         tree=newK(5,p->n+s->n); if(!tree) {stk--; GC;} //note: cleanup is unusual -- could turn into double labels
-        //O("tree1:");sd_(tree,9);
+        O("tree1:");sd_(tree,9);
         DO(tree->n, if(!(kK(tree)[i]=newK(0,3))){cd(tree); stk--; GC;}) //shallow dict copy -- dictionary entry pool?
-        //O("tree2:");sd_(tree,9);
+        O("tree2:");sd_(tree,9);
         DO(tree->n, DO2(3,  kK(DI(tree,i))[j] = ci(kK((i<p->n?DI(p,i):DI(s,i-p->n)))[j])))//shallow copy
-        //O("tree3:");sd_(tree,9);
+        O("tree3:");sd_(tree,9);
         kV(f)[CACHE_TREE]=tree; }
       if(fsf){
         K j0=dot_monadic(kV(prnt)[LOCALS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]);
@@ -769,6 +771,16 @@ K vf_ex(V q, K g)
       O("~AN ex(fw)      ex(K a) <- vf_ex(V q, K g)      RRR-3      ");
       z=ex(fw);
       O("#AN vf_ex :: ex(fw)     RRR-4\n"); O("   AN:");sd(z);
+/*
+      if(5==z->t){
+         O("vvv0: sd_(*kK(z),2)\n"); sd_(*kK(z),2);
+         O("vvv1: sd_((kK(*kK(z)))[1],2)\n"); sd_((kK(*kK(z)))[1],2);
+         O("vvv2:                       \n"); O(" %c \n",*kC((kK(*kK(z)))[1]) );
+         O(" %d \n",*kC((kK(*kK(z)))[1]) );
+         if(71 == *kC((kK(*kK(z)))[1]) ) (*kC((kK(*kK(z)))[1]))=72;
+         O("vvv3: sd(z)\n"); sd(z);
+      }
+*/
       O("sd(fw):");sd(fw);
       stk1--;
       DO(p->n,e=EVP(DI(tree,i)); cd(*e); *e=0; )
@@ -810,7 +822,7 @@ K vf_ex(V q, K g)
       cd(kK(z)[CACHE_TREE]); kK(z)[CACHE_TREE]=dot_monadic(j2); cd(x); cd(xe); cd(j0); cd(j2); encp=1; } }
 
 cleanup:
-  cd(g); O("   sd(z): ");sd(z);
+  cd(g); //O("   sd(z): ");sd(z);
   R z;
 }
 
@@ -819,9 +831,10 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets
 { O("BEG ex_\n");
   K x,y=0,z,tmp;
 
+  O("   r:%lld",r);
   if(!a || VA(a) || bk(a)){O("    R a: %p\n",a); R a;}
-  O("   r:%lld",r);  O("   sd(x=*(K*)a):  ");sd(*(K*)a);
-  if(!(x=*(K*)a) || 7!=xt || (0<xn && xn<4)){O("   R ci(x)      x:");sd(x); R ci(x);} //assert xn>=4 -> conditionals or similar
+  O("   sd(x=*(K*)a):  ");sd(*(K*)a);
+  if(!(x=*(K*)a) || 7!=xt || (0<xn && xn<4)){O("    R ci(x)\n"); R ci(x);} //assert xn>=4 -> conditionals or similar
   //O("   *(K*)a: "); O("sd(*(K*)a):  ");sd(*(K*)a);
   //V *v; v=kW(x);
   //I ii; for(ii=0;v[ii];ii++){O("     a2[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE) {O(" %p",*(K*)v[ii]); sd_(*(K*)v[ii],1);} else O("\n"); }
@@ -839,10 +852,10 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets
     if(y->t == 0 && y->n==0){cd(y); y=_n();}
     if(fer>0 && !fCheck){O("   R y\n"); R y;}
   }
-  O("~AB ex0(kW(x),y,r)      K ex0(V*v,K k,I r) <- V ex_(V a, I r)      r:%lld   ",r); O("y:"); if(y)sd(y); else O(" is 0      ");
+  O("~AB ex0(kW(x),y,r)      K ex0(V*v,K k,I r) <- V ex_(V a, I r)      ");
   z=ex0(kW(x),y,r);  //eval wd()
   O("#AB ex_ :: ex0(kW(x),y,r)  r:%lld   ",r); O("y:"); if(y)sd(y); else O(" was 0\n");
-  O("   AB:");sd(z);
+  O("   AB:");sd_(z,0);
   cd(y);
 
   R z;
@@ -850,7 +863,7 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets
 
 K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
   O("BEG ex \n");
-  O("sd(a):");sd(a);O("\n");
+  O("sd_(a,2):");sd_(a,2);O("\n");
   U(a); if(a->t==7 && kVC(a)>(K)DT_SIZE && 7==kVC(a)->t && 6==kVC(a)->n)fwh=1;
   if(a->t==7){
     if(prnt==0){
@@ -877,6 +890,7 @@ K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
 Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
                      //Reverse execution/return multiple (paren not function or script) "list notation"  {4,5,6,7} -> {:,if,while,do}
 { O("BEG ex0\n");
+  O("     r: %lld",r); O("     sd(k):");sd(k);
   I ii; for(ii=0;v[ii];ii++){O("     ex0 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }  //Rex0
   I n=0, e=1, i,a,b;
   while(v[n])if(bk(v[n++]))e++;
@@ -887,18 +901,13 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
   {
     CS(0, for(i=-1;i<n;i++)                      //  c:9;a+b;c:1
             if(-1==i||bk(v[i])){
-            //cd(z); frg++; x=ex1(v+1+i,0,&i,n,1); frg--;
-              //O("count(z):%lld\n",(z->_c)>>8);
               if(z==0)O("     z==0 (no Asd(z))\n"); else {O("Asd(z):");sd(z);}
-            //for(ii=0;v[ii];ii++){O("     ex0 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE) {O(" %p",*(K*)v[ii]); sd_(*(K*)v[ii],1);} else O("\n"); }
-            //cd(z);        //RRR-3  added line   can just comment this out to reverse
               cd(z); frg++;
-              O("~AC ex1(v+1+i,0,&i,n,1)      K ex1(V*w,K k,I*i,I n,I f) <- K ex0(V*v,K k,I r)   i=%lld  n=%lld  f=1    ",i,n);
+              O("~AC ex1(v+1+i,0,&i,n,1)      K ex1(V*w,K k,I*i,I n,I f) <- K ex0(V*v,K k,I r)      i: %lld     ",i);
               x=ex1(v+1+i,0,&i,n,1);
-              //for(ii=0;v[ii];ii++){O("AC v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }
               O("#AC ex0 :: ex1(v+1+i,0,&i,n,1)\n"); O("   AC:");sd(x);
               O("Bsd(z):");sd(z);
-                                                   frg--;
+              frg--;
               if(!frg){encp=0;
                 if(encf){cd(encf); encf=0;}
                 if(grnt){cd(grnt); grnt=0;}}
@@ -942,7 +951,9 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
                   CS(7,DO2(a, x=ex0(v+i+1,0,0); if(fer>0)R x; cd(x);))}}
           while(6==r && a);
           R _n())
-    CD: z=newK(0,n?e:0);
+    CD: O("~DT newK(0,n?e:0)      K newK(I t, I n) <- Z K ex0(V*v,K k,I r)      ");
+        z=newK(0,n?e:0);
+        O("#DT ex0 :: newK(0,n?e:0)\n");
         if(n)for(i=n-1;i>=-1;i--)if(-1==i||bk(v[i])){
           if(offsetColon==(v+1+i)[0] && (UI)(v+1+i)[1]>DT_SIZE)fer=1;
           O("~AT ex1(v+1+i,0,&i,n,0)      K ex1(V*w,K k,I*i,I n,I f) <- K ex0(V*v,K k,I r)      ");
@@ -962,10 +973,15 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
     if(!j && 0==k->t) DO(k->n,if(!kK(k)[i])kK(k)[i]=_n()) //Fill in 0-type NULLs with _n
 
     if(z->t!=7 ||z->n!=1||(j<k->n && !(0==j && k->n==1))) {    //(0==j untested) project if necessary, reuse vf_ex.
-      if(encf && DT_SIZE<(UI)&z)x=vf_ex(&encf,k);
+      if(encf && DT_SIZE<(UI)&z){
+        O("~DS vf_ex(&encf,k)      K vf_ex(V q, K g) <- K ex0(V*v,K k,I r)      ");
+        x=vf_ex(&encf,k);
+        O("#DS ex0 :: vf_ex(&encf,k)"); O("   DS:");sd(x);
+      }
       else { O("~BF vf_ex(&z,k)	   K vf_ex(V q, K g) <- K ex0(V*v,K k,I r)      ");
              x=vf_ex(&z,k);
-             O("#BF ex0 :: vf_ex(&z,k)\n");}
+             O("#BF ex0 :: vf_ex(&z,k)\n"); O("   BF:");sd(x);
+      }
       if(encp!=3)cd(z);
       R z=x;
     }
@@ -992,7 +1008,10 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
       /////////////////////////
       if(z->t==7 && z->n==1 && kK(kK(z)[CODE])[0]==offsetSSR && k->t==0 && k->n==3 && ABS(kK(k)[2]->t)==-3)
          {kK(k)[2]=enlist(kK(k)[2]); cd(x);}
-      x=vf_ex(&z,k); cd(z); z=x; //copy/paste
+      O("~DR vf_ex(&z,k)      K vf_ex(V q, K g) <- K ex0(V*v,K k,I r)      ");
+      x=vf_ex(&z,k);
+      O("#DR ex0 :: vf_ex(&z,k)\n"); O("   DR:");sd(x);
+      cd(z); z=x; //copy/paste
       /////////////////////////
     }
   }
@@ -1042,15 +1061,16 @@ Z K bv_ex(V*p,K k) {
   if(offsetEachright==(L)q) { P(k->n!=2,VE) K a=kK(k)[0],b=kK(k)[1]; R eachright2(a,p,b); }
   if(offsetEachleft ==(L)q) { P(k->n!=2,VE) K a=kK(k)[0],b=kK(k)[1]; R eachleft2(a,p,b); }
   if(offsetEachpair ==(L)q) R NYI;//todo: is this reachable?
-  R vf_ex(*p,k); }
+  O("~DQ vf_ex(*p,k)      K vf_ex(V q, K g) <- K bv_ex(V*p,K k)      ");
+  K zz=vf_ex(*p,k);
+  O("#DQ bv_ex :: vf_ex(*p,k)\n"); O("   DQ:");sd(zz);
+  R zz; }
 
-K ex1(V*w,K k,I*i,I n,I f)//convert verb pieces (eg 1+/) to seven-types, default to ex2 (full pieces in between semicolons/newlines)
+K ex1(V *w,K k,I *i,I n,I f)//convert verb pieces (eg 1+/) to seven-types, default to ex2 (full pieces in between semicolons/newlines)
 { O("BEG ex1\n");
+  O("     i: %p       n: %lld      f: %lld",i,n,f); O("     sd(k):");sd(k);
   I ii; for(ii=0;w[ii];ii++){O("     ex1 w[%lld]: %p",ii,w[ii]); if(w[ii]>(V)DT_SIZE)sd(*(K*)w[ii]); else O("\n"); }
-  O("     sd(k):");sd(k);
-  O("     i: %p      n: %lld      f: %lld\n",i,n,f);
-  if(offsetColon==w[0] && (UI)w[1]>DT_SIZE && (UI)w[2]>DT_SIZE && fwh==0)
-    {fer=1; if(f)*i=n; else *i=-1; K tmp=*(K*)*(w+1); R ci(tmp); }
+  if(offsetColon==w[0] && (UI)w[1]>DT_SIZE && (UI)w[2]>DT_SIZE && fwh==0) {fer=1; if(f)*i=n; else *i=-1; K tmp=*(K*)*(w+1); R ci(tmp); }
   //if(in(*w,adverbs)) R NYI;//Adverb at beginning of snippet eg '1 2 3 or ;':1 2 3; or 4;\1+1;4
   if( DT_ADVERB_OFFSET<=(L)*w && (L)*w<DT_VERB_OFFSET && offsetScan!=(L)*(w+1) && NULL!=*(w+1)) {
     if(offsetScan==(L)*w) {
@@ -1067,8 +1087,7 @@ K ex1(V*w,K k,I*i,I n,I f)//convert verb pieces (eg 1+/) to seven-types, default
      //O("list before execution\n");
      //for(ii=0;w[ii];ii++){O("     ex2 w[%lld]: %p",ii,w[ii]); if(w[ii]>(V)DT_SIZE) {O(" %p",*(K*)w[ii]); sd(*(K*)w[ii]);} else O("\n"); }
      K vv=ex2(w,k); //typical list for execution
-     O("#AD ex1 :: ex2(w,k)\n");
-     O("   AD:");sd(vv);
+     O("#AD ex1 :: ex2(w,k)\n"); O("   AD:");sd(vv);
      R vv; }
 
   if(w[0]==offsetColon && (UI)w[1]>DT_SIZE){
@@ -1106,8 +1125,8 @@ K ex1(V*w,K k,I*i,I n,I f)//convert verb pieces (eg 1+/) to seven-types, default
 
 Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: conjunction?
 { O("BEG ex2\n");
-  I ii; for(ii=0;v[ii];ii++){O("     ex2 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }
   O("     sd(k):");sd(k);
+  I ii; for(ii=0;v[ii];ii++){O("     ex2 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }
   K t0,t2,t3,e,u;
   I i=0;
 
@@ -1158,6 +1177,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
 
   if(!VA(*v) && (offsetColon == v[1] || (VA(v[1]) && offsetColon==v[2]) ) ) //Handle assignment
   {
+    //if(offsetColon == v[1])O("vvv 1\n"); if(offsetColon == v[2])O("vvv 2\n");
     if(adverbClass(v[1]))R SYE;//Could potentially handle instead of erroring
     K a=0,b=0,c=0,d=0,p=0;
     K*w=*v;
@@ -1205,6 +1225,9 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
       if(rc(x)>1) { *w=kclone(x); cd(x); }
     }
 
+    if(3==(*w)->t){O("~divert\n"); O("#divert\n");
+                   //R ci(*w);   //comment out this
+                  }
     O("~AG dot_tetradic_2(w,b,c,d)      K dot_tetradic_2(K *g, K b, K c, K y) <- K ex2(V*v, K k)      ");
     K h=dot_tetradic_2(w,b,c,d);
     O("#AG ex2 :: dot_tetradic_2(w,b,c,d)\n"); O("   AG:");sd(h); //O("\nsd(prnt):");sd(prnt);O("\n");
@@ -1266,7 +1289,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
   i=0; while(adverbClass(v[1+i])) i++; //ALT'Y: i=adverbClass(b)?i+1:0;
   O("~AI ex2(v+1+i,k)      K ex2(V*v, K k) <- K ex2(V*v, K k)      k:");if(k)sd(k);else O(" is 0      ");
   t2=ex2(v+1+i,k); //oom. these cannot be placed into single function call b/c order of eval is unspecified
-  O("#AI ex2 :: ex2(v+1+i,k)\n"); O("   AI:");sd(t2);
+  O("#AI ex2 :: ex2(v+1+i,k)\n"); O("   AI:");sd_(t2,1);
   O("~AK ex_(*v,1)      V ex_(V a, I r) <- K ex2(V*v, K k)      ");
   t3=ex_(*v,1);
   O("#AK ex2 :: ex_(*v,1)\n"); if(t3<(K)DT_SIZE) O("   AK: %p\n",t3);
@@ -1299,7 +1322,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
     }
     O("RESET: prnt=ci(t3) at vn case in ex2.  prnt just before:"); if(prnt)sd(prnt); else O("\n");
     prnt=ci(t3);
-    O("after RESET, prnt:");sd(prnt); }
+    O("after RESET, prnt:");sd_(prnt,0); }
 
   u=*v; //Fixes a bug, see above. Not thread-safe. Adding to LOCALS probably better
   *v=VA(t3)?t3:(V)&t3;

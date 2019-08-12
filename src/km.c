@@ -122,7 +122,7 @@ K ci(K x)
     CS(0, DO(xn, ci(kK(x)[i])))
   }
   if(xt==0)O("           ");
-  O("  END ci "); sd(x);
+  O("  END ci "); sd_(x,0);
   R x;
 }
 
@@ -147,7 +147,7 @@ K newK(I t, I n)
   ic(slsz(z,r)); z->t=t; z->n=n;
   if(t==6)z->n=0;
   if(z->_c==0)z->_c=256;
-  O("&z: %p   sd_(z,1): ",&z);sd_(z,1);
+  O("&z: %p   sd_(z,0): ",&z);sd_(z,0);
   #ifdef DEBUG
   krec[kreci++]=z;
   #endif
@@ -352,17 +352,18 @@ K Kv(   ){O("BEG Kv\n");
 //Optimization: It's better if Kv() doesn't set PARAMS and LOCALS. Only charfuncs should set params
 
 K newEntry(S s){
-  O("BEG NewEntry\n");
-  R newE(s,_n());}//assumes s came from sp()
-K newE(S s, K k) //oom
-{ O("BEG newE\n");
+  O("BEG newEntry\n");
+  R newE(s,_n()); }//assumes s came from sp()
+
+K newE(S s, K k){ //oom
+  O("BEG newE\n");
   K z=newK(0,3); U(z)
   kK(z)[0]=Ks(s); // be careful -- s must have come from sp()
   kK(z)[1]=k;
   kK(z)[2]=_n();
   M(z,kK(z)[0],kK(z)[2]) //May want to redesign this function (& newEntry) to ci(k==kK(z)[1])
-  R z;
-}
+  R z; }
+
 I rp2(I v){v--;v|=v>>1;v|=v>>2;v|=v>>4;v|=v>>8;v|=v>>16;if(sizeof(V)>=8)v|=v>>32;v++;R MAX(1,v);}//round up to integer power of 2 (fails on upper 1/4 signed)
 
 K mstat(){K ks=newK(-1,4);M(ks);I*s=kI(ks);s[0]=mUsed;s[1]=mAlloc;s[2]=mMap;s[3]=mMax;R ks;}

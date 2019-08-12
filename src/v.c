@@ -67,7 +67,7 @@ K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
   if(5==a->t) if((x=DE(a,k))) R x;
   P(!strlen(k),TE) //TODO verify this noting `. is not `
   P(strchr(k,'.'),DOE)
-  O("~CX ewEntry(k)      K newEntry(S s) <- K lookupEntryOrCreate(K *p, S k)      ");
+  O("~CX newEntry(k)      K newEntry(S s) <- K lookupEntryOrCreate(K *p, S k)      ");
   x=newEntry(k);
   O("#CX lookupEntryOrCreate :: newEntry\n");
   if(6==a->t){ cd(*p);
@@ -116,25 +116,21 @@ Z K* denameRecurse(K*p,S t,I create) {
   K* z=denameRecurse(p,t,create);
   O("#CM denameRecurse :: denameRecurse(p,t,create)\n");
   O("   CM:  z: %p      sd_(*z,0):",p);sd_(*z,0);
-  R z;
-}
+  R z; }
 
 K* denameD(K*d, S t, I create) {
   O("BEG denameD\n");
-  O("    d: %p      t: %s     create: %lld\n",d,t,create);
-  //O("    sd(*d):");sd(*d);
+  O("    d: %p      t: %s      create: %lld      &KTREE: %p\n",d,t,create,&KTREE);
   if(!simpleString(t)) R 0; //some kind of error
   O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      K* denameRecurse(K *p,S t,I create) <- K* denameD(K *d,S t,I create)      ");
   K* v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
   O("#CK denameD :: denameRecurse('.'==*t||!*t?&KTREE:d,t,create)\n");
   O("   CK:"); O("  v: %p   sd_(*v,0):",v); if(v)sd_(*v,0); else O("\n");
-  R v;
-}
+  R v; }
 
 K* denameS(S dir_string, S t, I create) {
-  O("BEG denameS\n");
+  O("BEG denameS\n");    //duplicates '.' functionality in denameD to avoid dictionary initialization
   O("    dir_string: %s      t: %s      create: %lld\n",dir_string,t,create);
-  //K* v= denameD('.'==*t||!*t ? &KTREE : denameD(&KTREE,dir_string,create) ,t,create);
   K* z;
   if('.'==*t||!*t)z=&KTREE;
   else { O("~CJ denameD(&KTREE,dir_string,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)      ");
@@ -143,9 +139,7 @@ K* denameS(S dir_string, S t, I create) {
   O("~CO denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)     ");
   K* v= denameD(z,t,create);
   O("#CO denameS :: denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)\n");
-  R v;
-  //duplicates '.' functionality in denameD to avoid dictionary initialization
-}
+  R v; }
 
 //K* denameBig(K dir_sym,K name_sym){R denameS(*kS(dir_sym),*kS(name_sym));} //[unnecessary?] wrapper for K-object inputs
 
@@ -200,7 +194,12 @@ K at_verb(K a, K b) {    //[Internal Function]
     else if( 0==at){DO(bn,kK(z)[i]=ci(kK(a)[kI(b)[i]])) if(bt==ABS(bt) || bn!=1)z=collapse(z);} }
   else if(3==ABS(bt)) {   //a is dict/directory & b is executable string like "1+1+c"
     P(5!=at,TE)
-    z=ex(wd_(kC(b),bn,&a,0)); }
+    O("~DU wd_(s+k+1,r-2,*dict,func)      K wd_(S s, int n, K *dict, K func) <- K at_verb(K a, K b)      ");
+    K zz=wd_(kC(b),bn,&a,0);
+    O("#DU at_verb :: wd_(kC(b),bn,&a,0)\n");
+    O("~DW wd_(s+k+1,r-2,*dict,func)      K ex(K a) <- K at_verb(K a, K b)      ");
+    z=ex(zz);
+    O("#DW at_verb :: ex(zz)\n"); }
   else if(4==ABS(bt)) {
     P(5!=at,TE)
     z=newK(0,bn);
