@@ -717,18 +717,22 @@ K vf_ex(V q, K g)
         O("earlier:    K f=(K)(*(V*)q);   K o=kV(f)[CODE]; K p=kV(f)[PARAMS]; K s=kV(f)[LOCALS]; K r=kV(f)[CONJ];  3=locals  4=params\n");
         O("sd(f):");sd(f);
         tree=newK(5,p->n+s->n); if(!tree) {stk--; GC;} //note: cleanup is unusual -- could turn into double labels
-        O("tree1:");sd_(tree,9);
+        O("tree1: %p",&tree);sd_(tree,2);
         DO(tree->n, if(!(kK(tree)[i]=newK(0,3))){cd(tree); stk--; GC;}) //shallow dict copy -- dictionary entry pool?
-        O("tree2:");sd_(tree,9);
+        O("tree2: %p",&tree);sd_(tree,2);
         DO(tree->n, DO2(3,  kK(DI(tree,i))[j] = ci(kK((i<p->n?DI(p,i):DI(s,i-p->n)))[j])))//shallow copy
-        O("tree3:");sd_(tree,9);
+        O("tree3: %p",&tree);sd_(tree,2);
         kV(f)[CACHE_TREE]=tree; }
       if(fsf){
         K j0=dot_monadic(kV(prnt)[LOCALS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]);
         K j2=join(ci(j0),j1); cd(j0); cd(kV(prnt)[CACHE_TREE]); kV(prnt)[CACHE_TREE]=dot_monadic(j2);
-        cd(j0); cd(j1); cd(j2); tree=kV(prnt)[CACHE_TREE]; cd(kV(prnt)[CACHE_WD]); kV(prnt)[CACHE_WD]=0; }
+        cd(j0); cd(j1); cd(j2);
+        tree=kV(prnt)[CACHE_TREE];
+        O("tree4 (fsf): %p",&tree);sd_(tree,2);
+        cd(kV(prnt)[CACHE_WD]); kV(prnt)[CACHE_WD]=0; }
 
       DO(p->n,e=EVP(DI(tree,i)); cd(*e); *e=0; if(r && i<r->n) *e=ci(kK(r)[i]); if(!*e && j<g->n) *e=ci(kK(g)[j++])) //merge in: CONJ with function args
+      O("tree5: %p",&tree);sd_(tree,2);
 
       O("RRR-1\n"); K tc=0;
       fw=kV(f)[CACHE_WD]; I t=0;
@@ -745,7 +749,8 @@ K vf_ex(V q, K g)
         O("#DD vf_ex :: aw(kC(o),o->n, tree,fc)     RRR-2\n"); O("...DD:   sd(fw):     %p",&fw);sd(fw);
 */
 
-        O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K*dict, K func) <- K vf_ex(V q, K g)      ");
+        O("tree6: %p",&tree);sd_(tree,2);
+        O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K *dict, K func) <- K vf_ex(V q, K g)      ");
         fw=wd_(kC(o),o->n,&tree,fc);
         O("#AW vf_ex :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n");
         O("   AW:   dict-aft-AW:");sd(tree);
