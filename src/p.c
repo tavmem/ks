@@ -87,13 +87,14 @@ Z C flop(C c){ R c=='('?')':c=='['?']':c=='{'?'}':c;}
 
 I parsedepth(PDA p) {R p?p->n+(STATE_QUOTE(p)?1:0):0;}
 I complete(S a, I n, PDA *q, I *marks) //well-formed or incomplete codeblock? all "{[(\"" closed
-{
+{ O("BEG complete\n"); O("a: %s\n",a); O("n: %lld    *marks: ",n); if(!marks)O("0"); else DO(n+1, O(" %lld",marks[i])); O("\n");
   if(!*q)*q=newPDA();
   PDA p=*q;
   P(!p,-1)
   C t;
   I r=formed_group('\0')+1;//row-length
 
+  O("pda->i, pda->s, pda->c  (parse state: pos in input, state, stacklength, stack)\n");
   for(;p->i < n;p->i++)
   {
     I before_pn=p->n, before_sq=STATE_QUOTE(p), before_sc=STATE_COMMENT(p); //for 'marks'/parse() stuff
@@ -106,6 +107,7 @@ I complete(S a, I n, PDA *q, I *marks) //well-formed or incomplete codeblock? al
         else pop(p);}}
     p->s = formed_dfa[r*p->s + formed_group(a[p->i])] - '0'; //state transition
 
+    O("a[p->i] %c   i %lld   S %lld   n %lld   c %s\n",a[p->i],p->i,p->s,p->n,p->c);
     if(!marks)continue; //This marks stuff tacked on for the parse() function
     C bot=bottom(p);
     I m = bot==')'?MARK_PAREN:
@@ -356,14 +358,18 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   if('\\'==s[0] && fbs){fbs=0; R backslash(s,n, dict);}
 
   PDA p=0;
-  O("~DJ newK(-1,1+n)   K newK(I t, I n) -- K wd_(S s, int n, K*dict, K func)   ");
+  O("~DJ newK(-1,1+n)   K newK(I t, I n) -- K wd_(S s, int n, K* dict, K func)   ");
   K km=newK(-1,1+n);
   O("#DJ wd_ :: newK(-1,1+n)  --  marks\n");
   U(km) I *m = kI(km);//marks
-  I e=complete(s,n,&p,m);if(p){pdafree(p);p=0;} //Mark all ([{ and comments and quotes
+  O("~EA complete(s,n,&p,m)   I complete(S a, I n, PDA *q, I *marks) <- K wd_(S s, int n, K *dict, K func)      ");
+  I e=complete(s,n,&p,m);
+  O("#EA wd_ :: complete(s,n,&p,m)\n");
+  O("   EA:  e: %lld\n",e);
+  if(p){pdafree(p);p=0;} //Mark all ([{ and comments and quotes
   lineB=s; if(e){cd(km); R PE;}
 
-  O("~DM Kv()   K Kv() -- K wd_(S s, int n, K*dict, K func)      ");
+  O("~DM Kv()   K Kv() -- K wd_(S s, int n, K *dict, K func)      ");
   K v = Kv();
   O("#DM wd_ :: Kv()\n");
   M(v,km)
@@ -379,6 +385,27 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   marker(mark_verb,  MARK_VERB)  // ( D+: | _AA+ | V ) where D := [0-9] , V := ~!@#$%^&*_-+=|<,>.?:
   marker(mark_ignore,MARK_IGNORE)// get leftover spaces, anything else we want to ignore
 
+  O("n: %d    s:\n%s\n",n,s);
+  O("   %d-UNMK %d-IGNR %d-BRKT %d-END %d-PREN %d-BRAC %d-QUOT %d-SMBL %d-NAME %d-NMBR %d-VERB %d-ADVB %d-COND %d-CNT\n",MARK_UNMARKED,MARK_IGNORE,MARK_BRACKET,MARK_END,MARK_PAREN,MARK_BRACE,MARK_QUOTE,MARK_SYMBOL,MARK_NAME,MARK_NUMBER,MARK_VERB,MARK_ADVERB,MARK_CONDITIONAL,MARK_COUNT);
+  O("begin:     ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_end,MARK_END)   // ";\n" - mark_end first so mark_number's space-eater doesn't get any newlines
+  //NOTE: `1 is the 'empty' symbol indexed @ 1, `a.1 is `a . 1,  and `., `.., `... are not symbols
+  O("mark end:  ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_symbol,MARK_SYMBOL)// `a`b `A `_a `_aB01283.aaaa__.AB1._ `A.B.C, re-mark sym-quotes `"h-g" 
+  O("mark smbl: ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_name,MARK_NAME)  // ( _A | (\.?S\.?)+ ) where A := [A-Za-z] and S := A(A|[0-9_])* e.g.  _t, f, .k.a.b, a.b_0..c
+  O("mark name: ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_number,MARK_NUMBER)//unified numeric type, determine +-1/2 at word-building time. mark spaces for strtol,strtod
+  O("mark nmbr: ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_adverb,MARK_ADVERB)// / \ ' /: \: ': This is rude with the system/debug commands. those can be remarked later
+  O("mark advb: ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_conditional,MARK_CONDITIONAL)// : if do while
+  O("mark cond: ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_verb,MARK_VERB)  // ( D+: | _AA+ | V ) where D := [0-9] , V := ~!@#$%^&*_-+=|<,>.?:
+  O("mark verb: ");DO(n+1, O(" %lld",m[i]));O("\n");
+  marker(mark_ignore,MARK_IGNORE)// get leftover spaces, anything else we want to ignore
+  O("mark ignr: ");DO(n+1, O(" %lld",m[i]));O("\n");
+
   dumm(m,n);
 
   DO(n,if(m[i]==MARK_UNMARKED){cd(v);cd(km); R PE;})
@@ -389,7 +416,7 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   //(one nice thing about being restrictive here (_verb and -0.0: number verbs) is future versions are backwards compatible)
 
   I y=0; //consolidate - removes non-word spaces/comments/etc
-  O("~DK newK(-1,1+n)   K newK(I t, I n) <- K wd_(S s, int n, K*dict, K func)   ");
+  O("~DK newK(-1,1+n)   K newK(I t, I n) <- K wd_(S s, int n, K *dict, K func)   ");
   K ks2=newK(-3,n);
   O("#DK wd_ :: newK(-1,1+n)  --  consol\n");
   M(v,km,ks2)
@@ -398,14 +425,14 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   s2[y]=m[y]=0;
 
   I oc=overcount(m,n);
-  O("~DL newK(-1,1+n)   K newK(I t, I n) <- K wd_(S s, int n, K*dict, K func)   ");
+  O("~DL newK(-1,1+n)   K newK(I t, I n) <- K wd_(S s, int n, K *dict, K func)   ");
   K kw=newK(-4,1+oc);
   O("#DL wd_ :: newK(-1,1+n)  --  words\n");
   M(v,km,ks2,kw) V*w=(V*)kK(kw);//words. Assumes terminal extra NULL
 
   I c=0,j=0;  if(!fll)fll=strlen(s2); else fll=-1;
   DO(y,
-       O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)      capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func) <- wd_(S s, int n, K*dict, K func)      ");
+       O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS, dict,func)      capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func) <- wd_(S s, int n, K *dict, K func)      ");
        j   =capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func);
        O("#BY wd_ :: capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)\n");
        i+=-1+j;
@@ -511,7 +538,9 @@ K* inKtree(K *d, S t, I create) {
 I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
   //IN string, string length, pos in string, markings;
   //OUT words, current #words; IN locals-storage, names-storage, charfunc/NULL
-{ O("BEG capture\n"); O("    s: %s    n: %lld    k: %lld",s,n,k); O("    dict: %p      sd_(*dict,1):",dict);sd_(*dict,1);
+{ O("BEG capture\n"); O("    s: %s\n    n: %lld    k: %lld    *m: %lld    *w: %p    *d: %lld\n",s,n,k,*m,*w,*d);
+  O("    *locals:");sd(*locals); O("    dict: %p      sd_(*dict,1):",dict);sd_(*dict,1);
+  O("    func:");sd_(func,2);
   if(fll && fll!=n)fll=-1;
   V z=0,*p=w+*d; *p=0;
   I r=1,v=0,y=0,a,b=0,c;S u="",e;K g;I l;
@@ -666,8 +695,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       //if(func) *zdict = merge self, parent (in what way?)
 
       )
-    CS(MARK_NUMBER ,  O("number\n");
-                      r=v; // 0 1 -2.3e-4 6. .7 -8 9E0
+    CS(MARK_NUMBER ,  r=v; // 0 1 -2.3e-4 6. .7 -8 9E0
                       a=1; DO(r,if(stringHasChar(".Eein",s[k+i])){a=2;break;})
                       z=newK(1==y?a:-a,y); U(z)
                       DO(r, if(m[k+i]>=0)continue;
@@ -675,6 +703,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                             while(m[l+k+i]==MARK_NUMBER)l++;
                             if(!(u=strdupn(s+k+i,l))){cd(z);R (L)ME;}
                             g=1==a?formKiCS(u):formKfCS(u);
+                            O("number   u: %s   \n",u);
                             free(u);
                             M(z,g)
                             if(1==a) kI(z)[b++]=*kI(g);
@@ -689,21 +718,23 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       unescaped_fill(kC(z),s+k+1,r-2);
       )
     CS(MARK_SYMBOL ,  //handle `a`"b-\777\n\0"`c ```d.ef
-                      O("symbol\n");
                       r=v;
                       z=newK(1==y?4:-4,y); //oom
+                      O("symbol   ");
                       DO(r, if(m[k+i]>=0)continue;
                             for(a=0;m[k+i+1+a]>0;a++);
                             u=alloc(1+a); //oom  you can return 0 but catch above?
                             c='"'==s[k+i+1]?2:0;
                             u[unescaped_fill(u,s+k+i+1+c/2,a-c)]=0;
                             kS(z)[b++]=sp(u); //mm/o  you can return 0 but catch above?
+                            O("u: %s   ",u);
                             free(u);
                             i+=a;
                         )
+                        O("\n");
       )
     CS(MARK_NAME   ,  e=strdupn(s+k,r);
-                      //O("name   ");
+                      O("name   ");
                       u=sp(e); //converting to sp() probably unnecessary
                       free(e);
                       P(!u,(L)ME)                     //you can return 0 but catch above?
@@ -719,10 +750,10 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                           // see "getrusage" or http://stackoverflow.com/questions/53827/checking-available-stack-size-in-c
                         else {O("n1b   "); z=((K(*)())vn_[charpos(n_s,u[1])])();}
                       else if(func)
-                      { O("n2\n"); //if(ydict){O("sd(*ydict):    %p",ydict);sd(*ydict);} else O("nothing\n");
+                      { O("n2      u: %s      ",u);
+                        //if(ydict){O("sd(*ydict):    %p",ydict);sd(*ydict);} else O("nothing\n");
                         //O("sd(*dict):    %p", dict);sd(*dict);
                         //O("sd(KTREE):    %p",&KTREE);sd(KTREE);
-                        O("u: %s\n",u);
                         if( dict==(K*)kV(func)+PARAMS)
                         { O("n2a\n");
                           V q=newEntry(u);
@@ -732,7 +763,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                           cd(q);
                         }
                         else if((q=DE(*dict,u))){
-                          O("n2b   u:%s   sd_(*dict,9):",u);sd_(*dict,9); O("sd_(q,9):");sd_(q,9);
+                          O("n2b      sd_(*dict,9):");sd_(*dict,9); O("sd_(q,9):");sd_(q,9);
                           z=EVP(q);
                           } //If func has its local, use it
                         //else if(':'==s[k+r] && ':'==s[k+r+1] && -MARK_VERB==m[k+r+1])
@@ -745,7 +776,12 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                            z=denameS(kV(func)[CONTeXT],u,1);
                            O("#DX capture :: denameS(kV(func)[CONTeXT],u,1)\n");
                            O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n"); }
-                        else if(dict==  (K*)kV(func)+LOCALS  && ':'==s[k+r] && -MARK_VERB==m[k+r]){O("n2d   "); z=denameD( dict,u,1);}
+                        else if(dict==  (K*)kV(func)+LOCALS  && ':'==s[k+r] && -MARK_VERB==m[k+r]){
+                           O("n2d\n");
+                           O("~ED denameD( dict,u,1)      K* denameD(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                           z=denameD( dict,u,1);
+                           O("#ED capture :: denameD( dict,u,1)\n");
+                           O("   ED: z: %p\n",z); }
                           //K3.2:  a+:1 format applies to context-globals not locals
                         else
                           {O("n2e\n");
@@ -753,7 +789,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                           O("kK(z): %p   ",kK(z)); }//Otherwise check the context (refactor with above?)
                       }
                       else {
-                        //O("n3\n"); O("s: %s    n: %lld    k: %lld\n",s,n,k);
+                        O("n3      u: %s\n",u);
                         if(fll>0)fdc=0;
                         I i;for(i=k;i<strlen(s);i++){
                                if(!fbr && s[i]==';')break;
@@ -769,7 +805,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                            R err;}
                         O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=denameD( dict,u,fll&&fdc);
-                        O("#CA denameD( dict,u,fll&&fdc)\n");
+                        O("#CA capture :: denameD( dict,u,fll&&fdc)\n");
                       }
       )
     CS(MARK_VERB   ,  // "+" "4:" "_bin"  ;  grab "+:", "4::"
@@ -866,5 +902,6 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
   ++*d;
 
   O("      p: %p    z: %p    r: %lld",p,z,r); O("      &dict: %p      sd_(*dict,0):",&dict);sd_(*dict,0);
+  //O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
   R r;
 }

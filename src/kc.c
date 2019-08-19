@@ -42,13 +42,18 @@ I fbs=0;              //backslash flag
 
 I prompt(I n){DO(n,O(">")) O("  ");fflush(stdout);R 0;}
 
+I callComplete(S s, I n, PDA *q, I *m) {
+  O("~EB complete(t,m,&p,0)      I complete(S a, I n, PDA *q, I *marks) <- I wds_(K*a,FILE*f,I l)      ");
+  R complete(s,n,q,0);
+  O("wds_ <- callComplete(t,m,&p,0)\n"); }
+
 I wds(K* a,FILE*f){R wds_(a,f,0);}
 I wds_(K*a,FILE*f,I l) {
   S s=0,t=0;  I b=0,c=0,m=0,n=0,v=0;  K z=0; PDA p=0;
   I o=isatty(STDIN)&&f==stdin;
   if(-1==(c=getline_(&s,&n,f)))GC;
   appender(&t,&m,s,n);
-  while(1==(v=complete(t,m,&p,0))) {
+  while(1==(v=callComplete(t,m,&p,0))) {
     b=parsedepth(p);
     if(o)prompt(b+l);
     if(-1==(c=getline_(&s,&n,f)))GC;
@@ -276,7 +281,10 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     if(fCheck) { fCheck--;R 0; }   //escape suspended execution with single backslash
     if(*a) GC; }                    //escape continue with single backslash
   appender(a,n,s,c);         //"strcat"(a,s)
+  O("~EC complete(*a,*n,p,0)   I complete(S a, I n, PDA *q, I *marks) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
   I v=complete(*a,*n,p,0);   //will allocate if p is null
+  O("#EC line :: complete(*a,*n,p,0)\n");
+  O("   EC:  v: %lld\n",v);
   b=parsedepth(*p);
   if(v==3) { show(kerr("nest")); GC; }
   if(v==2) { show(kerr("unmatched")); b=0; GC; }

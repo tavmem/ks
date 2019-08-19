@@ -85,7 +85,7 @@ K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
 
 Z K* denameRecurse(K*p,S t,I create) {
   O("BEG denameRecurse\n");
-  O("      p: %p    t: %s     create: %lld\n",p,t,create);
+  O("      p: %p      t: %s      create: %lld\n",p,t,create);
   //O("sd(*p):");sd(*p);
   if(!*t)R p;
   if('.'==*t)t++;
