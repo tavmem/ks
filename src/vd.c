@@ -60,9 +60,9 @@ Z K of2(K d, K *x, K *y, I s)
 
 K of(K a, K b)  //TODO: oom all (see of2() for M(z,kK(z)[i]=...) pattern )
 {
-  O("BEG of\n");
-  O("    sd(a):");sd(a);
-  O("    sd(b):");sd(b);
+  O("BEG of \n");
+  O("    &a: %p   sd(a):",&a);sd(a);
+  O("    &b: %p   sd(b):",&b);sd(b);
   //TODO: must implement Value/Execute '`k.b@"a+1"' same as '.(`k.b;"a+1")'
 
   I at=a->t, an=a->n, bt=b->t, bn=b->n;
@@ -164,7 +164,7 @@ K dot_ref(K *p, K *x, K *z, I s, K c, K y)
     if(argc > 1) kK(args)[1] = ci(y);
     O("~BP specialAmendDot(c,args)      K specialAmendDot(K c, K args) <- K dot_ref(K *p, K *x, K *z, I s, K c, K y)      ");
     K r = specialAmendDot(c,args);
-    O("#BP dot_ref :: specialAmendDot(c,args)\n"); O("   BP:");sd(r); O("\nsd(prnt):");sd(prnt);O("\n");
+    O("#BP dot_ref :: specialAmendDot(c,args)\n"); O("   BP:");sd(r); O("\nsd_(prnt,2):");sd_(prnt,2);O("\n");
     cd(args);
     U(r)
     //O("        r->t:%lld   r->n:%lld   r->_c:%lld   count:%lld   lane:%lld   &r:%p   ",r->t,r->n,r->_c,(r->_c)>>8, 0xFF & (unsigned long long)r->_c, &r); O("show(r): "); show(r);
@@ -274,7 +274,7 @@ K dot_tetradic_2(K *g, K b, K c, K y)
   {
     O("~AH: dot_ref(g,&b,0,bn-1,c,y)      K dot_ref(K *p, K *x, K *z, I s, K c, K y) <- K dot_tetradic_2(K *g, K b, K c, K y)      ");
     dot_ref(g,&b,0,bn-1,c,y); //could factor further by promoting everything...
-    O("#AH dot_tetradic_2 :: K dot_ref(g,&b,0,bn-1,c,y)\n"); O("   AH:  returns NULL\n"); O("\nsd(prnt):");sd(prnt);O("\n");
+    O("#AH dot_tetradic_2 :: K dot_ref(g,&b,0,bn-1,c,y)\n"); O("   AH:  returns NULL\n"); O("\nsd_(prnt,2):");sd_(prnt,2);O("\n");
   }
   else if(0==bt || 1==ABS(bt) || 4==ABS(bt))
   {

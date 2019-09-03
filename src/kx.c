@@ -41,6 +41,7 @@ __thread I frg=0;    // Flag reset globals
          I fom=0;    // Flag overMonad (curried)
          I fam=1;    // Flag amend: 1=OK to print response
          I fdvx=0;   // restrict printing of void pointers in dv_ex
+         I cnte=0;
 
          I calf=-1;  // counter for alf
          C* alf="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"; // for recursive member display in sd_()
@@ -62,9 +63,9 @@ K sd_(K x,I f) { V *v;
        calf--; )
     CS(-4,  if(f>-1){ v=(kV(x)); if((v[0]>(V)0x10) & (v[0]<(V)0x5000000)) R 0; //stop, if have string of interned symbols
             I ii; for(ii=0;v[ii];ii++){ O("     .2%c[%lld]: %p",alf[calf],ii,v[ii]);
-                                        if(v[ii]>(V)DT_SIZE)sd_(*(K*)v[ii],9); else O("\n"); } } )
+                                        if(v[ii]>(V)DT_SIZE)sd_(*(K*)v[ii],1); else O("\n"); } } )
     CSR(5,)
-    CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[i],1); )) }
+    CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[i],2); )) }
   R 0; }
 
 K sd(K x){R sd_(x,1);}     //Shows the details of a K-structure. Useful in debugging.
@@ -497,7 +498,7 @@ K dv_ex(K a, V *p, K b)
 //        **** Next 2 lines removed to fix #432. They may be needed when returning to #244 and #247
 //  if(encp && (encp!=2 || (strchr(kC(kK(encf)[CODE]),"z"[0]))) && encp!=3 && DT_SIZE<(UI)*p)tmp=vf_ex(&encf,g);
 //  else
-    O("\nsd(prnt):");sd(prnt);O("\n");
+    O("\nsd_(prnt,2):");sd_(prnt,2);O("\n");
     O("~AM vf_ex(*p,g)      K vf_ex(V q, K g) <- K dv_ex(K a, V *p, K b)      ");
     tmp=vf_ex(*p,g);
     O("#AM dv_ex :: vf_ex(*p,g)\n"); O("   AM:");sd_(tmp,2);
@@ -533,6 +534,7 @@ K dv_ex(K a, V *p, K b)
 //K3.2 Bug - {b:1_,/";a",/:$a:!x; "{[",b,"]a3}[" ,(1_,/";",/:$a ),"]" } 67890  --> Sometimes works, sometimes stack error, sometimes crash
 K vf_ex(V q, K g)
 { O("BEG vf_ex\n");
+  K tc=0;
   if(q>(V)DT_SIZE){O("   sd_((K)(*(V*)q,2):");sd_((K)(*(V*)q),2);}
   O("   sd(g):");sd(g);
   if (interrupted) {interrupted=0; R BE;}
@@ -734,62 +736,37 @@ K vf_ex(V q, K g)
       DO(p->n,e=EVP(DI(tree,i)); cd(*e); *e=0; if(r && i<r->n) *e=ci(kK(r)[i]); if(!*e && j<g->n) *e=ci(kK(g)[j++])) //merge in: CONJ with function args
       O("tree5: %p",&tree);sd_(tree,2);
 
-      O("RRR-1\n"); K tc=0;
+      O("RRR-1\n");
       fw=kV(f)[CACHE_WD]; I t=0;
       if(!fw || (t=(UI)kS(kK(fw)[CODE])[0]>DT_SIZE || (UI)kS(kK(fw)[CODE])[1]>DT_SIZE) ) {
         if(t) cd(kV(f)[CACHE_WD]);
         K fc = kclone(f); //clone the function to pass for _f
         cd(kV(fc)[CONJ]); kV(fc)[CONJ]=0;
         kV(fc)[DEPTH]++;
-
-/*
-        O("sd(tree-bef-call: ");sd(tree);
-        O("~DD aw(kC(o),o->n, tree,fc)      K aw(S s, int n, K dict, K func) <- K vf_ex(V q, K g)      ");
-        fw= aw(kC(o),o->n, tree,fc);
-        O("#DD vf_ex :: aw(kC(o),o->n, tree,fc)     RRR-2\n"); O("...DD:   sd(fw):     %p",&fw);sd(fw);
-*/
-
-        O("tree6: %p",&tree);sd_(tree,2);
         O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K *dict, K func) <- K vf_ex(V q, K g)      ");
-        fw=wd_(kC(o),o->n,&tree,fc);
+        O("o->n: %lld\n",o->n);
+        I tt=0; DO(o->n, if(kC(o)[i]=='{'){ tt=1; break; })
+        if(tt || kC(o)[0]=='[') { O("&tree6: %p   sd_(tree6,2):",&tree);sd_(tree,2); fw=wd_(kC(o),o->n,&tree,fc); }
+        else { tc=kclone(tree); O("&tc: %p   sd_(tc,2);",&tc);sd_(tc,2); fw=wd_(kC(o),o->n,&tc,fc); }
         O("#AW vf_ex :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n");
         O("   AW:   dict-aft-AW:");sd(tree);
         O("sd(fw):     %p",&fw);sd(fw);
-
-        //tc=newK(5,tree->n); //O("tc1: %p",tc);sd_(tc,9);
-        //DO(tc->n, if(!(kK(tc)[i]=newK(0,3))){cd(tc); stk--; GC;}) //O("tc2: %p",tc);sd_(tc,9);
-        //DO(tc->n, DO2(3,  kK(DI(tc,i))[j] = ci(kK(DI(tree,i))[j]))) //O("tc3: %p",tc);sd_(tc,9);
-        //O("sd(tc):");sd(tc);O("\n");
-        //fw=wd_(kC(o),o->n,&tc,fc);
-
-        //O("fw->t:%lld  fw->n:%lld\n",fw->t,fw->n); O("sd(res): ");sd(fw);
         kV(f)[CACHE_WD]=fw;
         cd(fc); }
 
       #ifdef DEBUG
-      if(stk1>5) {cd(g); kerr("stack"); if(tc)cd(tc); R _n();}
+      if(stk1>5) {cd(g); kerr("stack"); R _n();}
       #else
-      if(stk1>1e3) {cd(g); kerr("stack"); if(tc)cd(tc); R _n();}
+      if(stk1>1e3) {cd(g); kerr("stack"); R _n();}
       #endif
       ci(fw);
       stk1++;
-      O("~AN ex(fw)      ex(K a) <- vf_ex(V q, K g)      RRR-3      ");
+      O("~AN ex(fw)      K ex(K a) <- K vf_ex(V q, K g)      RRR-3      ");
       z=ex(fw);
       O("#AN vf_ex :: ex(fw)     RRR-4\n"); O("   AN:");sd(z);
-/*
-      if(5==z->t){
-         O("vvv0: sd_(*kK(z),2)\n"); sd_(*kK(z),2);
-         O("vvv1: sd_((kK(*kK(z)))[1],2)\n"); sd_((kK(*kK(z)))[1],2);
-         O("vvv2:                       \n"); O(" %c \n",*kC((kK(*kK(z)))[1]) );
-         O(" %d \n",*kC((kK(*kK(z)))[1]) );
-         if(71 == *kC((kK(*kK(z)))[1]) ) (*kC((kK(*kK(z)))[1]))=72;
-         O("vvv3: sd(z)\n"); sd(z);
-      }
-*/
       O("sd(fw):");sd(fw);
       stk1--;
       DO(p->n,e=EVP(DI(tree,i)); cd(*e); *e=0; )
-      if(tc){ O("tc1:\n");sd(tc); cd(tc); O("tc2:\n");sd(tc); }
       stk--;
     )
   }
@@ -827,7 +804,7 @@ K vf_ex(V q, K g)
       cd(kK(z)[CACHE_TREE]); kK(z)[CACHE_TREE]=dot_monadic(j2); cd(x); cd(xe); cd(j0); cd(j2); encp=1; } }
 
 cleanup:
-  cd(g); //O("   sd(z): ");sd(z);
+  cd(g); cd(tc);  //O("   sd(z): ");sd(z);
   R z;
 }
 
@@ -869,6 +846,7 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets
 K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
   O("BEG ex \n");
   O("sd_(a,2):");sd_(a,2);O("\n");
+  O("exA %lld *****************************************************************************\n\n",++cnte);
   U(a); if(a->t==7 && kVC(a)>(K)DT_SIZE && 7==kVC(a)->t && 6==kVC(a)->n)fwh=1;
   if(a->t==7){
     if(prnt==0){
@@ -888,7 +866,7 @@ K ex(K a) {   //Input is (usually, but not always) 7-0 type from wd()
   fwh=stk=stk1=prj=prj2=fsf=0;
   if(prnt)cd(prnt);
   prnt=0;
-  O("res:");sd_(z,9);O("\n");
+  O("\nexB %lld  -- &z  sd_(z,2):\n %p",cnte--,&z); sd_(z,2); O("\n");
   R z;
 }
 
@@ -908,7 +886,7 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
             if(-1==i||bk(v[i])){
               if(z==0)O("     z==0 (no Asd(z))\n"); else {O("Asd(z):");sd(z);}
               cd(z); frg++;
-              O("~AC ex1(v+1+i,0,&i,n,1)      K ex1(V*w,K k,I*i,I n,I f) <- K ex0(V*v,K k,I r)      i: %lld     ",i);
+              O("~AC ex1(v+1+i,0,&i,n,1)      K ex1(V*w, K k, I *i, I n, I f) <- K ex0(V*v, K k, I r)      i: %lld     ",i);
               x=ex1(v+1+i,0,&i,n,1);
               O("#AC ex0 :: ex1(v+1+i,0,&i,n,1)\n"); O("   AC:");sd(x);
               O("Bsd(z):");sd(z);
@@ -1088,7 +1066,7 @@ K ex1(V *w,K k,I *i,I n,I f)//convert verb pieces (eg 1+/) to seven-types, defau
   I c=0; while(w[c] && !bk(w[c])){c++; if(offsetColon==w[c-1])break;} //must break or assignment is n^2  (a:b:c:1)
 
   if(!c || !VA(w[c-1]) || (c>1 && offsetColon==w[c-1] ) ){
-     O("~AD ex2(w,k)      ex2(V*v, K k) <- ex1(V*w,K k,I*i,I n,I f)      ");
+     O("~AD ex2(w,k)      K ex2(V*v, K k) <- K ex1(V*w, K k, I *i, I n, I f)      ");
      //O("list before execution\n");
      //for(ii=0;w[ii];ii++){O("     ex2 w[%lld]: %p",ii,w[ii]); if(w[ii]>(V)DT_SIZE) {O(" %p",*(K*)w[ii]); sd(*(K*)w[ii]);} else O("\n"); }
      K vv=ex2(w,k); //typical list for execution
@@ -1290,7 +1268,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
     R e; }
 
   //vn. case
-  O("vn case before RESET, if prnt:"); if(prnt)sd(prnt); else O("\n");
+  O("vn case before RESET, if prnt:"); if(prnt)sd_(prnt,2); else O("\n");
   i=0; while(adverbClass(v[1+i])) i++; //ALT'Y: i=adverbClass(b)?i+1:0;
   O("~AI ex2(v+1+i,k)      K ex2(V*v, K k) <- K ex2(V*v, K k)      k:");if(k)sd(k);else O(" is 0      ");
   t2=ex2(v+1+i,k); //oom. these cannot be placed into single function call b/c order of eval is unspecified
@@ -1325,14 +1303,14 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
           kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); } }
       if(grnt)cd(prnt); else grnt=prnt;
     }
-    O("RESET: prnt=ci(t3) at vn case in ex2.  prnt just before:"); if(prnt)sd(prnt); else O("\n");
+    O("RESET: prnt=ci(t3) at vn case in ex2.  prnt just before:"); if(prnt)sd_(prnt,2); else O("\n");
     prnt=ci(t3);
     O("after RESET, prnt:");sd_(prnt,0); }
 
   u=*v; //Fixes a bug, see above. Not thread-safe. Adding to LOCALS probably better
   *v=VA(t3)?t3:(V)&t3;
   if(*(v+i)==(V)offsetEach && !grnt)grnt=ci(prnt);
-  O("~AL dv_ex(0,v+i,t2)      dv_ex(K a, V *p, K b) <- K ex2(V*v, K k)      ");
+  O("~AL dv_ex(0,v+i,t2)      K dv_ex(K a, V *p, K b) <- K ex2(V*v, K k)      ");
   e=dv_ex(0,v+i,t2);
   O("#AL ex2 :: dv_ex(0,v+i,t2)\n"); O("   AL:");sd(e);
   *v=u;

@@ -331,7 +331,7 @@ K wd(S s, int n){
   O("BEG wd \n");
   O("  s: %s      n: %d    ",s,n);
   O("  d_:%s   &NIL:%p   sd(NIL):",d_,&NIL);sd(NIL);
-  O("  sd(KTREE):");sd(KTREE);
+  O("  &KTREE: %p      sd(KTREE):",&KTREE);sd(KTREE);
   //O("  sd(kK((kK(KTREE))[0])[1]):");sd(kK((kK(KTREE))[0])[1]);
   lineA=s;
   fdc=0;
@@ -340,7 +340,7 @@ K wd(S s, int n){
   O("#CZ wd :: denameD(&KTREE,d_,1)\n");
   O("   CZ:                   "); O("  z: %p                       sd_(*z,0):",z); if(z)sd_(*z,0); else O("\n");
   O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
-  O("~BS wd_(s,n,*z,0)      K wd_(S s, int n, K dict, K func) <- K wd(S s, int n)      ");
+  O("~BS wd_(s,n, z,0)      K wd_(S s, int n, K *dict, K func) <- K wd(S s, int n)      ");
   K res=wd_(s,n, z,0);
   O("#BS wd :: wd_(s,n, denameD(&KTREE,d_,1),0)      sd(res):\n"); O(" %p",&res); sd(res);
   R res;
@@ -385,7 +385,6 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   marker(mark_verb,  MARK_VERB)  // ( D+: | _AA+ | V ) where D := [0-9] , V := ~!@#$%^&*_-+=|<,>.?:
   marker(mark_ignore,MARK_IGNORE)// get leftover spaces, anything else we want to ignore
 
-  O("n: %d    s:\n%s\n",n,s);
   O("   %d-UNMK %d-IGNR %d-BRKT %d-END %d-PREN %d-BRAC %d-QUOT %d-SMBL %d-NAME %d-NMBR %d-VERB %d-ADVB %d-COND %d-CNT\n",MARK_UNMARKED,MARK_IGNORE,MARK_BRACKET,MARK_END,MARK_PAREN,MARK_BRACE,MARK_QUOTE,MARK_SYMBOL,MARK_NAME,MARK_NUMBER,MARK_VERB,MARK_ADVERB,MARK_CONDITIONAL,MARK_COUNT);
   O("begin:     ");DO(n+1, O(" %lld",m[i]));O("\n");
   marker(mark_end,MARK_END)   // ";\n" - mark_end first so mark_number's space-eater doesn't get any newlines
@@ -432,9 +431,10 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
 
   I c=0,j=0;  if(!fll)fll=strlen(s2); else fll=-1;
   DO(y,
-       O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS, dict,func)      capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func) <- wd_(S s, int n, K *dict, K func)      ");
-       j   =capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func);
+       O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS, dict,func)      I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func) <- K wd_(S s, int n, K *dict, K func)      ");
+       j = capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func);
        O("#BY wd_ :: capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)\n");
+       O("   BY: j: %lld\n",j);
        i+=-1+j;
        if(!j  ){M(0,v,km,ks2,kw)} )
   //O("sl:");DO(n  ,if(!s2[i])break;O("%4c" ,s2[i]))O("\n"); O("ml:");DO(n  ,O("%4ld",m[i]))O("\n"); O("##:");DO(n  ,O("%4ld",  i ))O("\n");
@@ -558,7 +558,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
     CS(MARK_CONDITIONAL, O("conditional\n"); z=offsetColon)//dummy value
     CS(MARK_PAREN  ,  O("paren\n");
                       fbr=1;
-                      O("~BT wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K*dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
+                      O("~BT wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
                       O("#BT capture :: wd_(s+k+1,r-2,dict,func)\n");
                       if(!z)R (L)PE;)                   //oom. currently z->t==7 z->n==0.
@@ -794,10 +794,11 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         I i;for(i=k;i<strlen(s);i++){
                                if(!fbr && s[i]==';')break;
                                else if(s[i]==':'|| (fbr && (s[i]=='x'||s[i]=='y'||s[i]=='z'))){fdc=1;break;}}
-                        O("~BZ inKtree( dict,u,0)      K* inKtree(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                        O("~BZ inKtree( dict,u,0)      K *inKtree(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=inKtree( dict,u,0);
                         O("#BZ capture :: inKtree( dict,u,0)\n");
-                        O("      fdc: %lld    z: %p\n",fdc,z);
+                        O("   BZ: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n");
+                        O("      fdc: %lld\n",fdc);
                         if((!fdc)&&!z){L err=(L)VLE;
                            #ifndef DEBUG
                            oerr(); O("%s\n%c\n",u,'^');
@@ -806,6 +807,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=denameD( dict,u,fll&&fdc);
                         O("#CA capture :: denameD( dict,u,fll&&fdc)\n");
+                        O("   CA: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n");
                       }
       )
     CS(MARK_VERB   ,  // "+" "4:" "_bin"  ;  grab "+:", "4::"
