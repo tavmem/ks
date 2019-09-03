@@ -4,7 +4,7 @@ kona with stack reporting
 How to use this respository:
 It is designed to show the details of some of the processing
 
-You must also have cloned the kona repsitory 
+You must also have cloned the kona repository 
 
 
 ```
