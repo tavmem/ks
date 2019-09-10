@@ -202,7 +202,7 @@ Z K overMonad(K a, V *p, K b)
                   O("    oMo p[%lld]: %p",ii,p[ii]);
                   if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]);
                   else O("\n");
-                  O("output limited to %lld\n",fdvx); } }
+                  O("    output limited to %lld\n",fdvx); } }
   fdvx=2;
 
   K u=b,c=0;I flag=0; fsf=0;
@@ -309,11 +309,26 @@ Z K scanMonad(K a, V *p, K b)
 
 Z K each2(K a, V *p, K b)
 { O("BEG each2\n");
+O("    sd(a):");sd(a); O("    sd(b):");sd(b);
+  if(!p || !*p)O("   !p || !*p\n");
+  else { I ii; if(!fdvx) for(ii=0;p[ii];ii++)
+                         {  O("    dvx p[%lld]: %p",ii,p[ii]);
+                            if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]);
+                            else O("\n");
+                         }
+               else for(ii=0;p[ii] && ii<fdvx;ii++)
+                    {  O("    dvx p[%lld]: %p",ii,p[ii]);
+                       if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]);
+                       else O("\n");
+                       O("output limited to %lld\n",fdvx);
+                    }
+       }
+  fdvx=0;
   I bt=b->t, bn=b->n; K prnt0=0,grnt0=0;
   if(bt > 0) { O("e2aaaa\n"); R dv_ex(0,p-1,b); }
   else
   { K z = newK(0,bn),d=0; U(z)
-    K g; I f=*p==(V)offsetEach && (*(p-1)==(V)offsetOver || *(p-1)==(V)offsetScan) && *(p-2)<(V)DT_SIZE;
+    K g; I f=*p==(V)offsetEach && (*(p-1)==(V)offsetEach || *(p-1)==(V)offsetOver || *(p-1)==(V)offsetScan) && *(p-2)<(V)DT_SIZE;
     if(0 >bt) DO(bn, g=newK(ABS(bt),1); M(g,z) memcpy(g->k,((V)b->k)+i*bp(bt),bp(bt));
                      if(f) { O("e2bbbb\n"); d=dv_ex(a,p-1,g); }
                      else  { O("e2cccc\n"); d=dv_ex(0,p-1,g); }
@@ -575,13 +590,10 @@ K dv_ex(K a, V *p, K b)
 K vf_ex(V q, K g)
 { O("BEG vf_ex\n");
   K tc=0;
-  if(q>(V)DT_SIZE)
-  { O("   sd_((K)(*(V*)q,2):");sd_((K)(*(V*)q),2);
-  }
+  if(q>(V)DT_SIZE) { O("   sd_((K)(*(V*)q,2):");sd_((K)(*(V*)q),2); }
+  else O("   q: %lx      hex\n",(unsigned long int)q);
   O("   sd(g):");sd(g);
-  if (interrupted)
-  { interrupted=0; R BE;
-  }
+  if (interrupted) { interrupted=0; R BE; }
 
   //V w=(*(V*)q);
 
@@ -592,28 +604,20 @@ K vf_ex(V q, K g)
 
   I k=sva(q);
   I n=-1,j=0;
-  if(!k&&!(*(V*)q))
-  { cd(g); R 0;
-  }              // (2="2") 2 err
+  if(!k&&!(*(V*)q)) { cd(g); R 0; }              // (2="2") 2 err
 
   if(q>(V)DT_SIZE)
   { K h=(K)(*(V*)q);
     if(h->t==7 && h->n==1 && kK(h)[CODE] && (UI)kK(kK(h)[CODE])[0]>DT_SIZE)
-    { if(kK(h)[CODE]->n==3 && (*(K*)(kS(kK(h)[CODE])[0]))->t==0 )
-      { z=dot(*(K*)(kS(kK(h)[CODE])[0]),g); GC;
-      }
-      if((UI)kK(kK(h)[CODE])[1]==0x3a && g->t==0 )
-      { z=dot( *(K*)(kS(kK(h)[CODE])[0]), kK(g)[0] ); GC;
-      }
+    { if(kK(h)[CODE]->n==3 && (*(K*)(kS(kK(h)[CODE])[0]))->t==0 ) { z=dot(*(K*)(kS(kK(h)[CODE])[0]),g); GC; }
+      if((UI)kK(kK(h)[CODE])[1]==0x3a && g->t==0 ) { z=dot( *(K*)(kS(kK(h)[CODE])[0]), kK(g)[0] ); GC; }
     }
   }
 
   n=valence(q); I ee=0;
   if(q>(V)DT_SIZE)
   { K e=*(K*)q;
-    if(e->t==7 && e->n==1 && (V)kS(kK(e)[CODE])[0]>(V)DT_SIZE && (*(K*)kS(kK(e)[CODE])[0])->t==7)
-    { n=2; ee=1;
-    }
+    if(e->t==7 && e->n==1 && (V)kS(kK(e)[CODE])[0]>(V)DT_SIZE && (*(K*)kS(kK(e)[CODE])[0])->t==7) { n=2; ee=1; }
   }
 
   if(ee && !kV(g)[0] && kV(g)[1]) fom=1;
@@ -664,11 +668,12 @@ K vf_ex(V q, K g)
     else
     { O("   vf_ex  ELSE --- z=((K(*)(K,K))DT[(L)q].func)(a,b);    (L)q:%lld---",(L)q);
       fdvx=1;
-     if(24==(L)q)O("minus\n");
-     if(42==(L)q)O("equals\n");
-     if(52==(L)q)O("join\n");
-     if(62==(L)q)O("_0d\n");
-     z=((K(*)(K,K))DT[(L)q].func)(a,b);
+      if(22==(L)q)O("plus\n");
+      if(24==(L)q)O("minus\n");
+      if(42==(L)q)O("equals\n");
+      if(52==(L)q)O("join\n");
+      if(62==(L)q)O("_0d\n");
+      z=((K(*)(K,K))DT[(L)q].func)(a,b);
     }
     GC;
   }
@@ -862,7 +867,7 @@ K vf_ex(V q, K g)
   if(encp==1)
   { I ff=0;
     if(z && z->t==7 && z->n==3 && kV(z)[CODE] && strchr(kC(kK(z)[CODE]),"y"[0]) && kV(z)[PARAMS] && kK(z)[PARAMS]->n)
-    { ff=1; 
+    { ff=1;
       DO(kK(z)[PARAMS]->n, if(!strcmp(*kS(kK(kK(kK(z)[PARAMS])[i])[0]),"y")) { ff=0; break; } )
     }
     if(ff)
