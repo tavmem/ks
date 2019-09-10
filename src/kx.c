@@ -80,7 +80,8 @@ K aw(S s,int n,K dict,K func){
   R zz; }
 */
 
-Z K cjoin(K x,K y) {
+Z K cjoin(K x,K y)
+{ O("BEG cjoin\n");
   P(3!=xt,TE)
   if(3==ABS(yt))R ci(y);
   P(yt,TE);
@@ -94,7 +95,8 @@ Z K cjoin(K x,K y) {
   R z;
 }
 
-Z K csplit(K x,K y) {//scan 2x
+Z K csplit(K x,K y)       //scan 2x
+{ O("BEG csplit\n");
   P(3!=xt,TE);
   P(3!=ABS(yt),TE);
   int delim=*kC(x);S s=kC(y);
@@ -124,7 +126,8 @@ Z K csplit(K x,K y) {//scan 2x
 }
 
 //TODO: for derived verbs like +/ you can add the sub-pieces in parallel
-K overDyad(K a, V *p, K b) {
+K overDyad(K a, V *p, K b)
+{ O("BEG overeDyad\n");
   V *o=p-1; K(*f)(K,K);
 
   K k=0; I i=0;
@@ -162,7 +165,7 @@ cleanup:
 }
 
 Z K scanDyad(K a, V *p, K b) //k4 has 1 +\ 2 3 yield 3 6 instead of 1 3 6
-{
+{ O("BEG scanDyad\n");
   V *o=p-1; K(*f)(K,K);
 
   K k=0;
@@ -220,22 +223,20 @@ Z K overMonad(K a, V *p, K b)
   else if(useB) // b f/x
   {
     I t;
-    do
-    {
-      K*aa=&a;
-      fdvx=1; O("~BB dv_ex(0,(V)&aa,u)      K dv_ex(K a, V *p, K b) <- K overMonad(K a, V *p, K b)      ");
-      K g=dv_ex(0,(V)&aa,u);
-      O("#BB overMonad :: dv_ex(0,(V)&aa,u)\n");
-      U(g)
-      t=(g->t==1 && *kI(g));
-      cd(g);
-      if(!t)break;
-      c=dv_ex(0,p-1,u); if(b!=u)cd(u); U(u=c)
-    }while(1);
+    do { K*aa=&a;
+         fdvx=1; O("~BB dv_ex(0,(V)&aa,u)      K dv_ex(K a, V *p, K b) <- K overMonad(K a, V *p, K b)      ");
+         K g=dv_ex(0,(V)&aa,u);
+         O("#BB overMonad :: dv_ex(0,(V)&aa,u)\n");
+         U(g)
+         t=(g->t==1 && *kI(g));
+         cd(g);
+         if(!t)break;
+         c=dv_ex(0,p-1,u); if(b!=u)cd(u); U(u=c)
+       } while(1);
     c=c?c:ci(b);
   }
-  else{   // f/x
-    V*o=p-1;
+  else   // f/x
+  { V*o=p-1;
     if(*o==(V)offsetOver)
       while(1) {
         if(matchI(b,c) || (u!=b && matchI(u,c)))flag=1;
@@ -244,23 +245,30 @@ Z K overMonad(K a, V *p, K b)
         u=c?c:u;
         U(c=dv_ex(0,p-1,u))
         if(1==ABS(b->t) && 3==ABS(c->t)) flag=1; }
-    else if(*o<(V)DT_SIZE || 7==(*(K*)*o)->t){  //f is a function
-      while(1){
-        if(matchI(b,c) || (u!=b && matchI(u,c)))flag=1;
-        if(flag)break;
-        if(u!=b) cd(u);
-        u=c?c:u;
-        U(c=dv_ex(0,o,u))
-        if(1==ABS(b->t) && 3==ABS(c->t)) flag=1; } cd(c); R u;}
-    else{  //f is data
-      a=*(K*)*o;if(3==a->t)R cjoin(a,b);
-      while(1){   // f/x
-        if(matchI(b,c) || (u!=b && matchI(u,c)))flag=1;
-        if(u!=b) cd(u);
-        if(flag)break;
-        u=c?c:u;
-        U(c=dv_ex(0,o,u))
-        if(1==ABS(b->t) && 3==ABS(c->t)) flag=1; } } }
+    else if(*o<(V)DT_SIZE || 7==(*(K*)*o)->t)  //f is a function
+         { while(1){
+                     if(matchI(b,c) || (u!=b && matchI(u,c)))flag=1;
+                     if(flag)break;
+                     if(u!=b) cd(u);
+                     u=c?c:u;
+                     U(c=dv_ex(0,o,u))
+                     if(1==ABS(b->t) && 3==ABS(c->t)) flag=1;
+                   }
+           cd(c);
+           R u;
+         }
+         else  //f is data
+         { a=*(K*)*o;if(3==a->t)R cjoin(a,b);
+           while(1)   // f/x
+           { if(matchI(b,c) || (u!=b && matchI(u,c)))flag=1;
+             if(u!=b) cd(u);
+             if(flag)break;
+             u=c?c:u;
+             U(c=dv_ex(0,o,u))
+             if(1==ABS(b->t) && 3==ABS(c->t)) flag=1;
+           }
+         }
+  }
   R c;
 }
 
@@ -337,13 +345,24 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
     if(0==bt)
     { if(prnt) prnt0=ci(prnt);
       if(grnt) grnt0=ci(grnt);
-      DO( bn, if(f) { O("e2dddd\n"); d=dv_ex(a,p-1,kK(b)[i]); }
+      DO( bn, if(f)
+              { if(a && a->n>1)
+                { O("~EJ dv_ex(a,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      i: %lld      ",i);
+                  d=dv_ex(kK(a)[i],p-1,kK(b)[i]);
+                  O("#EJ each2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   EJ:");sd(d);
+                }
+                else
+                { O("~EH dv_ex(a,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      i: %lld      ",i);
+                  d=dv_ex(a,p-1,kK(b)[i]);
+                  O("#EH each2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   EH:");sd(d);
+                }
+              }
               else
               { if(prnt0) { cd(prnt);prnt=ci(prnt0); }
                 if(grnt0) { cd(grnt);grnt=ci(grnt0); }
                 O("~EF dv_ex(0,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      i: %lld      ",i);
                 d=dv_ex(0,p-1,kK(b)[i]);
-                O("#EF each2 :: dv_ex(0,p-1,kK(b)[i])\n"); O("   DZ:");sd(d);
+                O("#EF each2 :: dv_ex(0,p-1,kK(b)[i])\n"); O("   EF:");sd(d);
               }
               if(!d || !z)
               { if(prnt0) { cd(prnt0);prnt0=0; }
@@ -380,8 +399,8 @@ Z K eachright2(K a, V *p, K b)
   R demote(z);
 }
 
-Z K eachleft2(K a, V *p, K b) {
-  O("BEG eachleft2\n");
+Z K eachleft2(K a, V *p, K b)
+{ O("BEG eachleft2\n");
   if(!a) R VE;
   I at=a->t, an=a->n;
   if(at > 0) R dv_ex(a,p-1,b);
@@ -391,8 +410,8 @@ Z K eachleft2(K a, V *p, K b) {
   if(0==at) DO(an, d=dv_ex(kK(a)[i],p-1,b); U(d) kK(z)[i]=d) //TODO: err/mmo
   R demote(z); }
 
-Z K eachpair2(K a, V *p, K b) {    //2==k necessary?
-  O("BEG eachpair2\n");
+Z K eachpair2(K a, V *p, K b)     //2==k necessary?
+{ O("BEG eachpair2\n");
   V *o=p-1; K(*f)(K,K);
 
   K k=0;
@@ -430,8 +449,7 @@ Z K eachpair2(K a, V *p, K b) {    //2==k necessary?
 //TODO: Try (?) and grow adverb results as vectors before devolving to 0-type
 //TODO: consider merging dv_ex with vf_ex
 K dv_ex(K a, V *p, K b)
-{
-  O("BEG dv_ex\n"); O("    sd(a):");sd(a); O("    sd(b):");sd(b);
+{ O("BEG dv_ex\n"); O("    sd(a):");sd(a); O("    sd(b):");sd(b);
   if(!p || !*p)O("   !p || !*p\n");
   else { I ii; if(!fdvx) for(ii=0;p[ii];ii++)
                          {  O("    dvx p[%lld]: %p",ii,p[ii]);
@@ -471,14 +489,18 @@ K dv_ex(K a, V *p, K b)
     if ((UI)adverb == offsetEach)
     { if(!a) adverb = (V)offsetEachright;
       else if(a->t <= 0 && b->t <= 0 && a->n != b->n) R LE;
-      else if(a->t > 0 && b->t > 0) R dv_ex(a,p-1,b);
+      else if(a->t > 0 && b->t > 0) {O("DVaaaa\n"); R dv_ex(a,p-1,b);}
       else if (a->t > 0) adverb = (V)offsetEachright;
       else if(b->t > 0) adverb = (V)offsetEachleft;
       else        //a and b both lists/vectors of size an
       { a=promote(a); b=promote(b); M(a,b)
         K z = newK(0,a->n); M(z,a,b)
         K k;
-        DO(a->n, k=dv_ex(kK(a)[i],p-1,kK(b)[i]); M(k,z,a,b) kK(z)[i]=k)
+        DO(a->n, O("~EI dv_ex(kK(a)[i],p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K dv_ex(K a, V *p, K b)      i: %lld      ",i);
+                 k=dv_ex(kK(a)[i],p-1,kK(b)[i]);
+                 O("#EI dv_ex :: dv_ex(kK(a)[i],p-1,kK(b)[i])\n"); O("   EI:");sd(k);
+                 M(k,z,a,b)
+                 kK(z)[i]=k )
         cd(a); cd(b);
         R demote(z);
       }
@@ -548,7 +570,8 @@ K dv_ex(K a, V *p, K b)
     O("#CC dv_ex :: vf_ex(*p,b)\n");
   }
   else
-  { if(stk>2e6) R kerr("stack"); stk++;
+  { if(stk>2e6) R kerr("stack");
+    stk++;
 //        **** Next 2 lines removed to fix #432. They may be needed when returning to #244 and #247
 //  if(encp && (encp!=2 || (strchr(kC(kK(encf)[CODE]),"z"[0]))) && encp!=3 && DT_SIZE<(UI)*p)tmp=vf_ex(&encf,g);
 //  else
@@ -1413,7 +1436,8 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
   R e;
 }
 
-I cirRef(K x,K y){
+I cirRef(K x,K y)
+{ O("BEG cirRef\n");
   if(x&&(x==y))R 1; // XXX
   I f=0;
   if(xt==6 || !y || (yt!=0 && yt!=5) || (UI)x<DT_SIZE) R 0;
@@ -1421,7 +1445,8 @@ I cirRef(K x,K y){
   R f;
 }
 
-I cirRef_(K x,K y,I f){
+I cirRef_(K x,K y,I f)
+{ O("BEG cirREF_\n");
   if(x==y)f=1;
   DO(yn, if(!f && (yt==0 || yt==5)) f=cirRef_(x,kK(y)[yn-i-1],f))
   R f;

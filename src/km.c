@@ -138,7 +138,7 @@ Z I nearPG(I i){ I k=((size_t)i)&(PG-1);R k?i+PG-k:i;}//up 0,8,...,8,16,16,...
 //Keyword "backingstore" in old k mailing list archives - extra KSWAP beyond regular swap space
 
 K newK(I t, I n)
-{ O("BEG newK   t: %lld   n:%lld   ",t,n);
+{ O("  BEG newK   t: %lld   n:%lld   ",t,n);
   K z;
   if(n>0 && n>MAX_OBJECT_LENGTH)R ME;//coarse (ignores bytes per type). but sz can overflow
   I k=sz(t,n),r;
