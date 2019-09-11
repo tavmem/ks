@@ -333,10 +333,21 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
        }
   fdvx=0; K d=0;
   I bt=b->t, bn=b->n; K prnt0=0,grnt0=0;
-  if(bt > 0) { O("~EK dv_ex(a,p-1,b)      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      ");
-               d = dv_ex(a,p-1,b);
-               O("#EK each2 :: dv_ex(a,p-1,b)\n"); O("   EK:"); sd(d);
-               R d;
+  if(bt > 0) { if(a && a->n>0)
+               { K z = newK(0,a->n); U(z)
+                 DO(a->n, O("~EL dv_ex(a,p-1,b)      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      ");
+                          d = dv_ex(kK(a)[i],p-1,b);
+                          O("#EL each2 :: dv_ex(a,p-1,b)\n"); O("   EL:"); sd(d);
+                          M(d,z) kK(z)[i]=d )
+                 z=demote(z); if(z->t==1) z->t=-1;
+                 R z;
+               }
+               else
+               { O("~EK dv_ex(a,p-1,b)      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      ");
+                 d = dv_ex(a,p-1,b);
+                 O("#EK each2 :: dv_ex(a,p-1,b)\n"); O("   EK:"); sd(d);
+                 R d;
+               }
              }
   else
   { K z = newK(0,bn); U(z)
@@ -372,8 +383,7 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
                 if(grnt0) { cd(grnt0);grnt0=0; }
               }
               if(grnt && !prnt) prnt=ci(grnt);
-              M(d,z) kK(z)[i]=d
-        )
+              M(d,z) kK(z)[i]=d )
     }
     z=demote(z); if(z->t==1) z->t=-1;
     if(prnt0) { cd(prnt0);prnt0=0; }
@@ -384,6 +394,21 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
 
 Z K eachright2(K a, V *p, K b)
 { O("BEG eachright2\n");
+ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
+  if(!p || !*p)O("   !p || !*p\n");
+  else { I ii; if(!fdvx) for(ii=0;p[ii];ii++)
+                         {  O("    dvx p[%lld]: %p",ii,p[ii]);
+                            if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]);
+                            else O("\n");
+                         }
+               else for(ii=0;p[ii] && ii<fdvx;ii++)
+                    {  O("    dvx p[%lld]: %p",ii,p[ii]);
+                       if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]);
+                       else O("\n");
+                       O("output limited to %lld\n",fdvx);
+                    }
+       }
+  fdvx=0;
   I bt=b->t, bn=b->n;
   if(bt > 0) { O("er2aaaa\n"); dv_ex(a,p-1,b); }
   K z = newK(0,bn), d;
@@ -392,11 +417,11 @@ Z K eachright2(K a, V *p, K b)
                     memcpy(g->k,((V)b->k)+i*bp(bt),bp(bt));
                     O("~EG dv_ex(a,p-1,g)      K dv_ex(K a, V *p, K b) <- K eachright2(K a, V *p, K b)      i: %lld      ",i);
                     d=dv_ex(a,p-1,g);
-                    O("#EG eachright2 :: dv_ex(a,p-1,g)\n"); O("   DZ:");sd(d);
+                    O("#EG eachright2 :: dv_ex(a,p-1,g)\n"); O("   EG:"); sd(d);
                     cd(g); U(d) kK(z)[i]=d )
   if(0==bt) DO( bn, O("~DZ dv_ex(a,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K eachright2(K a, V *p, K b)      i: %lld      ",i);
                     d=dv_ex(a,p-1,kK(b)[i]);
-                    O("#DZ eachright2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   DZ:");sd(d);
+                    O("#DZ eachright2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   DZ:"); sd(d);
                     U(d)
                     kK(z)[i]=d )
   R demote(z);
@@ -404,13 +429,31 @@ Z K eachright2(K a, V *p, K b)
 
 Z K eachleft2(K a, V *p, K b)
 { O("BEG eachleft2\n");
+  O("    sd(a):");sd(a); O("    sd(b):");sd(b);
+  if(!p || !*p)O("   !p || !*p\n");
+  else { I ii; if(!fdvx) for(ii=0;p[ii];ii++)
+                         {  O("    dvx p[%lld]: %p",ii,p[ii]);
+                            if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]);
+                            else O("\n");
+                         }
+               else for(ii=0;p[ii] && ii<fdvx;ii++)
+                    {  O("    dvx p[%lld]: %p",ii,p[ii]);
+                       if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]);
+                       else O("\n");
+                       O("output limited to %lld\n",fdvx);
+                    }
+       }
+  fdvx=0;
   if(!a) R VE;
   I at=a->t, an=a->n;
-  if(at > 0) R dv_ex(a,p-1,b);
+  if(at > 0) {O("el2aaaa\n"); R dv_ex(a,p-1,b);}
   K z = newK(0,an),d;
   K g;
-  if(0 >at) DO(an, g=newK(ABS(at),1); memcpy(g->k,((V)a->k)+i*bp(at),bp(at)); d=dv_ex(g,p-1,b); cd(g); U(d) kK(z)[i]=d) //TODO: err/mmo oom-g
-  if(0==at) DO(an, d=dv_ex(kK(a)[i],p-1,b); U(d) kK(z)[i]=d) //TODO: err/mmo
+  if(0 >at) DO(an, g=newK(ABS(at),1); memcpy(g->k,((V)a->k)+i*bp(at),bp(at)); O("el2bbbb\n"); d=dv_ex(g,p-1,b); cd(g); U(d) kK(z)[i]=d) //TODO: err/mmo oom-g
+  if(0==at) DO(an, O("~EL dv_ex(kK(a)[i],p-1,b)      K dv_ex(K a, V *p, K b) <- K eachleft2(K a, V *p, K b)      i: %lld      ",i);
+                   d=dv_ex(kK(a)[i],p-1,b);
+                   O("#EL eachleft2 :: dv_ex(kK(a)[i],p-1,b)\n"); O("   EL:"); sd(d);
+                   U(d) kK(z)[i]=d ) //TODO: err/mmo
   R demote(z);
 }
 
@@ -617,7 +660,7 @@ K vf_ex(V q, K g)
 { O("BEG vf_ex\n");
   K tc=0;
   if(q>(V)DT_SIZE) { O("   sd_((K)(*(V*)q,2):");sd_((K)(*(V*)q),2); }
-  else O("   q: %lx      hex\n",(unsigned long int)q);
+  else O("   q:         0x%lx\n",(unsigned long int)q);
   O("   sd(g):");sd(g);
   if (interrupted) { interrupted=0; R BE; }
 
