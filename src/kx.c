@@ -331,17 +331,20 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
                        O("output limited to %lld\n",fdvx);
                     }
        }
-  fdvx=0;
+  fdvx=0; K d=0;
   I bt=b->t, bn=b->n; K prnt0=0,grnt0=0;
-  if(bt > 0) { O("e2aaaa\n"); R dv_ex(0,p-1,b); }
+  if(bt > 0) { O("~EK dv_ex(a,p-1,b)      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      ");
+               d = dv_ex(a,p-1,b);
+               O("#EK each2 :: dv_ex(a,p-1,b)\n"); O("   EK:"); sd(d);
+               R d;
+             }
   else
-  { K z = newK(0,bn),d=0; U(z)
+  { K z = newK(0,bn); U(z)
     K g; I f=*p==(V)offsetEach && (*(p-1)==(V)offsetEach || *(p-1)==(V)offsetOver || *(p-1)==(V)offsetScan) && *(p-2)<(V)DT_SIZE;
     if(0 >bt) DO(bn, g=newK(ABS(bt),1); M(g,z) memcpy(g->k,((V)b->k)+i*bp(bt),bp(bt));
                      if(f) { O("e2bbbb\n"); d=dv_ex(a,p-1,g); }
                      else  { O("e2cccc\n"); d=dv_ex(0,p-1,g); }
-                     cd(g); M(d,z) kK(z)[i]=d
-                )
+                     cd(g); M(d,z) kK(z)[i]=d )
     if(0==bt)
     { if(prnt) prnt0=ci(prnt);
       if(grnt) grnt0=ci(grnt);
@@ -349,12 +352,12 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
               { if(a && a->n>1)
                 { O("~EJ dv_ex(a,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      i: %lld      ",i);
                   d=dv_ex(kK(a)[i],p-1,kK(b)[i]);
-                  O("#EJ each2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   EJ:");sd(d);
+                  O("#EJ each2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   EJ:"); sd(d);
                 }
                 else
                 { O("~EH dv_ex(a,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      i: %lld      ",i);
                   d=dv_ex(a,p-1,kK(b)[i]);
-                  O("#EH each2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   EH:");sd(d);
+                  O("#EH each2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   EH:"); sd(d);
                 }
               }
               else
@@ -362,7 +365,7 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
                 if(grnt0) { cd(grnt);grnt=ci(grnt0); }
                 O("~EF dv_ex(0,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      i: %lld      ",i);
                 d=dv_ex(0,p-1,kK(b)[i]);
-                O("#EF each2 :: dv_ex(0,p-1,kK(b)[i])\n"); O("   EF:");sd(d);
+                O("#EF each2 :: dv_ex(0,p-1,kK(b)[i])\n"); O("   EF:"); sd(d);
               }
               if(!d || !z)
               { if(prnt0) { cd(prnt0);prnt0=0; }
@@ -408,7 +411,8 @@ Z K eachleft2(K a, V *p, K b)
   K g;
   if(0 >at) DO(an, g=newK(ABS(at),1); memcpy(g->k,((V)a->k)+i*bp(at),bp(at)); d=dv_ex(g,p-1,b); cd(g); U(d) kK(z)[i]=d) //TODO: err/mmo oom-g
   if(0==at) DO(an, d=dv_ex(kK(a)[i],p-1,b); U(d) kK(z)[i]=d) //TODO: err/mmo
-  R demote(z); }
+  R demote(z);
+}
 
 Z K eachpair2(K a, V *p, K b)     //2==k necessary?
 { O("BEG eachpair2\n");
@@ -420,12 +424,10 @@ Z K eachpair2(K a, V *p, K b)     //2==k necessary?
 
   I bt=b->t, bn=b->n;
   if(bt >  0) R dv_ex(a,p-1,b);
-  if(bt <= 0)
-  {
-    if     (bn == 0 && !a) R LE;
-    else if(bn == 0 &&  a) R newK(0,0);//TODO: memory manage/ optimize in join with null ptr ?
-    else if(bn < 2) R newK(0,0);//TODO: this newK and the above.....does empty list type depend on input?
-  }
+  if(bt <= 0) { if     (bn == 0 && !a) R LE;
+                else if(bn == 0 &&  a) R newK(0,0);//TODO: memory manage/ optimize in join with null ptr ?
+                else if(bn < 2) R newK(0,0);//TODO: this newK and the above.....does empty list type depend on input?
+              }
 
   K z = newK(0,bn-1),d=0; U(z)
   K g,h;
@@ -434,17 +436,18 @@ Z K eachpair2(K a, V *p, K b)     //2==k necessary?
 
   z=demote(z);
 
-  if(a) {
-    K u,v,f,d;
-    f=first(b);M(f);
-    d=dv_ex(a,p-1,f);
-    u=enlist(d);
-    M(u,z)
-    v=join(u,z);
-    cd(u);cd(z);cd(f);cd(d);
-    R v; }
+  if(a) { K u,v,f,d;
+          f=first(b);M(f);
+          d=dv_ex(a,p-1,f);
+          u=enlist(d);
+          M(u,z)
+          v=join(u,z);
+          cd(u);cd(z);cd(f);cd(d);
+          R v;
+        }
 
-  R z; }
+  R z;
+}
 
 //TODO: Try (?) and grow adverb results as vectors before devolving to 0-type
 //TODO: consider merging dv_ex with vf_ex
