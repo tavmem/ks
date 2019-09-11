@@ -529,13 +529,19 @@ K dv_ex(K a, V *p, K b)
   //if(k>2 && !(adverbClass(*p) && !VA(*o)))k=2;
   if(k>2)k=2;
 
+  if(*p==(V)offsetEach && a->t==1 && b->t==1)k=2;
+
   if(2==k || (k==0 && (UI)adverb==offsetScan))
   { if ((UI)adverb == offsetOver) R overDyad(a, p, b);
     if ((UI)adverb == offsetScan) R scanDyad(a, p, b);
     if ((UI)adverb == offsetEach)
     { if(!a) adverb = (V)offsetEachright;
       else if(a->t <= 0 && b->t <= 0 && a->n != b->n) R LE;
-      else if(a->t > 0 && b->t > 0) {O("DVaaaa\n"); R dv_ex(a,p-1,b);}
+      else if(a->t > 0 && b->t > 0) { O("~EM dv_ex(a,p-1,b)      K dv_ex(K a, V *p, K b) <- K dv_ex(K a, V *p, K b)      ");
+                                      K zz = dv_ex(a,p-1,b);
+                                      O("#EM dv_ex :: dv_ex(a,p-1,b)\n"); O("   EM:");sd(zz);
+                                      R zz;
+                                    }
       else if (a->t > 0) adverb = (V)offsetEachright;
       else if(b->t > 0) adverb = (V)offsetEachleft;
       else        //a and b both lists/vectors of size an
