@@ -353,7 +353,10 @@ O("    sd(a):");sd(a); O("    sd(b):");sd(b);
   { K z = newK(0,bn); U(z)
     K g; I f=*p==(V)offsetEach && (*(p-1)==(V)offsetEach || *(p-1)==(V)offsetOver || *(p-1)==(V)offsetScan) && *(p-2)<(V)DT_SIZE;
     if(0 >bt) DO(bn, g=newK(ABS(bt),1); M(g,z) memcpy(g->k,((V)b->k)+i*bp(bt),bp(bt));
-                     if(f) { O("e2bbbb\n"); d=dv_ex(a,p-1,g); }
+                     if(f) { O("~EN dv_ex(a,p-1,g)      K dv_ex(K a, V *p, K b) <- K each2(K a, V *p, K b)      ");
+                             d=dv_ex(a,p-1,g);
+                             O("#EN each2 :: dv_ex(a,p-1,g)\n"); O("   EN:"); sd(d);
+                           }
                      else  { O("e2cccc\n"); d=dv_ex(0,p-1,g); }
                      cd(g); M(d,z) kK(z)[i]=d )
     if(0==bt)
@@ -449,7 +452,11 @@ Z K eachleft2(K a, V *p, K b)
   if(at > 0) {O("el2aaaa\n"); R dv_ex(a,p-1,b);}
   K z = newK(0,an),d;
   K g;
-  if(0 >at) DO(an, g=newK(ABS(at),1); memcpy(g->k,((V)a->k)+i*bp(at),bp(at)); O("el2bbbb\n"); d=dv_ex(g,p-1,b); cd(g); U(d) kK(z)[i]=d) //TODO: err/mmo oom-g
+  if(0 >at) DO(an, g=newK(ABS(at),1); memcpy(g->k,((V)a->k)+i*bp(at),bp(at));
+                   O("~EO dv_ex(g,p-1,b)      K dv_ex(K a, V *p, K b) <- K eachleft2(K a, V *p, K b)      i: %lld      ",i);
+                   d=dv_ex(g,p-1,b);
+                   O("#EO eachleft2 :: dv_ex(g,p-1,b)\n"); O("   EO:"); sd(d);
+                   cd(g); U(d) kK(z)[i]=d ) //TODO: err/mmo oom-g
   if(0==at) DO(an, O("~EL dv_ex(kK(a)[i],p-1,b)      K dv_ex(K a, V *p, K b) <- K eachleft2(K a, V *p, K b)      i: %lld      ",i);
                    d=dv_ex(kK(a)[i],p-1,b);
                    O("#EL eachleft2 :: dv_ex(kK(a)[i],p-1,b)\n"); O("   EL:"); sd(d);
@@ -528,8 +535,6 @@ K dv_ex(K a, V *p, K b)
   //!(adver...  ---- added to let f/[;;;] through
   //if(k>2 && !(adverbClass(*p) && !VA(*o)))k=2;
   if(k>2)k=2;
-
-  if(*p==(V)offsetEach && a->t==1 && b->t==1)k=2;
 
   if(2==k || (k==0 && (UI)adverb==offsetScan))
   { if ((UI)adverb == offsetOver) R overDyad(a, p, b);
