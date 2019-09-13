@@ -557,7 +557,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
   {
     CS(MARK_CONDITIONAL, O("conditional\n"); z=offsetColon)//dummy value
     CS(MARK_PAREN  ,  O("paren\n");
-                      fbr=1;
+                      fbr=1; fdc=1;
                       O("~BT wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
                       O("#BT capture :: wd_(s+k+1,r-2,dict,func)\n");
