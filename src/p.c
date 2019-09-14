@@ -644,7 +644,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
       )
     CS(MARK_BRACE  ,  //Functions & subfunctions validated at parse time
                       O("brace\n");
-                      fbr=1;
+                      fbr=1; fdc=1;
                       z=Kv(); g=newK(-3,r-2);
                       M(z,g) //M(z,g,kV(z)[PARAMS]=Kd(),kV(z)[LOCALS]=Kd())
                       kV(z)[CODE]=g;
