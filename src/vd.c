@@ -19,7 +19,7 @@ Z K of2(K d, K *x, K *y, I s)
 
   if(0>=s){ O("~BK at_verb(d,f)      K at_verb(K a, K b) <- K of2(K d, K *x, K *y, I s)      ");
             K zz=at_verb(d,f); //Is it at_verb or at()...  ?
-            O("#BK of2 :: at_verb(d,f)\n");
+            O("#BK of2 :: at_verb(d,f)\n"); O("   BK:");sd(zz);
             R zz; }
 
   K z;
@@ -109,7 +109,7 @@ K of(K a, K b)  //TODO: oom all (see of2() for M(z,kK(z)[i]=...) pattern )
     if(0==bt){K *f=&kK(b)[0];
               O("~BI of2(a,f,bn>0?1+f:0,bn-1)      K of2(K d, K *x, K *y, I s) <- K of(K a, K b)      ");
               z=of2(a,f,bn>0?1+f:0,bn-1);
-              O("#BI of :: of2(a,f,bn>0?1+f:0,bn-1)\n"); }
+              O("#BI of :: of2(a,f,bn>0?1+f:0,bn-1)\n"); O("   BI:");sd(z); }
     else if(-1==bt || -4==bt){K k=promote(b); K *f=&kK(k)[0]; z=of2(a,f,1+f,bn-1); cd(k); } //mmo  U(k) ?  //This line added to fix test for (5 2.14;"abc") . 1 2  --- doesn't give me great confidence in the code
     else z=at_verb(a,b);
   }
@@ -132,7 +132,7 @@ K dot(K a, K b) //NB: b can be a cheating 0-type with NULLs .. ?
   if(7==a->t) R vf_ex(&a,b); //Verb: "Apply" //TODO: my guess is this fails everywhere vf_ex does (derived verbs?) (|+) . (0;1) ???
   O("~BH of(a,b)      K of(K a, K b) <- K dot(K a, K b)      ");
   K zz=of(a,b); //TODO: vf_ex might/could implement this itself ?
-  O("#BH dot :: of(a,b)\n");
+  O("#BH dot :: of(a,b)\n"); O("   BH:");sd(zz);
   R zz;
 }
 

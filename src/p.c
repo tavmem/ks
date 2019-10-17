@@ -339,7 +339,7 @@ K wd(S s, int n){
   K* z=denameD(&KTREE,d_,1);
   O("#CZ wd :: denameD(&KTREE,d_,1)\n");
   O("   CZ:                   "); O("  z: %p                       sd_(*z,0):",z); if(z)sd_(*z,0); else O("\n");
-  O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
+  if(kK(KTREE)[0]){ O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]); O("\n"); }
   O("~BS wd_(s,n, z,0)      K wd_(S s, int n, K *dict, K func) <- K wd(S s, int n)      ");
   K res=wd_(s,n, z,0);
   O("#BS wd :: wd_(s,n, denameD(&KTREE,d_,1),0)      sd(res):\n"); O(" %p",&res); sd(res);
@@ -349,8 +349,8 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
                                 //assumes: s does not contain a }])([{ mismatch, s is a "complete" expression
 { O("BEG wd_\n");
   //O("   s:%s\n   n:%d\n",s,n); O("    dict:%p   sd(*dict):",dict);if(dict)sd(*dict); O("   sd(func):"); if(func==0)O("0\n"); else sd(func);
-  O("    s: %s\n",s); O("    n: %d\n",n); O("    sd(func):"); if(func)sd(func); else O("\n");
-  O("    dict: %p      sd_(*dict,0):",dict);sd(*dict);
+  O("    s: %s\n",s); O("    n: %d\n",n); O("    sd_(func,2):"); if(func)sd_(func,2); else O("\n");
+  O("    dict: %p      sd_(*dict,0):",dict); if(dict)sd(*dict); else O("\n");
   if(!s) R 0;
   if(strstr(s,":\\t")) { show(kerr("\\t  syntax")); R 0; }
   //I z=0; if((z=syntaxChk(s))) {O("%lld\n",z); R SYE;}
@@ -377,6 +377,7 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   marker(mark_end,   MARK_END)   // ";\n" - mark_end first so mark_number's space-eater doesn't get any newlines
   //NOTE: `1 is the 'empty' symbol indexed @ 1, `a.1 is `a . 1,  and `., `.., `... are not symbols
 
+/*
   marker(mark_symbol,MARK_SYMBOL)// `a`b `A `_a `_aB01283.aaaa__.AB1._ `A.B.C, re-mark sym-quotes `"h-g"
   marker(mark_name,  MARK_NAME)  // ( _A | (\.?S\.?)+ ) where A := [A-Za-z] and S := A(A|[0-9_])* e.g.  _t, f, .k.a.b, a.b_0..c
   marker(mark_number,MARK_NUMBER)// unified numeric type, determine +-1/2 at word-building time. mark spaces for strtol,strtod
@@ -384,6 +385,7 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   marker(mark_conditional,MARK_CONDITIONAL)// : if do while
   marker(mark_verb,  MARK_VERB)  // ( D+: | _AA+ | V ) where D := [0-9] , V := ~!@#$%^&*_-+=|<,>.?:
   marker(mark_ignore,MARK_IGNORE)// get leftover spaces, anything else we want to ignore
+*/
 
   O("   %d-UNMK %d-IGNR %d-BRKT %d-END %d-PREN %d-BRAC %d-QUOT %d-SMBL %d-NAME %d-NMBR %d-VERB %d-ADVB %d-COND %d-CNT\n",MARK_UNMARKED,MARK_IGNORE,MARK_BRACKET,MARK_END,MARK_PAREN,MARK_BRACE,MARK_QUOTE,MARK_SYMBOL,MARK_NAME,MARK_NUMBER,MARK_VERB,MARK_ADVERB,MARK_CONDITIONAL,MARK_COUNT);
   O("begin:     ");DO(n+1, O(" %lld",m[i]));O("\n");
@@ -539,11 +541,12 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
   //IN string, string length, pos in string, markings;
   //OUT words, current #words; IN locals-storage, names-storage, charfunc/NULL
 { O("BEG capture\n"); O("    s: %s\n    n: %lld    k: %lld    *m: %lld    *w: %p    *d: %lld\n",s,n,k,*m,*w,*d);
-  O("    *locals:");sd(*locals); O("    dict: %p      sd_(*dict,1):",dict);sd_(*dict,1);
-  O("    func:");sd_(func,2);
+  O("    *locals:");sd(*locals);
+  if(dict){O("    dict: %p      sd_(*dict,1):",dict); sd_(*dict,1);}
+  O("    func:"); if(func)sd_(func,2); else O("\n");
   if(fll && fll!=n)fll=-1;
   V z=0,*p=w+*d; *p=0;
-  I r=1,v=0,y=0,a,b=0,c;S u="",e;K g;I l;
+  I r=1,v=0,y=0,a,b=0,c,l,frc=0;S u="",e;K g,h=0,hh=0;
 
   if(k>=n || !CAPTURE_START(m[k])) R r;
   I M=m[k];
@@ -745,15 +748,24 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       //      it uses the non-path-creating form of dename
 
                       if(2==r && '_'==*u && stringHasChar(n_s,u[1]))
-                        if('f'==u[1]){O("n1a   "); z=func?ci(func):_n(); } //TODO: stack error --- but be careful to generalize.
+                        if('f'==u[1]){O("n1a    got _f\n"); z=func?ci(func):_n(); O("z-set\n");} //TODO: stack error --- but be careful to generalize.
                           // proper soln will handle cycle f:{ g 0} g:{f 0}
                           // see "getrusage" or http://stackoverflow.com/questions/53827/checking-available-stack-size-in-c
                         else {O("n1b   "); z=((K(*)())vn_[charpos(n_s,u[1])])();}
                       else if(func)
-                      { O("n2      u: %s      ",u);
-                        //if(ydict){O("sd(*ydict):    %p",ydict);sd(*ydict);} else O("nothing\n");
-                        //O("sd(*dict):    %p", dict);sd(*dict);
-                        //O("sd(KTREE):    %p",&KTREE);sd(KTREE);
+                      { O("n2      u: %s     in if(func)\n ",u);
+                          O("func *********************************************************************************\n");
+                          sd((K)kV(func)[CODE]);
+                          O("s ------------------------------------------------------------------------------------\n");
+                          O("s: %s\n",s);
+                          O("u: %s\n",u);
+                          h=*denameS(".k",u,0);
+                          if(7==h->t)
+                          { hh = match( (K)kV(h)[CODE] , (K)kV(func)[CODE] );
+                            O("sd(h[CODE]):");sd_( (K)kV(h)[CODE] ,2);
+                            //O("%lld\n",*kI(match( (K)kV(h)[CODE] , (K)kV(func)[CODE] )));
+                          }
+                          O("......................................................................................\n");
                         if( dict==(K*)kV(func)+PARAMS)
                         { O("n2a\n");
                           V q=newEntry(u);
@@ -783,6 +795,9 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                            O("#ED capture :: denameD( dict,u,1)\n");
                            O("   ED: z: %p\n",z); }
                           //K3.2:  a+:1 format applies to context-globals not locals
+                        else if(7==h->t && *kI(hh))
+                          { O("got recur\n");
+                            z=ci(func); frc=1; }
                         else
                           {O("n2e\n");
                           z=denameS(kV(func)[CONTeXT],u,0);   //RRRR-4 (chg 0 to 1)
@@ -891,7 +906,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
 
   switch(-M) //Things that need to be stored locally
   {
-    CSR(MARK_NAME   , if('_'!=*u)break;)   //Fall-through
+    CSR(MARK_NAME   , if('_'!=*u && !frc)break;)   //Fall-through
     CSR(MARK_PAREN  ,)
     CSR(MARK_BRACKET,)
     CSR(MARK_BRACE  ,)
@@ -899,11 +914,12 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
     CSR(MARK_QUOTE  ,)
     CS (MARK_SYMBOL , z=newE(LS,z); P(!z,(L)ME)                    kap(locals,&z); cd(z); z=EVP(z) ) //oom
   }
+  frc=0; cd(hh);
 
   *p=z;
   ++*d;
 
-  O("      p: %p    z: %p    r: %lld",p,z,r); O("      &dict: %p      sd_(*dict,0):",&dict);sd_(*dict,0);
-  //O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
+  O("      p: %p    z: %p    r: %lld\n",p,z,r);
+  O("      &dict: %p      sd_(*dict,2):",&dict);   if(dict)sd_(*dict,2); else O("\n");
   R r;
 }

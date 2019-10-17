@@ -38,7 +38,6 @@ I tc(S a, S b) //test comparison .  R 0,1,2
   K x = X(a); fer=fer1=fom=fbr=fll=fdc=feci=0; if(cls){cd(cls);cls=0;}
   // fprintf(stderr,"testing: %s\n",b);
   K y = X(b); fer=fer1=fom=fbr=fll=fdc=feci=0; if(cls){cd(cls);cls=0;}
-  O("\nsd_(x,9):");sd_(x,9); O("sd_(y,9):");sd_(y,9);
   I m=matchI(x,y);
 
   if(!m)
@@ -66,11 +65,11 @@ I tc(S a, S b) //test comparison .  R 0,1,2
 I test()
 { testtime=clock();
 
-  //testsBook();
-  //tests01();
+  testsBook();
+  tests01();
   tests02();
-  //testsIO();  //could become slow - in the future may not want to test by default
-  //K x; x=_(567);if(!tp(x && *kI(x)==567))fprintf(stderr,"\n\nK string execution broken\n\n"); cd(x);
+  testsIO();  //could become slow - in the future may not want to test by default
+  K x; x=_(567);if(!tp(x && *kI(x)==567))fprintf(stderr,"\n\nK string execution broken\n\n"); cd(x);
 
 //done:
   testtime=(clock()-testtime)/CLOCKS_PER_SEC;
@@ -84,18 +83,14 @@ I test()
 
 Z I testsIO()
 {
-  return 0;
+  R 0;
   //binary - 1: 2:
   TC(1,t:`testfile00; a:(1;1.0;"c";`d;1 2;3.0 4.0;"ef";`g`h;();(1;`z)); t 1: a;  &/ a ~/: (1:t;2:t)) //leaves a file
+  TC(1, (40000<#x) & &/ "</html>" = -7 # x: `"google.com"`http 4:"GET /") // issue 523 (partial fetch from network connection)
 }
 
 Z I tests02()
 {
-  TC( 3, {b:3; g:{b}; b:4; g[]}0)                   //passes
-  TC( 1 2 3, A.I:1 2 3; A.I)                        //passes
-  TC((.,(`a;2;)), d:.();  (.[`d;`a;:;])2; d)        //passes
-R 0;
-/*
   TC(`b,(`a`b)[1])
   TC(2, {1+1} 0)
   TC(2, {a:1;a+a} _n )
@@ -161,9 +156,7 @@ R 0;
   TC(7, {a::[1;7];a} 0)
 
   //Subfunctions
-*/
   TC( 3, {b:3; g:{b}; b:4; g[]}0)       // inheritance: same var in prnt&child  child res
-R 0;
   TC( 4, {b:3; g:{b}; b:4; b}0)         // inheritance: same var in prnt&child  prnt res
   TC(_n, {b:3; g:{a}; b:4; g[]}0)       // inheritance: diff var in prnt/child, child res
   TC( 4, {b:3; g:{a}; b:4; b}0)         // inheritance: diff var in prnt/child, prnt res
@@ -295,12 +288,19 @@ R 0;
   TC(=/!0, 1)                                     // issue 475
   TC(=/1 2 3, 0)                                  // issue 475
   TC(120, fac:{[n] :[n=0;1;n*fac n-1]}; fac 5)    // issue 487
+  TC(120, fac:{[n] :[n=0;1;n*fac[n-1]]}; fac 5)   // issue 487
   TC(120, fac:{[n] :[n=0;1;n*_f n-1]}; fac 5)     // issue 487
+  TC(120, fac:{[n] :[n=0;1;n*_f[n-1]]}; fac 5)    // issue 487
   TC(3, a:3;a)                                    // issue 502
   TC("abcdefghij"2 3, "cd")                       // issue 508
   TC_(",1 1", "0(+\\)\\1 1")                      // issue 515
   TC(+[a+2;a:3],8)                                // issue 538
   TC((a;a:2), 2 2)                                // issue 538
+  TC("F",tk:("F";"G");call:{nm:*tk; tk::1 _ tk;if[nm~"G"; :0];call();nm};call())   // issue 521
+  TC(1, (a)=a:12 )                                // issue 551
+  TC( _n, {a}0 )                                  // issue 540
+  TC( 0, {a x}0 )                                 // issue 540
+  TC( 0, f:{:[x>0;2*f[x-1];1]}; g:f; f:{0}; g 4 ) // issue 537
 
   //Error trap: {[a;b][c;d] a+b} -> parse error ; { {[a][b] }} -> parse error
   TC(.[*; (3;4); :], (0;12) )
@@ -665,7 +665,7 @@ R 0;
   TC(skip, 5 6, a[5 6])            // value error
   TC(skip, 5, a 5)                 // value error
   TC(skip, 5 6, a 5 6)             // value error
-  TC(a:{a[x]}; a 5, )
+  TC(skip, a:{a[x]}; a 5, )        // stack error
   TC(4 3 2 1 0, r:{:[x;x,_f[x-1];0]}; r[4])
   TC(4 3 2 1 0, r:{:[x;x,r[x-1];0]}; r[4])
   TC(1, `a.1)   //issue #290
@@ -698,6 +698,8 @@ R 0;
   TC_("'\"abc\"", "\"abc\"")              //issue #367
   TC(6, fac:{:[x>1;x*fac[x-1];1]}; fac 3) //issue #373 (valgrind leaks)
   TC(6, fac:{:[x>1;x*fac x-1;1]}; fac 3)  //issue #373 (valgrind leaks)
+  TC(6, fac:{:[x>1;x*_f[x-1];1]}; fac 3)  //issue #373 (valgrind leaks)
+  TC(6, fac:{:[x>1;x*_f x-1;1]}; fac 3)   //issue #373 (valgrind leaks)
   TC(2, 1 2 3 . (,1))
   TC(1, (-0i) = -0I)                      // nan and inf handling
   TC(1, 0n = 0N)
@@ -1237,6 +1239,14 @@ Z I testsBook()
   TC_("(\"ad\";\"bd\";\"cd\")"," \"abc\" ,' \"d\"")
   TC_("(\"ad\";\"be\";\"cf\")"," \"abc\" ,' \"def\"")
   TC_("1", "((,\"a\") ,' (,\"b\")) ~ ,\"ab\"")
+  TC_("(1 2;3 4),''(5 6;7 8)","((1 5;2 6);(3 7;4 8))")            // issue 539
+  TC_("5+''(1 2;3 4)","(6 7;8 9)")                                // issue 539
+  TC_("(1 2;3 4)+''5","(6 7;8 9)")                                // issue 539
+  TC_("5,''(1 2;3 4)","((5 1;5 2);(5 3;5 4))")                    // issue 539
+  TC_("(1 2;3 4),''5","((1 5;2 5);(3 5;4 5))")                    // issue 539
+  TC_("1,''2","1 2")                                              // issue 539
+  TC_("1.1,''2.2","1.1 2.2")                                      // issue 539
+  TC_("`a,''`b","`a `b")                                          // issue 539
   //Begin 'Each Left'
   TC((2 5 6 7;3 5 6 7;4 5 6 7), 2 3 4 ,\\: 5 6 7)
   TC_("3 5 5 11 11", "-': 1 4 9 14 25 36")

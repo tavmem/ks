@@ -46,7 +46,7 @@ K DE(K d,S b){
    //O("end DE\n");
    R 0;} //dictionary entry lookup
 Z K* EIA(K a,I i){R kK(a)+i;}         //dictionary entry's address of i-th index
-K* EVP(K e){ O("BEG EVP\n"); O("    &e: %p      sd_(e,0): ",&e);sd_(e,0);
+K* EVP(K e){ O("BEG EVP\n"); O("    &e: %p      sd_(e,2): ",&e);sd_(e,2);
              R EIA(e,1);}            //dictionary entry's value-pointer address (K*)
 K* EAP(K e){R EIA(e,2);}            //dictionary entry's attribute_dictionary-pointer address (K*)
 K   EV(K e){R *EVP(e);}             //dictionary entry's stored value

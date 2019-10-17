@@ -785,7 +785,7 @@ K vf_ex(V q, K g)
     if(g)
     { O("~BO dot(f,g)      K dot(K a, K b) <- K vf_ex(V q, K g)      ");
       z=dot(f,g);
-      O("#BO vf_ex :: dot(f,g)\n");
+      O("#BO vf_ex :: dot(f,g)\n"); O("   BO:");sd(z);
     }
     else z=f;
     GC;
@@ -886,8 +886,9 @@ K vf_ex(V q, K g)
           cd(kV(prnt)[CACHE_WD]); kV(prnt)[CACHE_WD]=0;
         }
 
+        O("\ntree5a: sd_(tree,2):");sd_(tree,2);O("\n"); O("p->n: %lld\n",p->n);
         DO(p->n,e=EVP(DI(tree,i)); cd(*e); *e=0; if(r && i<r->n) *e=ci(kK(r)[i]); if(!*e && j<g->n) *e=ci(kK(g)[j++])) //merge in: CONJ with function args
-        O("tree5: %p",&tree);sd_(tree,2);
+        O("\ntree5b: sd_(tree,2):");sd_(tree,2);O("\n=======================================================================================\n");
 
         O("RRR-1\n");
         fw=kV(f)[CACHE_WD]; I t=0;
@@ -896,18 +897,22 @@ K vf_ex(V q, K g)
           K fc = kclone(f); //clone the function to pass for _f
           cd(kV(fc)[CONJ]); kV(fc)[CONJ]=0;
           kV(fc)[DEPTH]++;
-          O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K *dict, K func) <- K vf_ex(V q, K g)      ");
-          O("o->n: %lld\n",o->n);
           I tt=0; DO(o->n, if(kC(o)[i]=='{'){ tt=1; break; })
           if(tt || kC(o)[0]=='[')
-          { O("&tree6: %p   sd_(tree6,2):",&tree);sd_(tree,2); fw=wd_(kC(o),o->n,&tree,fc);
-          }
+          { O("&tree6: %p   sd_(tree6,2):",&tree);sd_(tree,2);
+            O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K *dict, K func) <- K vf_ex(V q, K g)      ");
+            fw=wd_(kC(o),o->n,&tree,fc);
+            O("#AW vf_ex :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n");
+            O("   AW:   dict-aft-AW:");sd(tree);
+            O("sd_(fw,2):     %p",&fw);sd_(fw,2); }
           else
-          { tc=kclone(tree); O("&tc: %p   sd_(tc,2);",&tc);sd_(tc,2); fw=wd_(kC(o),o->n,&tc,fc);
-          }
-          O("#AW vf_ex :: wd_(kC(o),o->n,&tree,fc)     RRR-2\n");
-          O("   AW:   dict-aft-AW:");sd(tree);
-          O("sd(fw):     %p",&fw);sd(fw);
+          { tc=kclone(tree);
+            O("&tc: %p   sd_(tc,2);",&tc);sd_(tc,2);
+            O("~EP wd_(kC(o),o->n,&tc,fc)      K wd_(S s, int n, K *dict, K func) <- K vf_ex(V q, K g)      ");
+            fw=wd_(kC(o),o->n,&tc,fc);
+            O("#EP vf_ex :: wd_(kC(o),o->n,&tc,fc)\n");
+            O("   EP:   dict-aft-AW:");sd(tree);
+            O("sd_(fw,2):     %p",&fw);sd_(fw,2); }
           kV(f)[CACHE_WD]=fw;
           cd(fc);
         }
@@ -1049,6 +1054,7 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
 { O("BEG ex0\n");
   O("     r: %lld",r); O("     sd(k):");sd(k);
   I ii; for(ii=0;v[ii];ii++){O("     ex0 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }  //Rex0
+  //if(ii==1){ O("sd_(*(K*)v[0],2):");sd_(*(K*)v[0],2); }
   I n=0, e=1, i,a,b;
   while(v[n])if(bk(v[n++]))e++;
   b=e>1;
@@ -1402,6 +1408,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
     O("~AP ex2(v+2+i,k)      Z K ex2(V*v, K k) <- Z K ex2(V*v, K k)      i: %lld      ",i);      //i=%lld  k=",i); if(k)sd(k); else O("empty   ");
     t2=ex2(v+2+i,k);
     O("#AP ex2 :: ex2(v+2+i),k)\n"); O("   AP:");sd(t2);
+    for(ii=0;v[ii];ii++){O("     ex2 v[%lld]: %p",ii,v[ii]); if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }
     if(fer>0 && strcmp(errmsg,"(nil)")) R t2;
        //these cannot be placed into single function call b/c order of eval is unspecified
     O("~AQ ex_(v[1],1)      Z V ex_(V a, I r) <- K ex2(V*v, K k)      ");
@@ -1421,7 +1428,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
     v[1]=VA(t3)?t3:(V)&t3;
     O("~AR ex_(*v,1)      V ex_(V a, I r) <- K ex2(V*v, K k)      ");
     t0=ex_(*v,1);
-    O("#AR ex2 :: ex_(*v,1)\n"); O("   AR:");sd(t0);
+    O("#AR ex2 :: ex_(*v,1)\n"); O("   AR:"); if(t0)sd(t0); else O(" not t0\n");
     if(fer>0 && strcmp(errmsg,"(nil)")){cd(t2); R(t0);}
     if(t0>(K)DT_SIZE && t0->t==7 && t0->n==3) {
       if(prnt && kV(prnt)[CACHE_TREE] && kV(prnt)[CACHE_WD] && !kK(t0)[LOCALS]->n) {
