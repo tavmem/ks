@@ -346,7 +346,7 @@ Z K eachright2(K a, V *p, K b)
                    d=dv_ex(a,p-1,g);
                    O("#EG eachright2 :: dv_ex(a,p-1,g)\n"); O("   EG:"); sd(d);
                    cd(g); U(d) kK(z)[i]=d )
-  if(0==bt) DO(bn, O("~DZ dv_ex(a,p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K eachright2(K a, V *p, K b)     i: %lld     ",i);
+  if(0==bt) DO(bn, O("~DZ dv_ex(a,p-1,kK(b)[i])     K dv_ex(K a, V *p, K b) <- K eachright2(K a, V *p, K b)     i: %lld     ",i);
                    d=dv_ex(a,p-1,kK(b)[i]);
                    O("#DZ eachright2 :: dv_ex(a,p-1,kK(b)[i])\n"); O("   DZ:"); sd(d);
                    U(d)
@@ -377,7 +377,7 @@ Z K eachleft2(K a, V *p, K b)
                    d=dv_ex(g,p-1,b);
                    O("#EO eachleft2 :: dv_ex(g,p-1,b)\n"); O("   EO:"); sd(d);
                    cd(g); U(d) kK(z)[i]=d ) //TODO: err/mmo oom-g
-  if(0==at) DO(an, O("~EL dv_ex(kK(a)[i],p-1,b)      K dv_ex(K a, V *p, K b) <- K eachleft2(K a, V *p, K b)      i: %lld     ",i);
+  if(0==at) DO(an, O("~EL dv_ex(kK(a)[i],p-1,b)      K dv_ex(K a, V *p, K b) <- K eachleft2(K a, V *p, K b)     i: %lld     ",i);
                    d=dv_ex(kK(a)[i],p-1,b);
                    O("#EL eachleft2 :: dv_ex(kK(a)[i],p-1,b)\n"); O("   EL:"); sd(d);
                    U(d) kK(z)[i]=d ) //TODO: err/mmo
@@ -449,7 +449,7 @@ K dv_ex(K a, V *p, K b)
       { a=promote(a); b=promote(b); M(a,b)
         K z = newK(0,a->n); M(z,a,b)
         K k;
-        DO(a->n, O("~EI dv_ex(kK(a)[i],p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- K dv_ex(K a, V *p, K b)     i: %lld     ",i);
+        DO(a->n, O("~EI dv_ex(kK(a)[i],p-1,kK(b)[i])     K dv_ex(K a, V *p, K b) <- K dv_ex(K a, V *p, K b)     i: %lld     ",i);
                  k=dv_ex(kK(a)[i],p-1,kK(b)[i]);
                  O("#EI dv_ex :: dv_ex(kK(a)[i],p-1,kK(b)[i])\n"); O("   EI:");sd(k);
                  M(k,z,a,b)
