@@ -227,7 +227,8 @@ Z I syntaxChk(S s)               //TODO: refactor the syntax check as a single p
     if(s[i]=='?' && (s[i-1]=='-' || s[i-1]=='\\')) R 70; }
   if(n>2) for(i=2;i<n;++i)
   { if(s[i]=='\\' && s[i-1]==':' && (s[i-2]!='/' && s[i-2]!='\\')) R 80;
-    if(s[i]=='/' && (s[i-1]=='+' || s[i-1]=='\'' || s[i-1]=='>' || s[i-1]=='%' || s[i-1]=='*' || s[i-1]=='?' || s[i-1]=='&' || s[i-1]=='\\') && s[i-2]=='/') R 90;
+    if(s[i]=='/' && (s[i-1]=='+' || s[i-1]=='\'' || s[i-1]=='>' || s[i-1]=='%' || s[i-1]=='*' || s[i-1]=='?' || s[i-1]=='&' 
+       || s[i-1]=='\\') && s[i-2]=='/') R 90;
     if(s[i]=='/' && s[i-1]=='/' && s[i-2]=='-') R 100;
     if(s[i]=='_' && s[i-1]==',' && s[i-2]=='~') R 110;
     if(s[i]=='/' && s[i-1]=='#' && s[i-2]=='0') R 120;
@@ -296,7 +297,9 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   M(v,km)  v->n=0; //7-0 "waiting" to be executed/potentially condensed ... set "isTenseWordfunc" -- wordfunc 'needing' execution
   marker(mark_end,   MARK_END)   // ";\n" - mark_end first so mark_number's space-eater doesn't get any newlines
   //NOTE: `1 is the 'empty' symbol indexed @ 1, `a.1 is `a . 1,  and `., `.., `... are not symbols
-  O("   %d-UNMK %d-IGNR %d-BRKT %d-END %d-PREN %d-BRAC %d-QUOT %d-SMBL %d-NAME %d-NMBR %d-VERB %d-ADVB %d-COND %d-CNT\n",MARK_UNMARKED,MARK_IGNORE,MARK_BRACKET,MARK_END,MARK_PAREN,MARK_BRACE,MARK_QUOTE,MARK_SYMBOL,MARK_NAME,MARK_NUMBER,MARK_VERB,MARK_ADVERB,MARK_CONDITIONAL,MARK_COUNT);
+  O("   %d-UNMK %d-IGNR %d-BRKT %d-END %d-PREN %d-BRAC %d-QUOT %d-SMBL %d-NAME %d-NMBR %d-VERB %d-ADVB %d-COND %d-CNT\n",
+     MARK_UNMARKED,MARK_IGNORE,MARK_BRACKET,MARK_END,MARK_PAREN,MARK_BRACE,MARK_QUOTE,MARK_SYMBOL,MARK_NAME,MARK_NUMBER,
+     MARK_VERB,MARK_ADVERB,MARK_CONDITIONAL,MARK_COUNT);
   O("begin:     ");DO(n+1, O(" %lld",m[i]));O("\n");
   marker(mark_end,MARK_END)   // ";\n" - mark_end first so mark_number's space-eater doesn't get any newlines
   //NOTE: `1 is the 'empty' symbol indexed @ 1, `a.1 is `a . 1,  and `., `.., `... are not symbols
@@ -316,8 +319,8 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   marker(mark_ignore,MARK_IGNORE)   // get leftover spaces, anything else we want to ignore
   O("mark ignr: ");DO(n+1, O(" %lld",m[i]));O("\n");
   DO(n,if(m[i]==MARK_UNMARKED){cd(v);cd(km); R PE;})
-  //TODO: check here to see if any _A+ listed that don't exist ("reserved error") free m etc. reserved error probably bubbles from "dename"
-  //TODO: technically .k._a  (a valid global name e.g. no sym quotes) throws a value error then parse error here (we marked it weird)
+  //TODO: check here if any _A+ listed that don't exist ("reserved error") free m etc. reserved error probably from "dename"
+  //TODO: technically .k._a  (a valid global name e.g. no sym quotes) throws a value error then parse error here (mark it weird)
   //(one nice thing about being restrictive here (_verb and -0.0: number verbs) is future versions are backwards compatible)
   I y=0; //consolidate - removes non-word spaces/comments/etc
   O("~DK newK(-1,1+n)   K newK(I t, I n) <- K wd_(S s, int n, K *dict, K func)   ");
@@ -332,17 +335,20 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   M(v,km,ks2,kw) V*w=(V*)kK(kw);//words. Assumes terminal extra NULL
   I c=0,j=0;
   if(!fll)fll=strlen(s2); else fll=-1;
-  DO(y, O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS, dict,func)      I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func) <- K wd_(S s, int n, K *dict, K func)      ");
+  DO(y, O("~BY capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS, dict,func)      ");
+        O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func) <- K wd_(S s, int n, K *dict, K func)      ");
         j=capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func);
         O("#BY wd_ :: capture(s2,y,i,m,w,&c,(K*)kV(v)+LOCALS,dict,func)\n");
         O("   BY: j: %lld\n",j);
         i+=-1+j;
         if(!j  ){ M(0,v,km,ks2,kw) } )
   cd(km); cd(ks2);
-  //wrong: Suppressed this for now (wastes at most n/2 space) -- may need to reenable if padded oc bad (eg imagine 1+1 is not 0=t,4=n VVV0 but 0=t,6=n VVV000)
-  //        ^^^ padded overcount bad already (for O(1) valence calc)
+  //wrong: Suppressed this for now (wastes at most n/2 space) -- 
+  //       may need to reenable if padded oc bad (eg imagine 1+1 is not 0=t,4=n VVV0 but 0=t,6=n VVV000)
+  //       ^^^ padded overcount bad already (for O(1) valence calc)
   //"reall0c" kw down to size
-  if(oc>c && lsz(sz(0,1+oc)) > lsz(sz(0,1+c))) //TODO: better if possible: fix overcount() to be exact count: could just be adding != -MARK_BRACKET. dd() differences
+  if(oc>c && lsz(sz(0,1+oc)) > lsz(sz(0,1+c)))
+     //TODO: better if possible: fix overcount() to be exact count: could just be adding != -MARK_BRACKET. dd() differences
      //if(oc-c){test_print=1; dd(oc-c); if(tests>110)exit(0);}
   { K kw2=newK(-4,1+c); //trim because we cut corners using overcount()
     M(v,kw,kw2) memcpy(kK(kw2),kK(kw),sizeof(V)*c); cd(kw); kw=kw2; }   //-4 special trick: don't recursively cd() contents
@@ -454,7 +460,8 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
   { CS(MARK_CONDITIONAL, O("conditional\n"); z=offsetColon)   //dummy value
     CS(MARK_PAREN  ,  O("paren\n");
                       fbr=1; fdc=1;
-                      O("~BT wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
+                      O("~BT wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- ");
+                      O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
                       O("#BT capture :: wd_(s+k+1,r-2,dict,func)\n");
                       if(!z)R (L)PE;)                   //oom. currently z->t==7 z->n==0.
@@ -469,7 +476,8 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       //could perhaps put [] directly on () or {} 7 instead of making new g provided 0==a.
                       g=Kv(); K ko=newK(-4,a+2); M(g,ko)  g->n=0; kV(g)[CODE]=ko;
                       V *o=kW(g);
-                      O("~BU wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
+                      O("~BU wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- ");
+                      O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
                       O("#BU capture :: wd_(s+k+1,r-2,dict,func)\n");
                       if(!z){ cd(g); R (L)PE; }
@@ -478,7 +486,6 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       { V *zp=kW(z);
                         while(*zp && !bk(*zp)) zp++;
                         SW(s[k-1]){CS(':',b=4) CS('f',b=5) CS('e',b=6) CS('o',b=7)  }  //: if while do
-                        //if(b!=6&&!bk(*zp)){cd(g);cd(z); feci=1; R (I)PE;} //check that at least one ; is present | commented on trial basis
                         ((K)z)->n=b;
                         cd(g);
                         goto grabdone; }
@@ -520,14 +527,16 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       P(state>1,(L)kerr("parameter"))
                       if(state) //Bracketed parameters exist and are well-formed
                       { S a=strchr(s+k+1,'['); S b=strchr(a,']');
-                        O("~BV wd_(a+1,b-a-1,zdict,z)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
+                        O("~BV wd_(a+1,b-a-1,zdict,z)      K wd_(S s, int n, K *dict, K func) <- ");
+                        O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                         j=wd_(a+1,b-a-1, zdict,z); //Grab only params. This must create entries in  zdict
                         O("#BV capture :: wd_(a+1,b-a-1, zdict,z)\n");
                         M(z,j) //not g
                         cd(j); }
                       else   //Deal with any implicit Z,Y,X parameters
                       { K t=Kd(); M(z,t)
-                        O("~BW wd_(s+k+1,r-2,&t,0)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
+                        O("~BW wd_(s+k+1,r-2,&t,0)      K wd_(S s, int n, K *dict, K func) <- ");
+                        O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                         j=wd_(s+k+1,r-2,&t,0);   //Grab all local names
                         O("#BW capture :: wd_(s+k+1,r-2,&t,0)\n");
                         O("sd(*ydict):    %p",ydict);sd(*ydict);
@@ -535,7 +544,8 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         DO(3, if(DE(t,IFP[2-i])){ n=3-i; break; } )
                         DO(n, denameD(zdict,IFP[i],1) ) //TODO: oom
                         cd(t); cd(j); }
-                      O("~BX wd_(s+k+1,r-2, ydict,z)      K wd_(S s, int n, K *dict, K func) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
+                      O("~BX wd_(s+k+1,r-2, ydict,z)      K wd_(S s, int n, K *dict, K func) <- ");
+                      O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       j=wd_(s+k+1,r-2, ydict,z);
                       O("#BX capture :: wd_(s+k+1,r-2, ydict,z)\n");
                       M(z,j)
@@ -603,15 +613,19 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                           //  {m[k+r]=MARK_NAME; r++; z=denameS(kV(func)[CONTeXT],u);} //m[]=  probably superfluous
                         else if(-MARK_VERB==m[k+r] && ':'==s[k+r+1] && -MARK_VERB==m[k+r+1])
                         { O("n2c\n");
-                          O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
+                          O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",
+                            &kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
                           if(':'==s[k+r])r++;
-                          O("~DX denameS(kV(func)[CONTeXT],u,1)      K* denameS(S dir_string, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func)      ");
+                          O("~DX denameS(kV(func)[CONTeXT],u,1)      K* denameS(S dir_string, S t, I create) <- ");
+                          O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func)      ");
                           z=denameS(kV(func)[CONTeXT],u,1);
                           O("#DX capture :: denameS(kV(func)[CONTeXT],u,1)\n");
-                          O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n"); }
+                          O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",
+                            &kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n"); }
                         else if(dict==  (K*)kV(func)+LOCALS  && ':'==s[k+r] && -MARK_VERB==m[k+r])
                         { O("n2d\n");
-                          O("~ED denameD( dict,u,1)      K* denameD(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                          O("~ED denameD( dict,u,1)      K* denameD(K *d, S t, I create) <- ");
+                          O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                           z=denameD( dict,u,1);
                           O("#ED capture :: denameD( dict,u,1)\n");
                           O("   ED: z: %p\n",z); }
@@ -627,7 +641,8 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         I i; for(i=k;i<strlen(s);i++)
                              { if(!fbr && s[i]==';') break;
                                else if(s[i]==':'|| (fbr && (s[i]=='x'||s[i]=='y'||s[i]=='z'))){ fdc=1; break; } }
-                        O("~BZ inKtree( dict,u,0)      K *inKtree(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                        O("~BZ inKtree( dict,u,0)      K *inKtree(K *d, S t, I create) <- ");
+                        O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=inKtree( dict,u,0);
                         O("#BZ capture :: inKtree( dict,u,0)\n");
                         O("   BZ: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n");
@@ -638,7 +653,8 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                           oerr(); O("%s\n%c\n",u,'^');
                           #endif
                           R err; }
-                        O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K *d, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                        O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K *d, S t, I create) <- ");
+                        O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=denameD( dict,u,fll&&fdc);
                         O("#CA capture :: denameD( dict,u,fll&&fdc)\n");
                         O("   CA: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n"); } )
@@ -662,14 +678,14 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       I modifier_colon = k+r<n && ':'==s[k+r] && -MARK_VERB==m[k+r];
                       if(k-i > 0) if(is_colon && MARK_VERB == ABS(m[k-i-1])) i++;
                       if(k-i > 0) if(MARK_BRACKET ==  ABS(m[k-i-1])) while(m[k-i] != -MARK_BRACKET) i++;
-                      if(k-i > 0) if(MARK_NAME == ABS(m[k-i-1])) name_bracket_assign = 1; //(no adverb, assigning to non-names, etc)
+                      if(k-i > 0) if(MARK_NAME == ABS(m[k-i-1])) name_bracket_assign = 1; //(no adverb, assign to non-names, etc)
                       if(!is_colon && !(k+1<n && ':'==s[k+1] && -MARK_VERB==m[k+1] )) name_bracket_assign=0;
                       //  Handles this case at least (0 0)[0]:1  (works but not proven correct/the right thing to do)
                       if(i && is_colon && !modifier_colon && !name_bracket_assign) R (L)PE;
                       I y_present= k+r+1<n && !(s[k+r+1] == ':' && -MARK_VERB==m[k+r+1]) && MARK_END != ABS(m[k+r+1]);
                       //MARK_END may end up being redundant here?
                       a=(!*d || MARK_END==ABS(m[k-1]) || MARK_ADVERB==ABS(m[k-1]) || MARK_VERB==ABS(m[k-1]))
-                          && !( k+r >= n || -MARK_END==m[k+r] || -MARK_ADVERB==m[k+r] || -MARK_BRACKET==m[k+r] )?1:2;   //indicate arity
+                          && !( k+r >= n || -MARK_END==m[k+r] || -MARK_ADVERB==m[k+r] || -MARK_BRACKET==m[k+r] )?1:2;   //arity
                       if(is_colon && !modifier_colon)
                       { a=2;
                         if(k> 0 && -MARK_END!=m[k-1] && !s[k+1] && !name_bracket_assign) R (L)PE; }
@@ -684,7 +700,8 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       { j=(V)atol(s+k);
                         i=DT_SPECIAL_VERB_OFFSET;
                         while(i < DT_SIZE && (!DT[i].text || (L)j != atol(DT[i].text)))i++;
-                        if(i<DT_SIZE)z=(V)(i+(1==a?0:1));  else R (L)PE; } )   //no matching 0: 1: style verb. (if exists, we also allow eg 123: and -2: )
+                        if(i<DT_SIZE)z=(V)(i+(1==a?0:1));  else R (L)PE; } )
+                      //no matching 0: 1: style verb. (if exists, we also allow eg 123: and -2: )
                       //Assignment is not supported for nested bracket: a[][][] +: 1  <--- parse error
                       //save ':' if       a    []?        :    y    ;?        ---> colon
                       //                         verb (should be covered except for   0   :  `file  -> 0:`file )
