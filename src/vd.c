@@ -293,7 +293,7 @@ K dot_tetradic_2(K *g, K b, K c, K y)
 //TODO: All this must be rewritten to handle function-local-dictionaries and global
 K dot_tetradic(K a, K b, K c, K y)//Handles triadic and tetradic case
 {
-  O("BEG dot_tetradic\n");
+  O("BEG dot_tetradic \n");
   O("    sd(a): ");sd(a);  O("    sd(b): ");sd(b);  O("    sd(c): ");sd(c);  O("    sd(y): ");sd(y);
   if(isColonDyadic(c) && !y && !kV(c)[CONJ]) //'Error Trap'
   {
@@ -301,7 +301,9 @@ K dot_tetradic(K a, K b, K c, K y)//Handles triadic and tetradic case
     K i = Ki(0);
     M(d,i)
     kK(d)[0] = i;
+    O("~DD vf_ex(&a,b)      K vf_ex(V q, K g) <- K dot_tetradic(K a, K b, K c, K y))      ");
     K z = vf_ex(&a,b);
+    O("#DD dot_tetradic :: vf_ex(&a,b)\n"); O("   DD:");sd(z);
     kK(d)[1]=z;
     if(!z)
     {

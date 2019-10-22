@@ -112,9 +112,9 @@ Z K csplit(K x,K y)       //scan 2x
          if(j<yn&&delim==s[j]) j++; )
   R z; }
 
-//TODO: for derived verbs like +/ you can add the sub-pieces in parallel
 K overDyad(K a, V *p, K b)
-{ O("BEG overeDyad\n");
+{ //TODO: for derived verbs like +/ you can add the sub-pieces in parallel
+  O("BEG overeDyad\n");
   V *o=p-1; K (*f)(K,K), k=0; I i=0;
   if(a&&*o==offsetJoin&&!b->t&&!b->n) R 0<a->t?enlist(a):ci(a);
   if(b->t==0) while(i<b->n && !kK(b)[i]->t){++i;}
@@ -404,10 +404,10 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
   if(a){ K u,v,f,d; f=first(b);M(f); d=dv_ex(a,p-1,f); u=enlist(d); M(u,z)  v=join(u,z); cd(u); cd(z); cd(f); cd(d); R v; }
   R z; }
 
-//TODO: Try (?) and grow adverb results as vectors before devolving to 0-type
-//TODO: consider merging dv_ex with vf_ex
 K dv_ex(K a, V *p, K b)
-{ O("BEG dv_ex\n"); O("    sd(a):");sd(a); O("    sd(b):");sd(b);
+{ //TODO: Try (?) and grow adverb results as vectors before devolving to 0-type
+  //TODO: consider merging dv_ex with vf_ex
+  O("BEG dv_ex\n"); O("    sd(a):");sd(a); O("    sd(b):");sd(b);
   if(!p || !*p) O("   !p || !*p\n");
   else
   { I ii;
@@ -564,7 +564,7 @@ K vf_ex(V q, K g)
     if(e->t==7 && e->n==1 && (V)kS(kK(e)[CODE])[0]>(V)DT_SIZE && (*(K*)kS(kK(e)[CODE])[0])->t==7) { n=2; ee=1; } }
   if(ee && !kV(g)[0] && kV(g)[1]) fom=1;
   if( ((k || (*(K*)q)->t==7) && ( ((UI)q<DT_SIZE || (*(V*)q))  && gn>n && !(!n && 1>=gn))) || (ee && kV(g)[0] && kV(g)[1]) )
-  { if(kK(g)[0]==NULL) { VE; GC; }
+  { if(kK(g)[0]==NULL) { O("raise valence-1\n"); VE; GC; }
     if(3!=kK(g)[0]->t || 1==(*(K*)q)->n || kK(g)[1]==NULL)
     { if(g->t==0  &&  gn==2  &&  kK(*(K*)q)[CODE]->t==-4  &&  (V)kS(kK(*(K*)q)[CODE])[0]>(V)DT_SIZE
       &&  (*(K*)kS(kK(*(K*)q)[CODE])[0])->t==7 )
@@ -573,7 +573,7 @@ K vf_ex(V q, K g)
         fdvx=1; z=overMonad(kK(g)[0], &w[1], kK(g)[1]);
         O("#BM vf_ex :: overMonad(kK(g)[0], &w[1], kK(g)[1])\n");
         GC; }
-      else { VE; GC; } }
+      else { O("raise valence-2\n"); VE; GC; } }
     else{ g=enlist(collapse(g)); gn=g->n; cd(kK(g)[0]); } }
   I argc=0; DO(gn, if(kK(g)[i]) argc++ )
   K a=0,b=0,c=0,d=0;
@@ -585,13 +585,13 @@ K vf_ex(V q, K g)
   if(gn>2 && (q==offsetWhat || q==offsetSSR)) { z=(q==offsetWhat?what_triadic:_ssr)(a,b,c); GC; }
   if(gn>2 && (q==offsetAt   || q==offsetDot ))
   { if(q==offsetAt)
-    { O("~CG at_tetradic(a,b,c,d)      at_tetradic(K a, K b, K c, K y) <- vf_ex(V q, K g)      ");
+    { O("~CG at_tetradic(a,b,c,d)      K at_tetradic(K a, K b, K c, K y) <- K vf_ex(V q, K g)      ");
       z=at_tetradic(a,b,c,d);
-      O("#CG vf_ex :: at_tetradic(a,b,c,d)\n"); }
+      O("#CG vf_ex :: at_tetradic(a,b,c,d)\n"); O("   CG:");sd(z); }
     else
-    { O("~CH dot_tetradic(a,b,c,d)      dot_tetradic(K a, K b, K c, K y) <- vf_ex(V q, K g)      ");
+    { O("~CH dot_tetradic(a,b,c,d)      K dot_tetradic(K a, K b, K c, K y) <- K vf_ex(V q, K g)      ");
       z=dot_tetradic(a,b,c,d);
-      O("#CH vf_ex :: dot_tetradic(a,b,c,d)\n"); }
+      O("#CH vf_ex :: dot_tetradic(a,b,c,d)\n"); O("   CH:");sd(z); }
     GC; }     //common verbs
   if(2==k && a && b)
   { fnc=DT[(L)q].text;
@@ -1097,9 +1097,9 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
       else{ cd(z); R prnt; } }
     R z; }
   if(!v[1] && sva(*v))
-  { O("~CF vf_ex(*v,k)      vf_ex(V q, K g) <- ex2(V*v, K k)      ");
+  { O("~CF vf_ex(*v,k)      K vf_ex(V q, K g) <- K ex2(V*v, K k)      ");
     K zz=vf_ex(*v,k);
-    O("#CF ex2 :: vf_ex(*v,k)\n");
+    O("#CF ex2 :: vf_ex(*v,k)\n"); O("   CF:");sd(zz);
     R zz; }     //TODO: (,/:) and (,\:) both valence 2
     //TODO: brackets may also appear as:     +/\/\[]    {x}/\/\[]    a/\/\[]    (!200)\\[10;20]
   if(bk(v[1]))
