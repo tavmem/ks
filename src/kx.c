@@ -41,6 +41,7 @@ __thread I frg=0;    // Flag reset globals
          I fom=0;    // Flag overMonad (curried)
          I fam=1;    // Flag amend: 1=OK to print response
          I fdvx=0;   // restrict printing of void pointers in dv_ex
+         I ft3=0;    // Flag if t3<DT_SIZE
          I cnte=0;
 
          I calf=-1;  // counter for alf
@@ -325,6 +326,7 @@ Z K each2(K a, V *p, K b)
 
 Z K eachright2(K a, V *p, K b)
 { O("BEG eachright2\n"); O("    sd(a):");sd(a); O("    sd(b):");sd(b);
+  if(ft3 && !a) R VE;
   if(!p || !*p) O("   !p || !*p\n");
   else
   { I ii;
@@ -1066,7 +1068,7 @@ K ex1(V *w,K k,I *i,I n,I f)
   R a; }
 
 Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: conjunction?
-{ O("BEG ex2\n"); O("     sd(k):");sd(k);
+{ O("BEG ex2\n"); O("     sd(k):");sd(k); ft3=0;
   I ii; for(ii=0;v[ii];ii++)
         { O("     ex2 v[%lld]: %p",ii,v[ii]);
           if(v[ii]>(V)DT_SIZE)sd(*(K*)v[ii]); else O("\n"); }
@@ -1209,7 +1211,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
   O("#AI ex2 :: ex2(v+1+i,k)\n"); O("   AI:");sd_(t2,1);
   O("~AK ex_(*v,1)      V ex_(V a, I r) <- K ex2(V*v, K k)      ");
   t3=ex_(*v,1);
-  O("#AK ex2 :: ex_(*v,1)\n"); if(t3<(K)DT_SIZE) O("   AK: %p\n",t3);
+  O("#AK ex2 :: ex_(*v,1)\n"); if(t3<(K)DT_SIZE){ft3=1;O("   AK: %p\n",t3);} else{O("   AK:");sd(t3);}
   if(t3>(K)DT_SIZE && t3->t==7 && t3->n==3)
   { O("   AK:");sd(t3);
     if(kV(t3)==kV(grnt)){ if(cls)cd(cls); cls=ci(kK(kK(kK(prnt)[7])[0])[1]); }
