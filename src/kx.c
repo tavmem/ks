@@ -67,7 +67,7 @@ K sd_(K x,I f)
              if((v[0]>(V)0x10) & (v[0]<(V)0x5000000)) R 0; //stop, if have string of interned symbols
              I ii; for(ii=0;v[ii];ii++)
                    { O("     .2%c[%lld]: %p",alf[calf],ii,v[ii]);
-                     if(v[ii]>(V)DT_SIZE){ if(calf<1)sd_(*(K*)v[ii],2); else sd_(*(K*)v[ii],1); }
+                     if(v[ii]>(V)DT_SIZE){ if(calf<2)sd_(*(K*)v[ii],2); else sd_(*(K*)v[ii],1); }
                      else O("\n"); } } )
     CSR(5,)
     CS( 0, DO(xn, O(" %p",&kK(x)[xn-i-1]); sd_(kK(x)[i],2);) ) }
@@ -511,7 +511,7 @@ K dv_ex(K a, V *p, K b)
     O("\nsd_(prnt,2):");sd_(prnt,2);O("\n");
     O("~AM vf_ex(*p,g)      K vf_ex(V q, K g) <- K dv_ex(K a, V *p, K b)      ");
     tmp=vf_ex(*p,g);
-    O("#AM dv_ex :: vf_ex(*p,g)\n"); O("   AM:");sd_(tmp,2);
+    O("#AM dv_ex :: vf_ex(*p,g)\n"); O("   AM: %p",&tmp);sd_(tmp,2);
     stk--; if(grnt && !prnt)prnt=ci(grnt); }
   memset(kK(g),0,g->n*sizeof(K)); cd(g); //Special privileges here...don't ci() members beforehand
   R tmp; }
@@ -739,7 +739,7 @@ K vf_ex(V q, K g)
                O("~EP wd_(kC(o),o->n,&tc,fc)      K wd_(S s, int n, K *dict, K func) <- K vf_ex(V q, K g)      ");
                fw=wd_(kC(o),o->n,&tc,fc);
                O("#EP vf_ex :: wd_(kC(o),o->n,&tc,fc)\n");
-               O("   EP:   dict-aft-AW:");sd(tree);
+               O("   EP:   dict-aft-EP:");sd(tree);
                O("sd_(fw,2):     %p",&fw);sd_(fw,2); }
              kV(f)[CACHE_WD]=fw; cd(fc); }
            #ifdef DEBUG
@@ -750,7 +750,7 @@ K vf_ex(V q, K g)
            ci(fw); stk1++;
            O("~AN ex(fw)      K ex(K a) <- K vf_ex(V q, K g)      RRR-3      ");
            z=ex(fw);
-           O("#AN vf_ex :: ex(fw)     RRR-4\n"); O("   AN:");sd(z);
+           O("#AN vf_ex :: ex(fw)     RRR-4\n"); O("   AN: %p",&z);sd(z);
            O("sd(fw):");sd(fw);
            stk1--;
            DO(p->n, e=EVP(DI(tree,i)); cd(*e); *e=0; )
@@ -813,7 +813,7 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets.  Could 
   O("~AB ex0(kW(x),y,r)      K ex0(V*v,K k,I r) <- V ex_(V a, I r)      ");
   z=ex0(kW(x),y,r);   //eval wd()
   O("#AB ex_ :: ex0(kW(x),y,r)  r:%lld   ",r); O("y:"); if(y)sd(y); else O(" was 0\n");
-  O("   AB:");sd_(z,0);
+  O("   AB: %p",&z);sd(z);
   cd(y); R z; }
 
 K ex(K a)   //Input is (usually, but not always) 7-0 type from wd()
@@ -828,7 +828,7 @@ K ex(K a)   //Input is (usually, but not always) 7-0 type from wd()
   else fam=1;
   O("~AA ex_(&a,0)      V ex_(V a, I r) <- K ex(K a)    ");
   K z=ex_(&a,0); cd(a);
-  O("#AA ex :: ex_(&a,0)\n"); O("   AA:");sd_(z,9);
+  O("#AA ex :: ex_(&a,0)\n"); O("   AA: %p",&z);sd_(z,2);
   if(fer==1) fer=fer1=0;
   fwh=stk=stk1=prj=prj2=fsf=0;
   if(prnt) cd(prnt);
@@ -852,7 +852,7 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
               cd(z); frg++;
               O("~AC ex1(v+1+i,0,&i,n,1)      K ex1(V*w, K k, I *i, I n, I f) <- K ex0(V*v, K k, I r)      i: %lld     ",i);
               x=ex1(v+1+i,0,&i,n,1);
-              O("#AC ex0 :: ex1(v+1+i,0,&i,n,1)\n"); O("   AC:");sd(x);
+              O("#AC ex0 :: ex1(v+1+i,0,&i,n,1)\n"); O("   AC: %p",&x);sd(x);
               O("Bsd(z):");sd(z);
               frg--;
               if(!frg)
@@ -1033,7 +1033,7 @@ K ex1(V *w,K k,I *i,I n,I f)
   if(!c || !VA(w[c-1]) || (c>1 && offsetColon==w[c-1] ) )
   { O("~AD ex2(w,k)      K ex2(V*v, K k) <- K ex1(V*w, K k, I *i, I n, I f)      ");
     K vv=ex2(w,k); //typical list for execution
-    O("#AD ex1 :: ex2(w,k)\n"); O("   AD:");sd(vv);
+    O("#AD ex1 :: ex2(w,k)\n"); O("   AD: %p",&vv);sd(vv);
     R vv; }
   if(w[0]==offsetColon && (UI)w[1]>DT_SIZE)
   { I d=0; while(w[d] && !bk(w[d])) d++;
@@ -1246,7 +1246,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
   if(*(v+i)==(V)offsetEach && !grnt)grnt=ci(prnt);
   O("~AL dv_ex(0,v+i,t2)      K dv_ex(K a, V *p, K b) <- K ex2(V*v, K k)      ");
   e=dv_ex(0,v+i,t2);
-  O("#AL ex2 :: dv_ex(0,v+i,t2)\n"); O("   AL:");sd(e);
+  O("#AL ex2 :: dv_ex(0,v+i,t2)\n"); O("   AL: %p",&e);sd(e);
   *v=u;
   if(*(v+i)==(V)offsetEach && prnt==grnt){ cd(grnt); grnt=0; }
   cd(t2);

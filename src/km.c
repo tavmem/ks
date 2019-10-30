@@ -122,7 +122,7 @@ K ci(K x)
     CS(0, DO(xn, ci(kK(x)[i])))
   }
   if(xt==0)O("           ");
-  O("  END ci "); sd_(x,0);
+  O("  END ci  %p",&x); sd(x);
   R x;
 }
 

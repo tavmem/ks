@@ -283,7 +283,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
 
-  if(o && fam && !feci){ O("\nresult:\n");sd_(k,2);O("\n"); }
+  if(o && fam && !feci){ O("\nresult: %p",&k);sd_(k,2);O("\n"); }
 
   cd(k);
  cleanup:
