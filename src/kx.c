@@ -726,7 +726,7 @@ K vf_ex(V q, K g)
              cd(kV(fc)[CONJ]); kV(fc)[CONJ]=0;
              kV(fc)[DEPTH]++;
              I tt=0; DO(o->n, if(kC(o)[i]=='{'){ tt=1; break; })
-             if(tt || kC(o)[0]=='[')
+             if(!grnt || tt || kC(o)[0]=='[')
              { O("&tree6: %p   sd_(tree6,2):",&tree);sd_(tree,2);
                O("~AW wd_(kC(o),o->n,&tree,fc)      K wd_(S s, int n, K *dict, K func) <- K vf_ex(V q, K g)      ");
                fw=wd_(kC(o),o->n,&tree,fc);
