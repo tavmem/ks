@@ -3,10 +3,13 @@ tokens: ((`id;"F")
 (`id;"G")
 (`oparen;"(")
 (`cparen;")")
+(`comma;",")
+(`id;"H")
+(`oparen;"(")
+(`cparen;")")
 (`cparen;")"))
 
 peek: {x~tokens[;0][0]}
-
 eat: {
   t: *tokens
   tokens :: 1 _ tokens
@@ -29,4 +32,4 @@ parse_arg_exprs: {
   eat[`cparen]
   arg_exprs}
 
-/parse_call()
+parse_call()
