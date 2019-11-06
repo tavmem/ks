@@ -165,6 +165,8 @@ Z I isDotDyadic(K x)  {R isVerbDyadic(x,offsetDot);}
 K at_verb(K a, K b) {    //[Internal Function]
   //"of" depends on this even though @[d;i] = .[d;,i] <--- that equality doesn't always hold
   O("BEG at_verb\n");
+  O("sd(a):");sd(a);
+  O("sd(b):");sd(b);
   if(!b) R b;
   if(0==b->t && 0==b->n)R newK(0,0);//Overriding right-arg ()
   I at=a->t, an=a->n, bt=b->t, bn=b->n;
@@ -204,7 +206,7 @@ K at_verb(K a, K b) {    //[Internal Function]
     P(5!=at,TE)
     z=newK(0,bn);
     DO(bn, kK(z)[i]=ci(lookup(a,kS(b)[i])))
-    z=collapse(z); }
+    if(!(bt<0 && bn==1))z=collapse(z); }
   else if(6==bt) {
     if(0>=at)z=ci(a);
     else if(5==at){z=newK(0,an); DO(an, kK(z)[i]=ci(EV(DI(a,i)))) z=collapse(z);} //TODO: untested
