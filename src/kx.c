@@ -745,11 +745,7 @@ K vf_ex(V q, K g)
                O("   EP:   dict-aft-EP:");sd(tree);
                O("sd_(fw,2):     %p",&fw);sd_(fw,2); }
              kV(f)[CACHE_WD]=fw; cd(fc); }
-           #ifdef DEBUG
-           if(stk1>5) { cd(g); kerr("stack"); R _n(); }
-           #else
            if(stk1>1e3) { cd(g); kerr("stack"); R _n(); }
-           #endif
            ci(fw); stk1++;
            O("~AN ex(fw)      K ex(K a) <- K vf_ex(V q, K g)      RRR-3      ");
            z=ex(fw);
@@ -917,7 +913,7 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
           if(fer1 || ((fer>0 && (v[0]==(V)offsetColon || v[2]==(V)1)) && !fCheck)){ cd(z); fer1=1; R x; }
           M(x,z)  kK(z)[--e]=bk(x)?2==r?0:_n():x; } }   //(c:9;a+b;c:1) oom
   //Note on brackets: [] is _n, not (). Expression [1;1] (0-type with two atoms) is different from [1 1] (integer vector)
-  if(1==r)z=collapse(z);
+  if(1==r || v[0]==(V)0x7d) z=collapse(z);
   if(k)
   { I j=valence(&z);
     if(!j && 0==k->t) DO(k->n, if(!kK(k)[i]) kK(k)[i]=_n() )   //Fill in 0-type NULLs with _n
