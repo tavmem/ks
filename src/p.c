@@ -458,16 +458,14 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
       if(WORD_START(m[k+v++]))y++;   // y #items in vector
   switch(-M)
   { CS(MARK_CONDITIONAL, O("conditional\n"); z=offsetColon)   //dummy value
-    CS(MARK_PAREN  ,  O("paren\n");
-                      fbr=1; fdc=1;
+    CS(MARK_PAREN  ,  O("paren ... fbr set, fdc set\n"); fbr=1; fdc=1;
                       O("~BT wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- ");
                       O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
                       O("#BT capture :: wd_(s+k+1,r-2,dict,func)\n");
                       if(!z)R (L)PE;)                   //oom. currently z->t==7 z->n==0.
                       //Execution will know this is paren (for rev order) because of its depth
-    CS(MARK_BRACKET,  O("bracket\n");
-                      fbr=1;
+    CS(MARK_BRACKET,  O("bracket ... fbr set\n"); fbr=1;
                       if(!*d || bk(p[-1]))
                       { if(func && !k) R r;              //Ignore function params. k because no {[a;b][c;d]}
                         else R (L)PE; }                  // [1;2] on a line by itself
@@ -476,6 +474,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       //could perhaps put [] directly on () or {} 7 instead of making new g provided 0==a.
                       g=Kv(); K ko=newK(-4,a+2); M(g,ko)  g->n=0; kV(g)[CODE]=ko;
                       V *o=kW(g);
+                      if((s+k+1)[0]=='x' && (s+k+1)[1]==';')fbr=0;
                       O("~BU wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- ");
                       O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
