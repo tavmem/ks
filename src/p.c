@@ -474,7 +474,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                       //could perhaps put [] directly on () or {} 7 instead of making new g provided 0==a.
                       g=Kv(); K ko=newK(-4,a+2); M(g,ko)  g->n=0; kV(g)[CODE]=ko;
                       V *o=kW(g);
-                      if((s+k+1)[0]=='x' && (s+k+1)[1]==';')fbr=0;
+                      if((s+k+1)[0]=='x' && (s+k+1)[1]==';')fbr=0; O("fbr cleared\n");
                       O("~BU wd_(s+k+1,r-2,dict,func)      K wd_(S s, int n, K *dict, K func) <- ");
                       O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)      ");
                       z=wd_(s+k+1,r-2,dict,func);
@@ -645,8 +645,8 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         z=inKtree( dict,u,0);
                         O("#BZ capture :: inKtree( dict,u,0)\n");
                         O("   BZ: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n");
-                        O("      fdc: %lld\n",fdc);
-                        if((!fdc)&&!z)
+                        O("      fbr: %lld   fdc: %lld\n",fbr,fdc);
+                        if( !fdc && !z )
                         { L err=(L)VLE;
                           #ifndef DEBUG
                           oerr(); O("%s\n%c\n",u,'^');
