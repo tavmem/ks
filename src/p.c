@@ -207,7 +207,8 @@ Z I overcount(I*m,I n)
   R c; }
 
 Z I syntaxChk(S s)               //TODO: refactor the syntax check as a single pass
-{ if(s[0]=='\t' || s[0]=='\014') R 5;
+{ O("BEG syntaxChk\n");
+  if(s[0]=='\t' || s[0]=='\014') R 5;
   I n=strlen(s);
   if(n==1){ if(s[0]=='\'')R 10; else R 0; }
   I i,j,k=0;
@@ -226,7 +227,7 @@ Z I syntaxChk(S s)               //TODO: refactor the syntax check as a single p
     if(s[i]==',' && (s[i-1]=='\\' || s[i-1]=='_')) R 60;
     if(s[i]=='?' && (s[i-1]=='-' || s[i-1]=='\\')) R 70; }
   if(n>2) for(i=2;i<n;++i)
-  { if(s[i]=='\\' && s[i-1]==':' && (s[i-2]!='/' && s[i-2]!='\\')) R 80;
+  { //if(s[i]=='\\' && s[i-1]==':' && (s[i-2]!='/' && s[i-2]!='\\')) R 80;
     if(s[i]=='/' && (s[i-1]=='+' || s[i-1]=='\'' || s[i-1]=='>' || s[i-1]=='%' || s[i-1]=='*' || s[i-1]=='?' || s[i-1]=='&' 
        || s[i-1]=='\\') && s[i-2]=='/') R 90;
     if(s[i]=='/' && s[i-1]=='/' && s[i-2]=='-') R 100;
@@ -278,7 +279,7 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   O("    dict: %p      sd_(*dict,0):",dict); if(dict)sd(*dict); else O("\n");
   if(!s) R 0;
   if(strstr(s,":\\t")) { show(kerr("\\t  syntax")); R 0; }
-  I z=syntaxChk(s); if(z==999)R NE; if(z) R SYE;
+  I z=syntaxChk(s); O("syntaxErrror: %lld\n",z); if(z==999)R NE; if(z) R SYE;
   if('\\'==s[0] && fbs){fbs=0; R backslash(s,n, dict);}
   PDA p=0;
   O("~DJ newK(-1,1+n)   K newK(I t, I n) -- K wd_(S s, int n, K* dict, K func)   ");
