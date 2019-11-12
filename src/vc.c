@@ -14,16 +14,16 @@ I FC_FI(F a,I b){ R FC(a,I2F(b)); }
 Z K lessmore(K a,K b,I x);
 
 K dp(K*z,K(*f)(K,K),K x,K y) //dyad promote
-{
+{  O("BEG dp\n");
    x=promote(x); y=promote(y);
    M(x,y,*z)
-   DO((*z)->n, if(!(kK(*z)[i]=f(kK(x)[i%xn],kK(y)[i%y->n]))){cd(*z);*z=ME;break;}) //TODO: optimization: remove these modulo % operations
+   DO((*z)->n, if(!(kK(*z)[i]=f(kK(x)[i%xn],kK(y)[i%y->n]))){cd(*z);*z=TE;break;}) //TODO: optimization: remove these modulo % operations
    cd(x);cd(y);
    R 0;
 }
 
 K equals(K a, K b)
-{
+{ O("BEG equals\n");
   I at=a->t, an=a->n, bt=b->t, bn=b->n;
   if(at <=0 && bt <= 0 && an != bn) R LE;
   I AT=ABS(at), BT=ABS(bt);
