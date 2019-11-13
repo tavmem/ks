@@ -3,7 +3,7 @@
 How I use this repositiory
 -----------
 
-Obviously, you can use this stuff any way you want, but hsre are some tips on what it was desinged to do.
+Obviously, you can use this stuff any way you want, but here are some tips on what it was desinged to do.
 
 The key script is ps.k ...  which you will need to modify so it has your directory structure.
 
