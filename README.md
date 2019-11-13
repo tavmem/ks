@@ -7,7 +7,7 @@ Obviously, you can use this stuff any way you want, but here are some tips on wh
 
 The key script is ps.k ...  which you will need to modify so it has your directory structure.
 
-Suppose that you want to examine the details of how a particular command is processed.
+Suppose that you want to examine the details of how a particular command is processed by kona.
 
 Take, for example, a recent issue, #561:
 ```
