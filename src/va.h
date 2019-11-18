@@ -20,3 +20,4 @@ K at(K x,K y);
 K power(K a,K b);
 K overDyad(K a,V*p,K b);
 extern C errmsg[256];
+extern K sd(K x);

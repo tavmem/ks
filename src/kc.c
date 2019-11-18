@@ -211,7 +211,9 @@ Z void trim(S s)    //remove leading blanks (and extra instances of "each")
                       s[j]=s[j+i]; k=0; }
            else {  k++; s[j]=s[j+i]; } } } }
 
-I check() {      //in suspended execution mode: allows checking of state at time of error
+I check()
+{ //in suspended execution mode: allows checking of state at time of error
+  O("BEG check\n");
   I ofCheck=fCheck;
   kerr("(nil)"); prompt(++fCheck); S a=0;  I n=0;  PDA q=0;
   for(;;) {
@@ -241,9 +243,13 @@ cleanup:
 I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,  intermediate is non-zero
   O("BEG line\n");
   O("f: %p      stdin: %p      *a: %s      *n: %lld      p: %p\n",f,stdin,*a,*n,p);
+  if(!*p)O("!*p\n");
+  else O("(*p)->i: %lld    (*p)->s: %lld    (*p)->n: %lld    (*)p->c: %s\n",(*p)->i,(*p)->s,(*p)->n,(*p)->c);
+  if(lineA)O("lineA: %s\n",lineA); if(lineB)O("lineB: %s\n",lineB); O("fCheck: %lld\n",fCheck);
   S s=0; I b=0,c=0,m=0,o=1; K k; F d; fbr=fer=feci=0; fam=1;
 
   if(-1==(c=getline_(&s,&m,f))) GC;
+  O("s: %s\n",s);
   if(fln&&(s[0]=='#' && s[1]=='!')) GC;
   if(s[0]=='\\' && s[1]=='\n') {
     if(!fCheck&&fLoad) { c=-1; GC; }   //escape file load
@@ -291,34 +297,50 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   S ptr=0;
   if(!strcmp(errmsg,"value"));
   else if(strcmp(errmsg,"(nil)") && fer!=-1) { oerr(); I ctl=0;
-    if(fError){
-      if(2==fError)exit(1);
-      if(lineA){
-        if(fnc){ I cnt=0,i;
-          if(strlen(fnc)==1)for(i=0;i<strlen(lineA);i++) { if(lineA[i]==*fnc) cnt++; }
-          else for(i=0;i<strlen(lineA)-1;i++) {if(lineA[i]==fnc[0]) if(lineA[i+1]==fnc[1]) {ptr=&lineA[i]; cnt++;}}
-          if(cnt==1) { ctl=1; O("%s\n",lineA); if(!ptr)ptr=strchr(lineA,*fnc); DO(ptr-lineA,O(" ")) O("^\n"); }
-          if(cnt>1 && fnci && fnci<127) { I num=0;
-            for(i=0;i<fnci;i++) { if(fncp[i]==fncp[fnci-1])num++; }
-            O("%s\n",lineA); O("at execution instance %lld of \"%s\"\n",num,fnc); }}}
-      if(lineB && !ctl && strcmp(lineA,lineB)) {
-        if(fnc) { I cnt=0,i; O("%s\n",lineB);
-          for(i=0;i<strlen(lineB);i++) { if(lineB[i]==*fnc) cnt++; }
-          if(cnt==1) { S ptr=strchr(lineB,*fnc); DO(ptr-lineB,O(" ")) O("^\n"); }
-          if(cnt>1 && fnci && fnci<127) { I num=0;
-            for(i=0;i<fnci;i++) { if(fncp[i]==fncp[fnci-1])num++; }
-            O("at execution instance %lld of %s\n",num,fnc); }}}
+    if(fError)
+    { if(2==fError)exit(1);
+      if(lineA)
+      { O("have lineA\n");
+        if(fnc)
+        { I cnt=0,i;
+          if(strlen(fnc)==1)
+            for(i=0;i<strlen(lineA);i++)
+            { if(lineA[i]==*fnc) cnt++; }
+          else
+            for(i=0;i<strlen(lineA)-1;i++)
+            { if(lineA[i]==fnc[0])
+                if(lineA[i+1]==fnc[1]){ ptr=&lineA[i]; cnt++; } }
+          if(cnt==1)
+          { ctl=1; O("%s\n",lineA);
+            if(!ptr)ptr=strchr(lineA,*fnc);
+            DO(ptr-lineA,O(" ")) O("^\n"); }
+          if(cnt>1 && fnci && fnci<127)
+          { I num=0;
+            for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])num++; }
+            O("%s\n",lineA); O("at execution instance %lld of \"%s\"\n",num,fnc); } } }
+      if(lineB && !ctl && strcmp(lineA,lineB))
+      { O("have lineB conditions\n");
+        if(fnc)
+        { I cnt=0,i; O("%s\n",lineB);
+          for(i=0;i<strlen(lineB);i++){ if(lineB[i]==*fnc) cnt++; }
+          if(cnt==1)
+          { S ptr=strchr(lineB,*fnc);
+            DO(ptr-lineB,O(" "))
+            O("^\n"); }
+          if(cnt>1 && fnci && fnci<127)
+          { I num=0;
+            for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])num++; }
+            O("at execution instance %lld of %s\n",num,fnc); } } }
       if(lineA || lineB)  check();          //enter suspended execution mode for checking
-      if(!lineA && !lineB) O("%s\n",*a); }}
+      if(!lineA && !lineB) O("%s\n",*a); } }
   if(*p)pdafree(*p);
-  *p=0;
-  free(*a);*a=0;*n=0;
-  free(s);s=0;
+  *p=0; free(*a); *a=0; *n=0; free(s); s=0;
  done:
-  if(fWksp) { O("used now : %lld (%lld %lld)\n",(I)mUsed,(I)mAlloc,(I)mMap);
-              O("max used : %lld\n",(I)mMax);
-              O("symbols  : "); I cnt=nodeCount(SYMBOLS); O("\n");
-              O("count    : %lld\n",cnt); fWksp=0; }
+  if(fWksp)
+  { O("used now : %lld (%lld %lld)\n",(I)mUsed,(I)mAlloc,(I)mMap);
+    O("max used : %lld\n",(I)mMax);
+    O("symbols  : "); I cnt=nodeCount(SYMBOLS); O("\n");
+    O("count    : %lld\n",cnt); fWksp=0; }
   if(o && !fLoad)prompt(b+fCheck);
   kerr("(nil)"); fll=fer=fer1=fnci=fom=feci=0; fnc=lineA=lineB=0; if(cls){cd(cls);cls=0;}
   R c; }

@@ -59,7 +59,7 @@ K power(K a, K b)
 }
 
 K plus(K a, K b) //compare plus() to times() or minus()
-{
+{ O("BEG plus\n"); O("sd(a):");sd(a); O("sd(b):");sd(b);
   SCALAR_INIT(2)
   K z=newK(zt,zn);U(z)          //Finally, we know what we're going to make
 

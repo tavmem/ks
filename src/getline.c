@@ -22,13 +22,12 @@ I expander(S *s, I n) //grow s? n - needs size
 }
 
 I appender(S *s, I *n, S t, I k) //concatenate t to s
-{
+{ O("BEG appender   *s: %s   *n: %lld   k: %lld   t: %s\n",*s,*n,k,t);
   if(expander(s,*n+k+1))R -1; //mm/o - failed
   memcpy(*s+*n,t,k);
   *n += k;
   (*s)[*n] = '\0';
-  R 0;
-}
+  R 0; }
 
 I getline_(S *s,I *n,FILE *f){R getdelim_(s,n,'\n',f);}
 
