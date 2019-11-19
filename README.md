@@ -13,7 +13,7 @@ Take, for example, a recent issue, #561:
 ```
 (.((`a;1);(`b;2)))(,`a)
 ```
-The first 3 (preparation) commands would be:
+The first 3 (preparation) commands are done in the ~/ks directory:
 ```
 rlwrap -n ./k > ggg
 (.((`a;1);(`b;2)))(,`a)
@@ -21,7 +21,7 @@ rlwrap -n ./k > ggg
 ```
 ps.k expects to find the output file ```ggg```
 
-Then, the final 2 commands:
+Then, the final 2 commands, which are also done in the ~/ks directory:
 ```
 rlwrap ~n ~/kona/k ps
 \\
