@@ -247,15 +247,21 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   else O("(*p)->i: %lld    (*p)->s: %lld    (*p)->n: %lld    (*)p->c: %s\n",(*p)->i,(*p)->s,(*p)->n,(*p)->c);
   if(lineA)O("lineA: %s\n",lineA); if(lineB)O("lineB: %s\n",lineB); O("fCheck: %lld\n",fCheck);
   S s=0; I b=0,c=0,m=0,o=1; K k; F d; fbr=fer=feci=0; fam=1;
-
   if(-1==(c=getline_(&s,&m,f))) GC;
-  O("s: %s\n",s);
+  O("s: %s\n",s);  O("cdp: %s\n",cdp);
   if(fln&&(s[0]=='#' && s[1]=='!')) GC;
+  if(fCheck && s[0]==':')
+  { I i; for(i=0; i<strlen(lineA); i++)if(lineA[i]==cdp[1])break;
+    appender(a,n,lineA,i+1);
+    appender(a,n,s+1,strlen(s)-2);
+    RTIME(d,k=ex(wd(*a,*n)))
+    goto next; }
   if(s[0]=='\\' && s[1]=='\n') {
     if(!fCheck&&fLoad) { c=-1; GC; }   //escape file load
     if(fCheck) { fCheck--;R 0; }   //escape suspended execution with single backslash
     if(*a) GC; }                    //escape continue with single backslash
-  appender(a,n,s,c);         //"strcat"(a,s)
+  if(s[0]=='\\' && s[1]=='\\')exit(0);
+  if(!fCheck)appender(a,n,s,c);         //"strcat"(a,s)
   O("~EC complete(*a,*n,p,0)   I complete(S a, I n, PDA *q, I *marks) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
   I v=complete(*a,*n,p,0);   //will allocate if p is null
   O("#EC line :: complete(*a,*n,p,0)\n");
@@ -266,14 +272,11 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   if(v==1) { fCmplt=1; goto done; }         //generally incomplete
   if(v==0) fCmplt=0;
   if(n && '\n'==(*a)[*n-1]) (*a)[--*n]=0;   //chop for getline
-
   trim(*a); //remove leading blanks
   *n=strlen(*a); //strlen might have been changed in 'trim' or in 'recur'
   if((*a)[0]=='\\')fbs=1; else fbs=0;
-
   if(pthread_mutex_lock(&execute_mutex)){
     perror("Lock mutex in line()"); abort();}
-
   O("\n~BQ wd(*a,*n)      K wd(S s, int n) <- I line(FILE *f, S *a, I *n, PDA *p)      ");
   K zz=wd(*a,*n);
   O("#BQ line :: wd(*a,*n)\n"); O("   BQ: sd(zz):");sd(zz); O("\n");
@@ -281,17 +284,14 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   O("~BR ex(zz)      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
   RTIME(d,k=ex(zz))
   O("#BR line :: ex(zz)\n");
-
   if(pthread_mutex_unlock(&execute_mutex)){
     perror("Unlock mutex in line()"); abort();}
-
   #ifdef DEBUG
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
-
-  if(o && fam && !feci){ O("\nresult: %p",&k);sd_(k,2);O("\n"); }
-
+  next: if(o && fam && !feci){ O("\nresult: %p",&k);sd_(k,2);O("\n"); }
   cd(k);
+  if(fCheck){ fCheck=0; goto done; }
  cleanup:
   if(fCheck && (strlen(s)==0 || s[strlen(s)-1]<0)) exit(0);
   S ptr=0;
@@ -331,8 +331,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
           { I num=0;
             for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])num++; }
             O("at execution instance %lld of %s\n",num,fnc); } } }
-      if(lineA || lineB)  check();          //enter suspended execution mode for checking
-      if(!lineA && !lineB) O("%s\n",*a); } }
+      if(lineA || lineB)  check(); } }          //enter suspended execution mode for checking
   if(*p)pdafree(*p);
   *p=0; free(*a); *a=0; *n=0; free(s); s=0;
  done:

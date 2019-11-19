@@ -42,6 +42,7 @@ __thread I frg=0;    // Flag reset globals
          I fam=1;    // Flag amend: 1=OK to print response
          I fdvx=0;   // restrict printing of void pointers in dv_ex
          I ft3=0;    // Flag if t3<DT_SIZE
+         C cdp[]="aaaaaaaaaa";    // Code Pointer
          I cnte=0;
 
          I calf=-1;  // counter for alf
@@ -822,8 +823,16 @@ K ex(K a)   //Input is (usually, but not always) 7-0 type from wd()
   U(a); if(a->t==7 && kVC(a)>(K)DT_SIZE && 7==kVC(a)->t && 6==kVC(a)->n)fwh=1;
   if(a->t==7)
   { if(prnt==0)
-    { if(kV(kK(a)[CODE])[1]==offsetColon && kV(kK(a)[CODE])[2]!=offset3m) fam=0;
-      if(kK(a)[CODE]->n>3){ I i=3; while(kV(kK(a)[CODE])[i]) if(kI(kK(a)[CODE])[i++]==0x1)fam=1; } } }
+    { if(kW(a)[1]==offsetColon && kW(a)[2]!=offset3m) fam=0;
+      if(kVC(a)->n>3)
+      { I i=3;
+        while(kW(a)[i]) if(kW(a)[i++]==(V)0x1)fam=1;
+        if(!fCheck && i>2)
+        { I j,k=0;
+          for(j=i-1; j>0 && k<10; j--)
+            if(kW(a)[j]<(V)DT_SIZE && kW(a)[j]>(V)1)
+            { cdp[k]=(C)*DT[(I)kW(a)[j]].text;
+              k++; } } } } }
   else fam=1;
   O("~AA ex_(&a,0)      V ex_(V a, I r) <- K ex(K a)    ");
   K z=ex_(&a,0); cd(a);
