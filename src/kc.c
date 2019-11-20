@@ -40,7 +40,7 @@ I fCmplt=0;
 I fbr=0;              //flag for brace, bracket, or paren
 I fbs=0;              //backslash flag
 
-I prompt(I n){DO(n,O(">")) O("  ");fflush(stdout);R 0;}
+I prompt(I n){ DO(n,O(">"))  O("  "); fflush(stdout); R 0; }
 
 I callComplete(S s, I n, PDA *q, I *m) {
   O("~EB complete(t,m,&p,0)      I complete(S a, I n, PDA *q, I *marks) <- I wds_(K*a,FILE*f,I l)      ");
@@ -236,7 +236,7 @@ I lines(FILE*f) {
     O("#DC lines :: line(f,&a,&n,&p)\n");
     if(z==-1)GC;
     fln=0; }
-cleanup:
+ cleanup:
   R 0;}
     //You could put lines(stdin) in main() to have not-multiplexed command-line-only input
 
@@ -246,11 +246,11 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   if(!*p)O("!*p\n");
   else O("(*p)->i: %lld    (*p)->s: %lld    (*p)->n: %lld    (*)p->c: %s\n",(*p)->i,(*p)->s,(*p)->n,(*p)->c);
   if(lineA)O("lineA: %s\n",lineA); if(lineB)O("lineB: %s\n",lineB); O("fCheck: %lld\n",fCheck);
-  S s=0; I b=0,c=0,m=0,o=1; K k; F d; fbr=fer=feci=0; fam=1;
+  S s=0; I b=0,c=0,m=0,o=1,q=1; K k; F d; fbr=fer=feci=0; fam=1;
   if(-1==(c=getline_(&s,&m,f))) GC;
   if(fCheck && 1==strlen(s) && s[0]=='\n')
   { while(1==strlen(s) && s[0]=='\n')
-    { O(">");
+    { prompt(b+fCheck);
       if(-1==(c=getline_(&s,&m,f))) GC; } }
   O("s: %s\n",s);  O("cdp: %s\n",cdp);
   if(fln&&(s[0]=='#' && s[1]=='!')) GC;
@@ -259,6 +259,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     appender(a,n,lineA,i+1);
     appender(a,n,s+1,strlen(s)-2);
     RTIME(d,k=ex(wd(*a,*n)))
+    fCheck=0; q=0;
     goto next; }
   if(s[0]=='\\' && s[1]=='\n') {
     if(!fCheck&&fLoad) { c=-1; GC; }   //escape file load
@@ -293,9 +294,10 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
   #ifdef DEBUG
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
-  next: if(o && fam && !feci){ O("\nresult: %p",&k);sd_(k,2);O("\n"); }
+ next:
+  if(o && fam && !feci){ O("\nresult: %p",&k);sd_(k,2);O("\n"); }
   cd(k);
-  if(fCheck){ fCheck=0; goto done; }
+  if(fCheck) goto done;
  cleanup:
   if(fCheck && (strlen(s)==0 || s[strlen(s)-1]<0)) exit(0);
   S ptr=0;
@@ -344,7 +346,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     O("max used : %lld\n",(I)mMax);
     O("symbols  : "); I cnt=nodeCount(SYMBOLS); O("\n");
     O("count    : %lld\n",cnt); fWksp=0; }
-  if(o && !fLoad)prompt(b+fCheck);
+  if(o && !fLoad && q)prompt(b+fCheck);
   kerr("(nil)"); fll=fer=fer1=fnci=fom=feci=0; fnc=lineA=lineB=0; if(cls){cd(cls);cls=0;}
   R c; }
 
