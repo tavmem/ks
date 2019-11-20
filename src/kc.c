@@ -254,7 +254,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
       if(-1==(c=getline_(&s,&m,f))) GC; } }
   O("s: %s\n",s);  O("cdp: %s\n",cdp);
   if(fln&&(s[0]=='#' && s[1]=='!')) GC;
-  if(fCheck && s[0]==':')
+  if(fCheck && s[0]==':' && lineA)
   { I i; for(i=0; i<strlen(lineA); i++)if(lineA[i]==cdp[1])break;
     appender(a,n,lineA,i+1);
     appender(a,n,s+1,strlen(s)-2);
