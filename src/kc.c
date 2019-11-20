@@ -261,7 +261,7 @@ I line(FILE*f, S*a, I*n, PDA*p) {  //just starting or just executed: *a=*n=*p=0,
     if(fCheck) { fCheck--;R 0; }   //escape suspended execution with single backslash
     if(*a) GC; }                    //escape continue with single backslash
   if(s[0]=='\\' && s[1]=='\\')exit(0);
-  if(!fCheck)appender(a,n,s,c);         //"strcat"(a,s)
+  appender(a,n,s,c);         //"strcat"(a,s)
   O("~EC complete(*a,*n,p,0)   I complete(S a, I n, PDA *q, I *marks) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
   I v=complete(*a,*n,p,0);   //will allocate if p is null
   O("#EC line :: complete(*a,*n,p,0)\n");
