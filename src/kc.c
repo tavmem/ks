@@ -42,6 +42,7 @@ I fbr=0;              //flag for brace, bracket, or paren
 I fbs=0;              //backslash flag
 I flc=0;
 C lineC[100];
+Z C ofnc[]=" ";
 
 I prompt(I n){ DO(n,O(">"))  O("  "); fflush(stdout); R 0; }
 
@@ -218,6 +219,7 @@ I check()
 { //in suspended execution mode: allows checking of state at time of error
   O("BEG check\n");
   I ofCheck=fCheck;
+  if(fnc)*ofnc=*fnc;
   kerr("(nil)"); prompt(++fCheck); S a=0;  I n=0;  PDA q=0;
   for(;;)
   { O("\n~DB line(stdin,&a,&n,&q)      I line(FILE*f, S*a, I*n, PDA*p) <- I check()      ");
@@ -258,12 +260,14 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
   O("s: %s\n",s);  O("cdp: %s\n",cdp);
   if(fln&&(s[0]=='#' && s[1]=='!')) GC;
   if(fCheck && s[0]==':' && (lineA || flc))
-  { I i;
+  { I i,j;
     if(*a)
-    { for(i=0; i<strlen(lineC); i++)if(lineC[i]==cdp[1])break;
+    { for(j=0; j<10; j++)if(cdp[j]==*ofnc)break;
+      for(i=0; i<strlen(lineC); i++)if(lineC[i]==cdp[j+1])break;
       *n=0; appender(a,n,lineC,i+1); }
     else
-    { for(i=0; i<strlen(lineC); i++)if(lineC[i]==cdp[1])break;
+    { for(j=0; j<10; j++)if(cdp[j]==*fnc)break;
+      for(i=0; i<strlen(lineC); i++)if(lineC[i]==cdp[j+1])break;
       appender(a,n,lineC,i+1); }
     appender(a,n,s+1,strlen(s)-2);
     RTIME(d,k=ex(wd(*a,*n)))
@@ -467,6 +471,7 @@ I attend() {  //K3.2 uses fcntl somewhere
     for(i = 0; i <= fdmax; i++)
       if (FD_ISSET(i, &read_fds)) {
         if(i==STDIN) {
+          flc=fCheck=ofCheck=0;
           O("&KTREE: %p      sd(KTREE):",&KTREE);sd(KTREE);
           O("\n~DA line(stdin,&a,&n,&q)      I line(FILE *f,S *a,I *n,PDA *p) <- I attend()      ");
           nbytes=line(stdin,&a,&n,&q);
@@ -580,6 +585,7 @@ I attend() {
   for(;;) {   // main loop for Windows stdin
     scrLim = 0;
     for(;;) {
+      flc=fCheck=ofCheck=0;
       if (-1==line(stdin, &a, &n, &q)) exit(0);
       } }
   R 0; }
