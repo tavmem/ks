@@ -38,7 +38,7 @@ Z I ofCheck=0;
   I fCmplt=0;
   I fbr=0;          //flag for brace, bracket, or paren
   I fbs=0;          //backslash flag
-Z I flc=0;
+Z I flc=0;          //flag lineC
 Z C lineC[100];
 Z C ofnc[]=" ";
 Z I ocr=0;          //which occurance
@@ -284,7 +284,7 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
     appender(a,n,s+1,strlen(s)-2);
     O("2nd *a: %s\n",*a);
     RTIME(d,k=ex(wd(*a,*n)))
-    fCheck=0; q=0;
+    fCheck--; q=0;
     goto next; }
   if(s[0]=='\\' && s[1]=='\n') {
     if(!fCheck&&fLoad) { c=-1; GC; }   //escape file load
@@ -323,7 +323,6 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
  next:
   if(o && fam && !feci){ O("\nresult: %p",&k);sd_(k,2);O("\n"); }
   cd(k);
-  if(fCheck) goto done;
  cleanup:
   if(fCheck && (strlen(s)==0 || s[strlen(s)-1]<0)) exit(0);
   S ptr=0;
@@ -349,7 +348,7 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
           if(cnt>1 && fnci && fnci<127)
           { ocr=0;
             for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])ocr++; }
-            O("%s\n",lineA); O("at execution instance %lld of \"%s\"\n",ocr,fnc); } } }
+            O("%s\n",lineA); O("at execution instance %lld of \"%s\"\n",ocr,fnc); fnci=0; } } }
       if(lineB && !ctl && strcmp(lineA,lineB))
       { O("have lineB conditions\n");
         if(fnc)
@@ -377,7 +376,9 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
     O("symbols  : "); I cnt=nodeCount(SYMBOLS); O("\n");
     O("count    : %lld\n",cnt); fWksp=0; }
   if(o && !fLoad && q)prompt(b+fCheck);
-  kerr("(nil)"); fll=fer=fer1=fnci=fom=feci=0; fnc=lineA=lineB=0; if(cls){cd(cls);cls=0;}
+  kerr("(nil)"); fll=fer=fer1=fnci=fom=feci=0;
+  if(!fCheck) fnc=lineA=lineB=0;
+  if(cls){ cd(cls); cls=0; }
   R c; }
 
 I tmr_ival=0;
