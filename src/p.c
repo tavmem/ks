@@ -634,7 +634,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         else if(7==h->t && *kI(hh)){ O("got recur\n"); z=ci(func); frc=1; }
                         else
                         { O("n2e\n");
-                          z=denameS(kV(func)[CONTeXT],u,1);
+                          z=denameS(kV(func)[CONTeXT],u,strstr(s,"do[")!=NULL);
                           O("kK(z): %p   ",kK(z)); } }   //Otherwise check the context (refactor with above?)
                       else
                       { O("n3      u: %s\n",u);
