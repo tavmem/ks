@@ -618,7 +618,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                             &kK(KTREE)[0]);sd(kK(kK(KTREE)[0])[1]);O("\n");
                           if(':'==s[k+r])r++;
                           O("~DX denameS(kV(func)[CONTeXT],u,1)      K* denameS(S dir_string, S t, I create) <- ");
-                          O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func)      ");
+                            O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func)      ");
                           z=denameS(kV(func)[CONTeXT],u,1);
                           O("#DX capture :: denameS(kV(func)[CONTeXT],u,1)\n");
                           O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",
@@ -626,7 +626,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         else if(dict==  (K*)kV(func)+LOCALS  && ':'==s[k+r] && -MARK_VERB==m[k+r])
                         { O("n2d\n");
                           O("~ED denameD( dict,u,1)      K* denameD(K *d, S t, I create) <- ");
-                          O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                            O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                           z=denameD( dict,u,1);
                           O("#ED capture :: denameD( dict,u,1)\n");
                           O("   ED: z: %p\n",z); }
@@ -643,22 +643,24 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                              { if(!fbr && s[i]==';') break;
                                else if(s[i]==':'|| (fbr && (s[i]=='x'||s[i]=='y'||s[i]=='z'))){ fdc=1; break; } }
                         O("~BZ inKtree( dict,u,0)      K *inKtree(K *d, S t, I create) <- ");
-                        O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                          O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
                         z=inKtree( dict,u,0);
                         O("#BZ capture :: inKtree( dict,u,0)\n");
                         O("   BZ: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n");
                         O("      fbr: %lld   fdc: %lld\n",fbr,fdc);
+                        if(fStop && !z) z=denameD(&stopDict,u,0);
                         if( !fdc && !z )
                         { L err=(L)VLE;
                           #ifndef DEBUG
                           oerr(); O("%s\n%c\n",u,'^');
                           #endif
                           R err; }
-                        O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K *d, S t, I create) <- ");
-                        O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
-                        z=denameD( dict,u,fll&&fdc);
-                        O("#CA capture :: denameD( dict,u,fll&&fdc)\n");
-                        O("   CA: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n"); } )
+                        if((!fStop) && !z)
+                        { O("~CA denameD( dict,u,fll&&fdc)      K* denameD(K *d, S t, I create) <- ");
+                            O("I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)     ");
+                          z=denameD( dict,u,fll&&fdc);
+                          O("#CA capture :: denameD( dict,u,fll&&fdc)\n");
+                          O("   CA: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n"); } } )
     CS(MARK_VERB   ,  // "+" "4:" "_bin"  ;  grab "+:", "4::"
                       O("verb\n");
                       if(s[k]=='\\'){ z=(V)0x7c; break; }   //trace or scan
