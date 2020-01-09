@@ -1228,27 +1228,27 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
       { if(kK(prnt)[LOCALS]->n)
         { if(kV(t3)[CACHE_WD]  &&  !kV(t3)[CACHE_TREE])
           { kK(t3)[CACHE_TREE]=kK(prnt)[CACHE_TREE]; ci(kK(t3)[CACHE_TREE]); }
-        else if(kK(t3)[PARAMS]->n || grnt)
-        { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]); K j2=join(ci(j0),j1); cd(j0);
-          if(kV(t3)[CACHE_TREE] && kK(t3)[CACHE_TREE]->n) cd(kK(t3)[CACHE_TREE]);
-          kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); } }
-      else if(kV(kK(prnt)[CACHE_WD])[LOCALS] && kK(kK(prnt)[CACHE_WD])[LOCALS]->n
-              && kV(prnt)[CACHE_TREE] && kK(prnt)[CACHE_TREE]->n
-              && (!kV(kK(kK(kK(prnt)[CACHE_WD])[LOCALS])[0])[1] || !kV(kK(kK(kK(kK(prnt)[CACHE_WD])[LOCALS])[0])[1])[CONJ]) )
-      { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]);
-        K j2=join(ci(j0),j1); cd(j0); kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); } }
-    else
-    { if(kV(prnt)[CACHE_TREE] && 1==kK(prnt)[CACHE_TREE]->n && !kV(prnt)[CACHE_WD] && !kV(t3)[CACHE_TREE])
-      { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]);
-        K j2=join(ci(j0),j1); cd(j0); kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); }
-      else if(kV(t3)[PARAMS] && kK(t3)[PARAMS]->n && kV(prnt)[CACHE_TREE] && kK(prnt)[CACHE_TREE]->n==1)
-      { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]); K j2=join(ci(j0),j1); cd(j0);
-        if(kV(t3)[CACHE_TREE] && kK(t3)[CACHE_TREE]->n) cd(kK(t3)[CACHE_TREE]);
-        kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); } }
-    if(grnt)cd(prnt); else grnt=prnt; }
-  O("RESET: prnt=ci(t3) at vn case in ex2.  prnt just before:"); if(prnt)sd_(prnt,2); else O("\n");
-  prnt=ci(t3);
-  O("after RESET, prnt:");sd_(prnt,0); }
+          else if(kK(t3)[PARAMS]->n || grnt)
+               { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]); K j2=join(ci(j0),j1); cd(j0);
+                 if(kV(t3)[CACHE_TREE] && kK(t3)[CACHE_TREE]->n) cd(kK(t3)[CACHE_TREE]);
+                 kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); } }
+        else if(kV(kK(prnt)[CACHE_WD])[LOCALS] && kK(kK(prnt)[CACHE_WD])[LOCALS]->n
+                && kV(prnt)[CACHE_TREE] && kK(prnt)[CACHE_TREE]->n
+                && (!kV(kK(kK(kK(prnt)[CACHE_WD])[LOCALS])[0])[1] || !kV(kK(kK(kK(kK(prnt)[CACHE_WD])[LOCALS])[0])[1])[CONJ]) )
+             { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]);
+               K j2=join(ci(j0),j1); cd(j0); kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); } }
+      else if(kV(prnt)[CACHE_TREE] && 1==kK(prnt)[CACHE_TREE]->n && !kV(prnt)[CACHE_WD] && !kV(t3)[CACHE_TREE])
+           { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]);
+             K j2=join(ci(j0),j1); cd(j0); kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); }
+           else if( kV(t3)[PARAMS] && kK(t3)[PARAMS]->n && kV(prnt)[CACHE_TREE] && kK(prnt)[CACHE_TREE]->n==1
+                    && (!kK(prnt)[CACHE_WD] || (kK(prnt)[CACHE_WD] && kK(prnt)[CACHE_WD]->n)))
+                { K j0=dot_monadic(kV(t3)[PARAMS]); K j1=dot_monadic(kV(prnt)[CACHE_TREE]); K j2=join(ci(j0),j1); cd(j0);
+                  if(kV(t3)[CACHE_TREE] && kK(t3)[CACHE_TREE]->n) cd(kK(t3)[CACHE_TREE]);
+                  kV(t3)[CACHE_TREE]=dot_monadic(j2); cd(j0); cd(j1); cd(j2); }
+      if(grnt)cd(prnt); else grnt=prnt; }
+    O("RESET: prnt=ci(t3) at vn case in ex2.  prnt just before:"); if(prnt)sd_(prnt,2); else O("\n");
+    prnt=ci(t3);
+    O("after RESET, prnt:");sd_(prnt,0); }
   u=*v; //Fixes a bug, see above. Not thread-safe. Adding to LOCALS probably better
   *v=VA(t3)?t3:(V)&t3;
   if(*(v+i)==(V)offsetEach && !grnt)grnt=ci(prnt);
