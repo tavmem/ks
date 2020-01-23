@@ -125,10 +125,14 @@ K of(K a, K b)  //TODO: oom all (see of2() for M(z,kK(z)[i]=...) pattern )
 }
 
 K dot(K a, K b) //NB: b can be a cheating 0-type with NULLs .. ?
-{ O("BEG dot\n");
+{ O("BEG dot \n");
   //TODO: create dename without path-creation effect. will lookup correct handle or return a _n to use ... but won't create path. K at() also needs this.
   //if(4==a->t)a=retrieveByHandle(a);
 
+  if(4==a->t && 4==b->t)
+  { S s=(char*)malloc(2+strlen(*kS(a))+strlen(*kS(b)));
+    s=strcpy(s,*kS(a)); strcat(s,"."); strcat(s,*kS(b));
+    R *inKtree(&kK((kK(KTREE))[0])[1],s,0); }
   if(7==a->t) R vf_ex(&a,b); //Verb: "Apply" //TODO: my guess is this fails everywhere vf_ex does (derived verbs?) (|+) . (0;1) ???
   O("~BH of(a,b)      K of(K a, K b) <- K dot(K a, K b)      ");
   K zz=of(a,b); //TODO: vf_ex might/could implement this itself ?

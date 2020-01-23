@@ -265,8 +265,7 @@ K wd(S s, int n)
   K* z=denameD(&KTREE,d_,1);
   O("#CZ wd :: denameD(&KTREE,d_,1)\n");
   O("   CZ:                   "); O("  z: %p                       sd_(*z,0):",z); if(z)sd_(*z,0); else O("\n");
-  if(kK(KTREE)[0])
-  { O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]); sd(kK(kK(KTREE)[0])[1]); O("\n"); }
+  //if(kK(KTREE)[0]){ O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]); sd(kK(kK(KTREE)[0])[1]); O("\n"); }
   O("~BS wd_(s,n, z,0)      K wd_(S s, int n, K *dict, K func) <- K wd(S s, int n)      ");
   K res=wd_(s,n, z,0);
   O("#BS wd :: wd_(s,n, denameD(&KTREE,d_,1),0)      sd(res):\n"); O(" %p",&res); sd(res);
@@ -276,7 +275,7 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
 { //assumes: s does not contain a }])([{ mismatch, s is a "complete" expression
   O("BEG wd_\n");
   O("    s: %s\n",s); O("    n: %d\n",n); O("    sd_(func,2):"); if(func)sd_(func,2); else O("\n");
-  O("    dict: %p      sd_(*dict,0):",dict); if(dict)sd(*dict); else O("\n");
+  O("    dict: %p      sd_(*dict,0):",dict); if(dict)sd_(*dict,0); else O("\n");
   if(!s) R 0;
   if(strstr(s,":\\t")) { show(kerr("\\t  syntax")); R 0; }
   I z=syntaxChk(s); if(z)O("syntaxErrror: %lld\n",z); if(z==999)R NE; if(z) R SYE;
@@ -409,7 +408,7 @@ Z I param_validate(S s,I n) // Works on ([]) and {[]} but pass inside exclusive 
   R 4==p?1:2; }   //State-4 yield 1 (pass, good parameters), otherwise yield 2 (fail, bad paramters)
 
 Z K* inKtreeR(K *p,S t,I create)
-{ O("BEG inKtreeR\n"); O("    t: %s      create:%lld",t,create);  O("    p: %p      sd_(*p,0):",p);sd_(*p,0);
+{ //O("BEG inKtreeR\n"); O("    t: %s      create:%lld",t,create);  O("    p: %p      sd_(*p,0):",p);sd_(*p,0);
   if(!*t) R p;
   if('.'==*t) t++;
   I c=0,a=(*p)->t;
@@ -423,23 +422,37 @@ Z K* inKtreeR(K *p,S t,I create)
   P(!(6==a || 5==a),(K*)TE)
   K e=0;
   if(create){ e=lookupEntryOrCreate(p,k); P(!e,(K*)ME) }
-  else{ K a=*p; if(5==a->t)e=DE(a,k); P(!e,(K*)0) }
+  else
+  { K a=*p;
+    if(5==a->t)
+    { O("~EQ DE(a,k)      K DE(K d,S b) <- Z K* inKtreeR(K *p,S t,I create)      ");
+      e=DE(a,k);
+      O("#EQ inKtreeR :: K e=DE(a,k)\n");
+      O("   EQ:  sd_(e,0):");sd_(e,0);
+    }
+    P(!e,(K*)0) }
   if('.'==*t && (!t[1] || '.'==t[1])){ t++; p=EAP(e); }   //attribute dict
   else
-  { O("~DI EVP(e)      K* inKtreeR(K*p,S t,I create) <- K* EVP(K e)     ");
+  { O("~DI EVP(e)      K* inKtreeR(K*p,S t,I create) <- K* EVP(K e)      BEG EVP\n");
+    O("    &e: %p      sd_(e,0): ",&e);sd_(e,0);
     p=EVP(e);
-    O("#DI inKtreeR :: EVP(e)\n"); }   //value
-  O("~DH inKtreeR(p,t,create)      K *z=inKtreeR(p,t,create) <- K *z=inKtreeR(p,t,create)     ");
-  K *z=inKtreeR(p,t,create);
+    O("#DI inKtreeR :: K*p=EVP(e)\n");
+    O("   DI:  p: %p      sd(*p):",p);sd(*p); }   //value
+  O("~DH inKtreeR(p,t,create)      Z K* inKtreeR(K *p,S t,I create) <- Z K* inKtreeR(K *p,S t,I create)      BEG inKtreeR\n");
+  O("    t: %s      create:%lld",t,create);  O("    p: %p      sd_(*p,0):",p);sd_(*p,0);
+  K*z=inKtreeR(p,t,create);
   O("#DH inKtreeR :: inKtreeR(p,t,create)\n");
+  O("   DH: sd(*z):"); if(z)sd(*z); else O("\n");
   R z; }
 
 K* inKtree(K *d, S t, I create)
 { O("BEG inKtree \n"); O("    t: %s      create:%lld",t,create);  O("    d: %p      sd_(*d,0):",d);sd_(*d,0);
   if(!simpleString(t)) R 0;   //some kind of error
-  O("~DG inKtreeR('.'==*t||!*t?&KTREE:d,t,create)      K* inKtreeR(K*p,S t,I create) <- K* inKtree(K*d, S t, I create)     ");
+  O("~DG inKtreeR('.'==*t||!*t?&KTREE:d,t,create)      K* inKtreeR(K*p,S t,I create) <- K* inKtree(K*d, S t, I create)      BEG inKtreeR\n");
+  O("    t: %s      create:%lld",t,create);  O("      sd_('.'==*t||!*t?&KTREE:d,0):");sd_(*('.'==*t||!*t?&KTREE:d),0);
   K *z=inKtreeR('.'==*t||!*t?&KTREE:d,t,create);
   O("#DG inKtree :: inKtreeR('.'==*t||!*t?&KTREE:d,t,create)\n");
+  O("   DG: z: %p      sd(*(K*)z):",z); if(z)sd(*(K*)z); else O("\n");
   R z; }
 
 //TODO: capture - oom all
@@ -448,7 +461,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
   //OUT words, current #words; IN locals-storage, names-storage, charfunc/NULL
   O("BEG capture\n"); O("    s: %s\n    n: %lld    k: %lld    *m: %lld    *w: %p    *d: %lld\n",s,n,k,*m,*w,*d);
   O("    *locals:");sd(*locals);
-  if(dict){O("    dict: %p      sd_(*dict,1):",dict); sd_(*dict,1);}
+  if(dict){O("    dict: %p      sd_(*dict,0):",dict); sd_(*dict,0);}
   O("    func:"); if(func)sd_(func,2); else O("\n");
   if(fll && fll!=n)fll=-1;
   V z=0,*p=w+*d; *p=0; I r=1,v=0,y=0,a,b=0,c,l,frc=0;S u="",e;K g,h=0,hh=0;
@@ -606,7 +619,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         h=*denameS(".k",u,0);
                         if(7==h->t){ hh=match( (K)kV(h)[CODE] , (K)kV(func)[CODE] ); O("sd(h[CODE]):");sd_( (K)kV(h)[CODE] ,2); }
                         O("......................................................................................\n");
-                        if( dict==(K*)kV(func)+PARAMS){ O("n2a\n"); V q=newEntry(u); U(q)  M(q,kap( dict,&q))  z=EV(q); cd(q); }
+                        if( dict==(K*)kV(func)+PARAMS){ O("n2a\n"); V q=newEntry(u); U(q)  M(q,kap( dict,&q)) z=EV(q); cd(q); }
                         else if((q=DE(*dict,u)))
                         { O("n2b      sd_(*dict,9):");sd_(*dict,9); O("sd_(q,9):");sd_(q,9);
                           z=EVP(q); }   //If func has its local, use it
@@ -726,6 +739,7 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
     CSR(MARK_QUOTE  ,)
     CS (MARK_SYMBOL , z=newE(LS,z); P(!z,(L)ME)  kap(locals,&z); cd(z); z=EVP(z) ) }   //oom
   frc=0; cd(hh); *p=z; ++*d;
-  O("      p: %p    z: %p    r: %lld\n",p,z,r);
-  O("      &dict: %p      sd_(*dict,2):",&dict);   if(dict)sd_(*dict,2); else O("\n");
+  O("      z: %p      sd(*(K*)(*z)):",z); //if(z>(V)DT_SIZE)sd_(*(K*)z,0); else O("\n");
+  O("      p: %p    *p: %p    r: %lld\n",p,*p,r);
+  //O("      &dict: %p      sd_(*dict,1):",&dict);   if(dict)sd_(*dict,1); else O("\n");
   R r; }

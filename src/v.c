@@ -33,21 +33,30 @@ K glue(K a, K b) { R Ks(sp(glueSS(*kS(a),*kS(b)))); } //oom
 
 //Dictionary and Dictionary Entry utility functions and accessors
 // currently no guards for 0 inputs ... should this change?
-K DI(K d, I i){R kK(d)[i];}         //dictionary index, yields entry
-S ES(K d){ R *kS(kK(d)[0]);}        //dictionary entry's symbol
-K DE(K d,S b){
-   //O("BEG DE\n");
-   DO(d->n,
-      K x=DI(d,i);
-      if(b==ES(x)){
-         //O("end DE\n");
-         R x;}
-     )
-   //O("end DE\n");
-   R 0;} //dictionary entry lookup
+K DI(K d, I i)
+  { O("BEG DI\n");
+    O("    sd_(d,0):");sd_(d,0); O("    i: %lld\n",i);
+    R kK(d)[i]; }         //dictionary index, yields entry
+S ES(K d)
+  { O("BEG ES\n");
+    R *kS(kK(d)[0]);}        //dictionary entry's symbol
+K DE(K d,S b)
+  { O("BEG DE\n");
+    O("    sd_(d,0):");sd_(d,0); O("    b: %s\n",b);
+    DO(d->n,
+       O("~ER DI(d,i)      K DI(K d, I i) <- K DE(K d,S b)      ");
+       K x=DI(d,i);
+       O("#ER DE :: K x=DI(d,i)\n");
+       O("   ER:  sd(x):");sd(x);
+       O("~ES ES(d)      S ES(K d) <- K DE(K d,S b)      ");
+       S s=ES(x);
+       O("#ES ES :: s=ES(x)\n");
+       O("   ES:  %s\n",s);
+       O("test if(b==s)  b:%s  s:%s\n",b,s);
+       if(b==s)R x; )
+  R 0;} //dictionary entry lookup
 Z K* EIA(K a,I i){R kK(a)+i;}         //dictionary entry's address of i-th index
-K* EVP(K e){ O("BEG EVP\n"); O("    &e: %p      sd_(e,2): ",&e);sd_(e,2);
-             R EIA(e,1);}            //dictionary entry's value-pointer address (K*)
+K* EVP(K e){ R EIA(e,1);}            //dictionary entry's value-pointer address (K*)
 K* EAP(K e){R EIA(e,2);}            //dictionary entry's attribute_dictionary-pointer address (K*)
 K   EV(K e){R *EVP(e);}             //dictionary entry's stored value
 
@@ -61,31 +70,36 @@ K   EV(K e){R *EVP(e);}             //dictionary entry's stored value
 
 K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
   O("BEG lookupEntryOrCreate\n");
-  O("    p: %p      k: %s\n",p,k);
+  O("    p: %p      k: %s      ",p,k); O("sd_(*p,0):");sd_(*p,0);
   //O("sd(*p):");sd(*p);
   K a=*p, x;
-  if(5==a->t) if((x=DE(a,k))) R x;
+  if(5==a->t)
+  { O("~ET DE(a,k)      K DE(K d,S b) <- K lookupEntryOrCreate(K *p, S k)      ");
+    x=DE(a,k);
+    O("#ET lookupEntryOrCreate :: K x=DE(a,k)\n");
+    O("   ET:  sd_(x,0):");sd_(x,0);
+    if(x) R x; }
   P(!strlen(k),TE) //TODO verify this noting `. is not `
   P(strchr(k,'.'),DOE)
   O("~CX newEntry(k)      K newEntry(S s) <- K lookupEntryOrCreate(K *p, S k)      ");
   x=newEntry(k);
   O("#CX lookupEntryOrCreate :: newEntry\n");
   if(6==a->t){ cd(*p);
-               O("&KTREE: %p      sd_(KTREE,9):",&KTREE);sd_(KTREE,9);
+               O("&KTREE: %p      sd_(KTREE,1):",&KTREE);sd_(KTREE,1);
                O("~CY newK(5,0)      K newK(I t, I n) <- K lookupEntryOrCreate(K *p, S k)      ");
                *p=newK(5,0);
                O("#CY lookupEntryOrCreate :; newK(5,0)\n");
                O("p: %p",p);sd_(*p,9);
-               O("&KTREE: %p      sd_(KTREE,9):",&KTREE);sd_(KTREE,9);
+               O("&KTREE: %p      sd_(KTREE,1):",&KTREE);sd_(KTREE,1);
              } //mm/o is this done right?
   kap(p,&x); //oom
   cd(x);
   R x;
 }
 
-Z K* denameRecurse(K*p,S t,I create) {
+Z K*denameRecurse(K*p,S t,I create) {
   O("BEG denameRecurse\n");
-  O("      p: %p      t: %s      create: %lld\n",p,t,create);
+  O("      p: %p      t: %s      create: %lld      ",p,t,create); O("sd_(*p,0):");sd_(*p,0);
   //O("sd(*p):");sd(*p);
   if(!*t)R p;
   if('.'==*t)t++;
@@ -108,17 +122,18 @@ Z K* denameRecurse(K*p,S t,I create) {
                P(!e,(K*)ME) }
   else { K a=*p; if(5==a->t)e=DE(a,k); P(!e,&NIL) }
   if('.'==*t && (!t[1] || '.'==t[1])) { t++; p=EAP(e); }    //attribute dict
-  else { O("~CL EVP(e)      K* EVP(K e) <- K* denameRecurse(K *p,S t,I create)      ");
+  else { O("~CL EVP(e)      K* EVP(K e) <- K* denameRecurse(K *p,S t,I create)      BEG EVP\n");
+         O("    &e: %p      sd_(e,0): ",&e);sd_(e,0);
          p=EVP(e);
          O("#CL denameRecurse :: EVP(e)\n"); } //value
-         O("   CL:  p: %p      sd_(*p,0):",p);sd_(*p,0);
+         O("   CL:  p: %p      sd_(*p,1):",p);sd_(*p,1);
   O("~CM denameRecurse(p,t,create)      K* denameRecurse(K*p,S t,I create) <- K* denameRecurse(K*p,S t,I create)      ");
   K* z=denameRecurse(p,t,create);
   O("#CM denameRecurse :: denameRecurse(p,t,create)\n");
   O("   CM:  z: %p      sd_(*z,0):",p);sd_(*z,0);
   R z; }
 
-K* denameD(K*d, S t, I create) {
+K*denameD(K*d, S t, I create) {
   O("BEG denameD\n");
   O("    d: %p      t: %s      create: %lld      &KTREE: %p\n",d,t,create,&KTREE);
   if(!simpleString(t)) R 0; //some kind of error
@@ -128,7 +143,7 @@ K* denameD(K*d, S t, I create) {
   O("   CK:"); O("  v: %p   sd_(*v,0):",v); if(v)sd_(*v,0); else O("\n");
   R v; }
 
-K* denameS(S dir_string, S t, I create) {
+K*denameS(S dir_string, S t, I create) {
   O("BEG denameS\n");    //duplicates '.' functionality in denameD to avoid dictionary initialization
   O("    dir_string: %s      t: %s      create: %lld\n",dir_string,t,create);
   K* z;
@@ -137,14 +152,14 @@ K* denameS(S dir_string, S t, I create) {
          z=denameD(&KTREE,dir_string,create);
          O("#CJ denameS :: denameD(&KTREE,dir_string,create)\n"); }
   O("~CO denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)     ");
-  K* v= denameD(z,t,create);
+  K*v= denameD(z,t,create);
   O("#CO denameS :: denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)\n");
   R v; }
 
 //K* denameBig(K dir_sym,K name_sym){R denameS(*kS(dir_sym),*kS(name_sym));} //[unnecessary?] wrapper for K-object inputs
 
 //K* lookupEVOrCreate(K *p, S k){K x=lookupEntryOrCreate(p,k); R x?EVP(x):0; } //mm/o
-K* lookupEVOrCreate(K *p, S k){
+K*lookupEVOrCreate(K *p, S k){
   O("BEG lookupEVOrCreate\n");
    O("~CT lookupEntryOrCreate(p,k)      K lookupEntryOrCreate(K *p, S k) <- K* lookupEVOrCreate(K *p, S k)      ");
    K x=lookupEntryOrCreate(p,k);
