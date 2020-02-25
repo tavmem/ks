@@ -316,8 +316,7 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
   O("~BR ex(zz)      K ex(K a) <- I line(FILE*f, S*a, I*n, PDA*p)      ");
   RTIME(d,k=ex(zz))
   O("#BR line :: ex(zz)\n");
-  if(pthread_mutex_unlock(&execute_mutex)){
-    perror("Unlock mutex in line()"); abort();}
+  if(pthread_mutex_unlock(&execute_mutex)){ perror("Unlock mutex in line()"); abort(); }
   #ifdef DEBUG
     if(o&&k)O("Elapsed: %.7f\n",d);
   #endif
@@ -328,46 +327,45 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
   if(fCheck && (strlen(s)==0 || s[strlen(s)-1]<0)) exit(0);
   S ptr=0;
   if(!strcmp(errmsg,"value"));
-  else if(strcmp(errmsg,"(nil)") && fer!=-1) { oerr(); I ctl=0;
-    if(fError)
-    { if(2==fError)exit(1);
-      if(lineA)
-      { O("have lineA\n");
-        if(fnc)
-        { I cnt=0,i;
-          if(strlen(fnc)==1)
-            for(i=0;i<strlen(lineA);i++)
-            { if(lineA[i]==*fnc) cnt++; }
-          else
-            for(i=0;i<strlen(lineA)-1;i++)
-            { if(lineA[i]==fnc[0])
-                if(lineA[i+1]==fnc[1]){ ptr=&lineA[i]; cnt++; } }
-          if(cnt==1)
-          { ctl=1; O("%s\n",lineA);
-            if(!ptr)ptr=strchr(lineA,*fnc);
-            DO(ptr-lineA,O(" ")) O("^\n"); }
-          if(cnt>1 && fnci && fnci<127)
-          { ocr=0;
-            for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])ocr++; }
-            O("%s\n",lineA); O("at execution instance %lld of \"%s\"\n",ocr,fnc); fnci=0; } } }
-      if(lineB && !ctl && strcmp(lineA,lineB))
-      { O("have lineB conditions\n");
-        if(fnc)
-        { I cnt=0,i; O("%s\n",lineB);
-          for(i=0;i<strlen(lineB);i++){ if(lineB[i]==*fnc) cnt++; }
-          if(cnt==1)
-          { S ptr=strchr(lineB,*fnc);
-            DO(ptr-lineB,O(" "))
-            O("^\n"); }
-          if(cnt>1 && fnci && fnci<127)
-          { ocr=0;
-            for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])ocr++; }
-            O("at execution instance %lld of %s\n",ocr,fnc); } } }
-      if(lineA || lineB)
-      { if(!flc)
-        { I i=0; for(i=0; i<1+strlen(*a); i++)lineC[i]=(*a)[i];
-          flc=1; }
-        check(); } } }    //enter suspended execution mode for checking
+  else if(strcmp(errmsg,"(nil)") && fer!=-1)
+       { oerr(); I ctl=0;
+         if(fError)
+         { if(2==fError)exit(1);
+           if(lineA)
+           { O("have lineA\n");
+             if(fnc)
+             { I cnt=0,i;
+               if(strlen(fnc)==1) for(i=0;i<strlen(lineA);i++) { if(lineA[i]==*fnc) cnt++; }
+               else for(i=0;i<strlen(lineA)-1;i++)
+                    { if(lineA[i]==fnc[0])
+                      if(lineA[i+1]==fnc[1]){ ptr=&lineA[i]; cnt++; } }
+               if(cnt==1)
+               { ctl=1; O("%s\n",lineA);
+                 if(!ptr)ptr=strchr(lineA,*fnc);
+                 DO(ptr-lineA,O(" ")) O("^\n"); }
+               if(cnt>1 && fnci && fnci<127)
+               { ocr=0;
+                 for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])ocr++; }
+                 O("%s\n",lineA); O("at execution instance %lld of \"%s\"\n",ocr,fnc); fnci=0; } } }
+           if(lineB && !ctl && strcmp(lineA,lineB))
+           { O("have lineB conditions\n");
+             if(fnc)
+             { I cnt=0,i; O("%s\n",lineB);
+               for(i=0;i<strlen(lineB);i++){ if(lineB[i]==*fnc) cnt++; }
+               if(cnt==1)
+               { S ptr=strchr(lineB,*fnc);
+                 DO(ptr-lineB,O(" "))
+                 O("^\n"); }
+               if(cnt>1 && fnci && fnci<127)
+               { ocr=0;
+                 for(i=0;i<fnci;i++){ if(fncp[i]==fncp[fnci-1])ocr++; }
+                 O("at execution instance %lld of %s\n",ocr,fnc); } } }
+           if(lineA || lineB)
+           { if(!flc)
+             { I i=0;
+               for(i=0; i<1+strlen(*a); i++)lineC[i]=(*a)[i];
+               flc=1; }
+             check(); } } }    //enter suspended execution mode for checking
   if(*p)pdafree(*p);
   *p=0; free(*a); *a=0; *n=0; free(s); s=0;
  done:
