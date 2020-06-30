@@ -23,7 +23,7 @@ ps.k expects to find the output file ```ggg```
 
 Then, the final 2 commands, which are also done in the ~/ks directory:
 ```
-rlwrap ~n ~/kona/k ps
+rlwrap -n ~/kona/k ps
 \\
 ```
 You get 2 results:
