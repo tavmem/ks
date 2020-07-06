@@ -1209,8 +1209,11 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
       if(prnt) cd(prnt);
       prnt=ci(t0); }
     if(!prnt && t0->t==7 && t0->n==3) prnt=ci(t0);
-    if(*(v+1+i)==offsetDot && t0->t==7 && t0->n==1 && kK(kK(t0)[CODE])[1]==(V)offsetEach)
-    { K p=kV(t0)[CODE]; I i=p->n-2;  V*q=(V*) kK(p)+i; e=bv_ex(q,t2); }
+    if(*(v+1+i)==offsetDot && t0->t==7 && t0->n==1 && (kK(kK(t0)[CODE])[1]==(V)offsetEach || kK(kK(t0)[CODE])[1]==(V)offsetEachright || kK(kK(t0)[CODE])[1]==(V)offsetEachleft) )
+    { K p=kV(t0)[CODE]; I i=p->n-2;  V*q=(V*) kK(p)+i;
+      O("~EU bv_ex(q,t2)      Z K bv_ex(V*p,K k) <- K ex2(V*v, K k)      ");
+      e=bv_ex(q,t2);
+      O("#EU ex2 :: bv_ex(q,t2)\n"); O("   EU:"); if(e)sd(e); else O(" not e\n"); }
     else
     { O("~AS dv_ex(t0,v+1+i,t2)      K dv_ex(K a, V *p, K b) <- K ex2(V*v, K k)      i: %lld      ",i);
       e= dv_ex(t0,v+1+i,t2);
