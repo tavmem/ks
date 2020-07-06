@@ -39,5 +39,5 @@ extern V fncp[128];
 extern I fnci;
 extern __thread I fer;
 extern __thread K prnt;
-K KONA_GSET;
-K KONA_IDX;
+extern K KONA_GSET;
+extern K KONA_IDX;
