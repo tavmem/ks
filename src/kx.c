@@ -390,11 +390,22 @@ Z K eachleft2(K a, V *p, K b)
   R demote(z); }
 
 Z K eachpair2(K a, V *p, K b)   //2==k necessary?
-{ O("BEG eachpair2\n");
+{ O("BEG eachpair2\n"); O("    sd(a):");sd(a); O("    sd(b):");sd(b);
+  if(!p || !*p) O("   !p || !*p\n");
+  else
+  { I ii;
+    if(!fdvx) for(ii=0;p[ii];ii++)
+    { O("    dvx p[%lld]: %p",ii,p[ii]);
+      if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]); else O("\n"); }
+    else for(ii=0;p[ii] && ii<fdvx;ii++)
+    { O("    dvx p[%lld]: %p",ii,p[ii]);
+      if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]); else O("\n");
+      O("output limited to %lld\n",fdvx); } }
   V *o=p-1; K (*f)(K,K), k=0;
   if(VA(*o) && (f=DT[(L)*o].alt_funcs.verb_eachpair)) k=f(a,b);   //k==0 just means not handled.
     //Errors are not set to come from alt_funcs
-  P(k,k)  I bt=b->t, bn=b->n;
+  O("   k:"); if(k)sd(k); else O(" not k\n");
+  P(k,k)  I bt=b->t, bn=b->n; O("   bt: %lld\n",bt);
   if(bt>0) R dv_ex(a,p-1,b);
   if(bt<=0)
   { if(bn==0 && !a) R LE;
@@ -402,11 +413,15 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
     else if(bn<2) R newK(0,0); }   //TODO: this newK and the above.....does empty list type depend on input?
   K z=newK(0,bn-1),d=0,g,h; U(z)
   if(0 >bt) DO(bn-1, h=newK(ABS(bt),1); g=newK(ABS(bt),1); memcpy(h->k,((V)b->k)+(i)*bp(bt),bp(bt));
-                     memcpy(g->k,((V)b->k)+(i+1)*bp(bt),bp(bt)); d=dv_ex(g,p-1,h);
+                     memcpy(g->k,((V)b->k)+(i+1)*bp(bt),bp(bt));
+                     O("~EW dv_ex(g,p-1,h)      K dv_ex(K a, V *p, K b) <- Z K eachpair2(K a, V *p, K b)      i: %lld      ",i);
+                     d=dv_ex(g,p-1,h);
+                     O("#EW eachpair2 :: dv_ex(g,p-1,h)\n"); O("   EW:"); sd(d);
                      cd(g);cd(h);U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z) - oom-g-h
   if(0==bt) DO(bn-1, d=dv_ex(kK(b)[i+1],p-1,kK(b)[i]); U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z)
   z=demote(z);
-  if(a){ K u,v,f,d; f=first(b);M(f); d=dv_ex(a,p-1,f); u=enlist(d); M(u,z)  v=join(u,z); cd(u); cd(z); cd(f); cd(d); R v; }
+  //if(a){ K u,v,f,d; f=first(b);M(f); d=dv_ex(a,p-1,f); u=enlist(d); M(u,z)  v=join(u,z); cd(u); cd(z); cd(f); cd(d); R v; }
+  if(a){ K u,v; u=enlist(a); M(u,z)  v=join(u,z); cd(u); cd(z); R v; }
   R z; }
 
 K dv_ex(K a, V *p, K b)
@@ -489,7 +504,11 @@ K dv_ex(K a, V *p, K b)
     K zz=eachleft2(a, p, b);
     O("#DF dv_ex :: eachleft2(a, p, b)\n");
     R zz; }
-  if((UI)adverb==offsetEachpair) R eachpair2(a, p, b);
+  if((UI)adverb==offsetEachpair)
+  { O("~EV eachpair2(a, p, b)      Z K eachpair2(K a, V *p, K b) <- K dv_ex(K a, V *p, K b)      ");
+    K zz=eachpair2(a, p, b);
+    O("#EV dv_ex :: eachpair2(a, p, b)\n"); O("   EV:"); if(zz)sd(zz); else O(" not zz\n");
+    R zz; }
   I gn=0;
   if(valence(*p)>=2 && a && b) gn=2;
   else if(a)     //issue #296
