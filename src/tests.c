@@ -315,6 +315,9 @@ Z I tests02()
   TC_( "12 6 3", "0 1 1 3 2 5 3 7 4 9 5 11 6\\ 12" )       // issue 572
   TC( .[;;;;], .[;;;;] )                          // issue 543  testing for leaks
   TC( .[], .[] )                                  // issue 543  testing for leaks
+  TC_( "(1 3;2 4)", "1 2 ,\'\' 3 4" )             // issue 594
+  TC_( "(1 3;2 4)", "{x,\'\'y} . (1 2;3 4)" )     // issue 594
+  TC_( "((1 3;1 4);(2 3;2 4))", "(,/:\\:) . (1 2;3 4)" )  // issue 588
 
   //Error trap: {[a;b][c;d] a+b} -> parse error ; { {[a][b] }} -> parse error
   TC(.[*; (3;4); :], (0;12) )
