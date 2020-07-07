@@ -402,6 +402,7 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
       if(p[ii]>(V)DT_SIZE)sd(*(K*)p[ii]); else O("\n");
       O("output limited to %lld\n",fdvx); } }
   V *o=p-1; K (*f)(K,K), k=0;
+  O("    *o: %p\n",*o);
   if(VA(*o) && (f=DT[(L)*o].alt_funcs.verb_eachpair)) k=f(a,b);   //k==0 just means not handled.
     //Errors are not set to come from alt_funcs
   O("   k:"); if(k)sd(k); else O(" not k\n");
