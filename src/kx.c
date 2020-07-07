@@ -406,7 +406,7 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
     //Errors are not set to come from alt_funcs
   O("   k:"); if(k)sd(k); else O(" not k\n");
   P(k,k)  I bt=b->t, bn=b->n; O("   bt: %lld\n",bt);
-  if(bt>0) R dv_ex(a,p-1,b);
+  if(bt>0) { K u,v; u=enlist(a); M(u,b)  v=join(u,b); cd(u); R v; }
   if(bt<=0)
   { if(bn==0 && !a) R LE;
     else if(bn==0 &&  a) R newK(0,0);   //TODO: memory manage/ optimize in join with null ptr ?
@@ -420,7 +420,6 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
                      cd(g);cd(h);U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z) - oom-g-h
   if(0==bt) DO(bn-1, d=dv_ex(kK(b)[i+1],p-1,kK(b)[i]); U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z)
   z=demote(z);
-  //if(a){ K u,v,f,d; f=first(b);M(f); d=dv_ex(a,p-1,f); u=enlist(d); M(u,z)  v=join(u,z); cd(u); cd(z); cd(f); cd(d); R v; }
   if(a){ K u,v; u=enlist(a); M(u,z)  v=join(u,z); cd(u); cd(z); R v; }
   R z; }
 
