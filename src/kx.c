@@ -419,7 +419,10 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
                      d=dv_ex(g,p-1,h);
                      O("#EW eachpair2 :: dv_ex(g,p-1,h)\n"); O("   EW:"); sd(d);
                      cd(g);cd(h);U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z) - oom-g-h
-  if(0==bt) DO(bn-1, d=dv_ex(kK(b)[i+1],p-1,kK(b)[i]); U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z)
+  if(0==bt) DO(bn-1, O("~EX dv_ex(kK(b)[i+1],p-1,kK(b)[i])      K dv_ex(K a, V *p, K b) <- Z K eachpair2(K a, V *p, K b)      i: %lld      ",i);
+                     d=dv_ex(kK(b)[i+1],p-1,kK(b)[i]);
+                     O("#EX eachpair2 :: dv_ex(kK(b)[i+1],p-1,kK(b)[i])\n"); O("   EX:"); sd(d);
+                     U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z)
   z=demote(z);
   if(a){ K u,v; u=enlist(a); M(u,z)  v=join(u,z); cd(u); cd(z); R v; }
   R z; }
@@ -985,6 +988,8 @@ Z K ex0(V*v,K k,I r) //r: {0,1,2} -> {code, (code), [code]}
 
 Z K bv_ex(V*p,K k)
 { O("BEG bv_ex\n");
+  O("    *p:     %p\n",*p);
+  O("     k:");sd(k);
   V q=*p; K x; I n=0;   //assert 0!=k->n    assert k==b->n (otherwise, projection/VE, which shouldn't reach here)
   //Next if-stmt may contribute to bv_ex subtriadic problems
   if(!adverbClass(*p) && valence(*p)<3)
@@ -1035,9 +1040,21 @@ Z K bv_ex(V*p,K k)
     cd(g);
     if(c)z=collapse(z); else z=demote(z);
     R z; }
-  if(offsetEachright==(L)q){ P(k->n!=2,VE) K a=kK(k)[0],b=kK(k)[1]; R eachright2(a,p,b); }
-  if(offsetEachleft==(L)q){ P(k->n!=2,VE) K a=kK(k)[0],b=kK(k)[1]; R eachleft2(a,p,b); }
-  if(offsetEachpair==(L)q) R NYI;   //todo: is this reachable?
+  if(offsetEachright==(L)q) { P(k->n!=2,VE) K a=kK(k)[0],b=kK(k)[1];
+                              O("~EY eachright2(a,p,b)      Z K eachright2(K a, V *p, K b) <- Z K bv_ex(V*p,K k)      ");
+                              K zz=eachright2(a,p,b);
+                              O("#EY bv_ex :: eachright2(a,p,b)\n"); O("   EY:");sd(zz);
+                              R zz; }
+  if(offsetEachleft==(L)q) { P(k->n!=2,VE) K a=kK(k)[0],b=kK(k)[1];
+                             O("~EZ eachleft2(a,p,b)      Z K eachleft2(K a, V *p, K b) <- Z K bv_ex(V*p,K k)      ");
+                             K zz=eachleft2(a,p,b);
+                             O("#EZ bv_ex :: eachleft2(a,p,b)\n"); O("   EZ:");sd(zz);
+                             R zz; }
+  if(offsetEachpair==(L)q) { P(k->n!=2,VE) K a=kK(k)[0],b=kK(k)[1];
+                             O("~FA eachpair2(a,p,b)      Z K eachpair2(K a, V *p, K b) <- Z K bv_ex(V*p,K k)      ");
+                             K zz=eachpair2(a,p,b);
+                             O("#FA bv_ex :: eachpair2(a,p,b)\n"); O("   FA:");sd(zz);
+                             R zz; }
   O("~DQ vf_ex(*p,k)      K vf_ex(V q, K g) <- K bv_ex(V*p,K k)      ");
   K zz=vf_ex(*p,k);
   O("#DQ bv_ex :: vf_ex(*p,k)\n"); O("   DQ:");sd(zz);
@@ -1228,7 +1245,7 @@ Z K ex2(V*v, K k)  //execute words --- all returns must be Ks. v: word list, k: 
       if(prnt) cd(prnt);
       prnt=ci(t0); }
     if(!prnt && t0->t==7 && t0->n==3) prnt=ci(t0);
-    if(*(v+1+i)==offsetDot && t0->t==7 && t0->n==1 && (kK(kK(t0)[CODE])[1]==(V)offsetEach || kK(kK(t0)[CODE])[1]==(V)offsetEachright || kK(kK(t0)[CODE])[1]==(V)offsetEachleft) )
+    if(*(v+1+i)==offsetDot && t0->t==7 && t0->n==1 && (kK(kK(t0)[CODE])[1]==(V)offsetEach || kK(kK(t0)[CODE])[1]==(V)offsetEachright || kK(kK(t0)[CODE])[1]==(V)offsetEachleft || kK(kK(t0)[CODE])[1]==(V)offsetEachpair) )
     { K p=kV(t0)[CODE]; I i=p->n-2;  V*q=(V*) kK(p)+i;
       O("~EU bv_ex(q,t2)      Z K bv_ex(V*p,K k) <- K ex2(V*v, K k)      ");
       e=bv_ex(q,t2);
