@@ -574,7 +574,7 @@ K vf_ex(V q, K g)
 { O("BEG vf_ex\n");
   K tc=0;
   if(q>(V)DT_SIZE){ O("   sd_((K)(*(V*)q,2):");sd_((K)(*(V*)q),2); }
-  else O("   q:         0x%lx\n",(unsigned long int)q);
+  else O("   q:         %p\n",q);
   O("   sd(g):");sd(g);
   if(interrupted){ interrupted=0; R BE; }
   if(!g)R 0;     //??? R w converted to type7...or ?

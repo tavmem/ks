@@ -352,11 +352,11 @@ K Kv(   ){O("BEG Kv\n");
 //Optimization: It's better if Kv() doesn't set PARAMS and LOCALS. Only charfuncs should set params
 
 K newEntry(S s){
-  O("BEG newEntry\n");
+  O("  BEG newEntry\n");
   R newE(s,_n()); }//assumes s came from sp()
 
 K newE(S s, K k){ //oom
-  O("BEG newE\n");
+  O("  BEG newE\n");
   K z=newK(0,3); U(z)
   kK(z)[0]=Ks(s); // be careful -- s must have come from sp()
   kK(z)[1]=k;
