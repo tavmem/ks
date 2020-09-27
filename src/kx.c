@@ -407,7 +407,7 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
     //Errors are not set to come from alt_funcs
   O("   k:"); if(k)sd(k); else O(" not k\n");
   P(k,k)  I bt=b->t, bn=b->n; O("   bt: %lld\n",bt);
-  if(bt>0) { K u,v; u=enlist(a); M(u,b)  v=join(u,b); cd(u); R v; }
+  if(a && bt>0 && bn>1) { K u,v; u=enlist(a); M(u,b)  v=join(u,b); cd(u); R v; }
   if(bt<=0)
   { if(bn==0 && !a) R LE;
     else if(bn==0 &&  a) R newK(0,0);   //TODO: memory manage/ optimize in join with null ptr ?
@@ -424,7 +424,9 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
                      O("#EX eachpair2 :: dv_ex(kK(b)[i+1],p-1,kK(b)[i])\n"); O("   EX:"); sd(d);
                      U(d) kK(z)[i]=d )   //TODO: err/mmo - cd(z)
   z=demote(z);
-  if(a){ K u,v; u=enlist(a); M(u,z)  v=join(u,z); cd(u); cd(z); R v; }
+  if(a)
+  { if(bn==1) {cd(z); R ci(a);}
+    K u,v; u=enlist(a); M(u,z)  v=join(u,z); cd(u); cd(z); R v; }
   R z; }
 
 K dv_ex(K a, V *p, K b)
@@ -826,7 +828,7 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets.  Could 
 { O("BEG ex_\n");
   K x,y=0,z,tmp;
   O("   r:%lld",r);
-  if(!a || VA(a) || bk(a)){ O("    R a: %p\n",a); R a; }
+  if(VA(a)){ O("    R a: %p\n",a); R a; }
   O("   sd(x=*(K*)a):  ");sd(*(K*)a);
   if(!(x=*(K*)a) || 7!=xt || (0<xn && xn<4)){ O("    R ci(x)\n"); R ci(x); }   //assert xn>=4 -> conditionals or similar
   r=xn<4?r:xn;   //suggests maybe r should be stored on 7type itself
