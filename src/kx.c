@@ -427,6 +427,7 @@ Z K eachpair2(K a, V *p, K b)   //2==k necessary?
   if(a)
   { if(bn==1) {cd(z); R ci(a);}
     K u,v; u=enlist(a); M(u,z)  v=join(u,z); cd(u); cd(z); R v; }
+  else if(z->t == 1) {K u; u=enlist(z); cd(z); R u;}
   R z; }
 
 K dv_ex(K a, V *p, K b)
