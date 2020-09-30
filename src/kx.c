@@ -832,9 +832,8 @@ Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets.  Could 
 { O("BEG ex_\n");
   K x,y=0,z,tmp;
   O("   r:%lld",r);
-  if(VA(a)){ O("    R a: %p\n",a); R a; }
-  O("   sd(x=*(K*)a):  ");sd(*(K*)a);
-  if(!(x=*(K*)a) || 7!=xt || (0<xn && xn<4)){ O("    R ci(x)\n"); R ci(x); }   //assert xn>=4 -> conditionals or similar
+  if(VA(a)){if(sva(a)); O("    R a: %p\n",a); R a;}  //the useless statement "if(sva(a));" eliminates a Fedora compiler warning
+  if(!(x=*(K*)a) || 7!=xt || (0<xn && xn<4)){O("   sd(x=*(K*)a):  ");sd(*(K*)a); O("    R ci(x)\n"); R ci(x); }   //assert xn>=4 -> conditionals or similar
   r=xn<4?r:xn;   //suggests maybe r should be stored on 7type itself
   if(kV(x)[CONJ])
   { O("kV(x)[CONJ]\n");
