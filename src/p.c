@@ -258,7 +258,7 @@ I mark(I*m,I k,I t){ DO(k, m[i]=i?t:-t) R k; }
 //other errors: syntax error
 
 K wd(S s, int n)
-{ O("BEG wd \n"); O("  s: %s      n: %d    ",s,n);
+{ O("BEG wd "); O("  s: %s      n: %d    \n",s,n);
   O("  d_:%s   &NIL:%p   sd(NIL):",d_,&NIL);sd(NIL);
   O("  &KTREE: %p      sd(KTREE):",&KTREE);sd(KTREE);
   lineA=s; fdc=0;

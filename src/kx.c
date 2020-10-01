@@ -831,7 +831,7 @@ K vf_ex(V q, K g)
 Z V ex_(V a, I r)//Expand wd()->7-0 types, expand and evaluate brackets.  Could probably fold ex0 into this function
 { O("BEG ex_\n");
   K x,y=0,z,tmp;
-  O("   r:%lld",r);
+  O("   r:%lld\n",r);
   if(VA(a)){O("    R a: %p\n",a); R a;}
   if(!(x=*(K*)a) || 7!=xt || (0<xn && xn<4)){O("   sd(x=*(K*)a):  ");sd(*(K*)a); O("    R ci(x)\n"); R ci(x); }   //assert xn>=4 -> conditionals or similar
   r=xn<4?r:xn;   //suggests maybe r should be stored on 7type itself
