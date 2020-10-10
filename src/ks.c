@@ -14,23 +14,47 @@ I strlenn(S s,I k){S t=memchr(s,'\0',k); R t?t-s:k;}
 
 I StoI(S s,I *n){S t; errno=0; *n=strtol(s,&t,10); R !(errno!=0||t==s||*t!=0);}
 
-I SC(S a,S b){I x=strcmp(a,b); R x<0?-1:x>0?1:0;}//String Compare: strcmp unfortunately does not draw from {-1,0,1}
+I SC(S a,S b)
+{ O("BEG SC\n");
+  I x=strcmp(a,b);
+  R x<0?-1:x>0?1:0; }//String Compare: strcmp unfortunately does not draw from {-1,0,1}
+
 S sp(S k)//symbol from phrase: string interning, Ks(sp("aaa")). This should be called before introducing any sym to the instance
 { //We are using this to ensure any two 'character-identical' symbols are in fact represented by the same pointer S
   //See Knuth Algorithm 6.2.2T
+  O("BEG sp   %s\n",k); fflush(stdout);
   #define LINK(n,x) (n)->c[((x)+1)/2] // -1 => 0 , 1 => 1
   if(!k)R 0;//used in glue. used in _2m_4. used in parse. Probably a good argument to keep since it's exposed for libraries via 2: dyadic
   N t=SYMBOLS, s=t->c[1],p=s,q=p,r; I a,x;
   if(!s){s=t->c[1]=newN();P(!s,(S)ME);s->k=sdupI(k); if(!s->k){free(s);t->c[1]=0;ME;} R s->k;} // <-- strdup here and below
   while(q)
-  { if(!(a=SC(k,p->k))){R p->k;}//In the usual tree put: p->k=k,p->v=v before returning
-    if(!(q=LINK(p,a))){q=newN();P(!q,(S)ME);q->k=sdupI(k);if(!q->k){free(q);ME; R 0;} LINK(p,a)=q;break;}//Usual tree would q->v=v. mmo
+  { O("~FN SC(k,p->k)      I SC(S a,S b) <- S sp(S k)      ");
+    a=SC(k,p->k);
+    O("#FN sp :: SC(k,p->k)\n");
+    if(!a){R p->k;}//In the usual tree put: p->k=k,p->v=v before returning
+    O("~FO LINK(p,a)      LINK(n,x) <- S sp(S k)      \n");
+    q=LINK(p,a);
+    O("#FO sp :: LINK(p,a)\n");
+    if(!q)
+    { O("~FP newN()      N newN() <- S sp(S k)      ");
+      q=newN();
+      O("#FP sp :: newN()\n");
+      P(!q,(S)ME);
+      q->k=sdupI(k);
+      if(!q->k){ free(q); ME; R 0;}
+      LINK(p,a)=q;break; }//Usual tree would q->v=v. mmo
     else if(q->b){t=p;s=q;}
     p=q;
   }
+  O("~FR SC(k,s->k)      I SC(S a,S b) <- S sp(S k)      ");
   a=0>SC(k,s->k)?-1:1;
+  O("#FR sp :: SC(k,s->k)\n");
   r=p=LINK(s,a);
-  while(p!=q){x=SC(k,p->k); p->b=x;p=LINK(p,x);}
+  while(p!=q)
+  { O("~FS SC(k,p->k)      I SC(S a,S b) <- S sp(S k)      ");
+    x=SC(k,p->k);
+    O("#FS sp :: SC(k,p->k)\n");
+    p->b=x;p=LINK(p,x);}
   if(!s->b){s->b=a;R p->k;}
   else if(s->b==-a){s->b=0; R p->k;}
   if(r->b==a){p=r; LINK(s,a)=LINK(r,-a); LINK(r,-a)=s; s->b=r->b=0;}
@@ -40,10 +64,11 @@ S sp(S k)//symbol from phrase: string interning, Ks(sp("aaa")). This should be c
     if     (p->b== a){s->b=-a; r->b=0;}
     else if(p->b== 0){s->b= 0; r->b=0;}
     else if(p->b==-a){s->b= 0; r->b=a;}
-    p->b=0;
-  }
+    p->b=0; }
   t->c[s==t->c[1]?1:0]=p;
-  R q->k;
+  S z=q->k;
+  O("KK2\n");
+  R z;
 }
 
 //S spkC(K a){S u=strdupn(kC(a),a->n),v=sp(u);free(u);R v;}

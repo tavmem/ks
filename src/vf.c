@@ -35,7 +35,10 @@ K formKiCS(S s) //  0 $ "123\000456\000" is 123 ('\0' char)
     if(IN==r)r=-II;//if r < -0I then r=-0I
   }
   P(q && !isblank(q),(K)0)
-  R Ki(r);//oom
+  O("~FC Ki(r)      K Ki(I x) <- K formKiCS(S s)      ");
+  K z=Ki(r);//oom
+  O("#FC formKiCS :: Ki(I x)\n");
+  R z;
 }
 
 K formKfCS(S s) // 0.0 $ "123\000456\000" is 123 ('\0' char)

@@ -138,16 +138,19 @@ Z I nearPG(I i){ I k=((size_t)i)&(PG-1);R k?i+PG-k:i;}//up 0,8,...,8,16,16,...
 //Keyword "backingstore" in old k mailing list archives - extra KSWAP beyond regular swap space
 
 K newK(I t, I n)
-{ O("  BEG newK   t: %lld   n:%lld   ",t,n);
+{ O("BEG newK\n");
   K z;
   if(n>0 && n>MAX_OBJECT_LENGTH)R ME;//coarse (ignores bytes per type). but sz can overflow
   I k=sz(t,n),r;
-  U(z=kalloc(k,&r))
+  O("~FG kalloc(k,&r)      V kalloc(I k,I*r) <- K newK(I t, I n)      ");
+  z=kalloc(k,&r);
+  O("#FG newK :: kalloc(k,&r)\n");
+  U(z)
   //^^ relies on MAP_ANON being zero-filled for 0==t || 5==t (cd() the half-complete), 3==ABS(t) kC(z)[n]=0 (+-3 types emulate c-string)
   ic(slsz(z,r)); z->t=t; z->n=n;
   if(t==6)z->n=0;
   if(z->_c==0)z->_c=256;
-  O("&z: %p   sd_(z,0): ",&z);sd_(z,0);
+  //O("newK--   &z: %p   sd(z): ",&z);sd(z);
   #ifdef DEBUG
   krec[kreci++]=z;
   #endif
@@ -155,17 +158,23 @@ K newK(I t, I n)
 }
 
 Z V kallocI(I k,I r)
-{
+{ O("BEG kallocI   k: %lld   r: %lld\n",k,r);
   if(r>KP_MAX)R amem(k,r);// allocate for objects of sz > 2^KP_MAX
-  R unpool(r);
-}
+  O("~FI unpool(r)      V unpool(I r) <- V kallocI(I k,I r)      ");
+  V z=unpool(r);
+  O("#FI kallocI :: unpool(r)\n");
+  R z;}
 
 Z V kalloc(I k,I*r) //bytes. assumes k>0
-{
-  *r=lsz(k);R kallocI(k,*r);
-}
+{ O("BEG kalloc   k: %lld   r: %p\n",k,r);
+  *r=lsz(k);
+  O("~FH kallocI(k,*r)      V kallocI(I k,I r) <- V kalloc(I k,I*r)      ");
+  V z=kallocI(k,*r);
+  O("#FH kalloc :: kallocI(k,*r)\n");
+  R z; }
 
-Z V amem(I k,I r) {
+Z V amem(I k,I r)
+{ O("BEG amem   k: %lld   r: %lld\n",k,r);
   K z;
   if(MAP_FAILED==(z=mmap(0,k,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANON,-1,0)))R ME;
   mAlloc+=k<PG?PG:k;
@@ -174,12 +183,13 @@ Z V amem(I k,I r) {
 }
 
 Z V unpool(I r)
-{
+{ O("BEG unpool   r: %lld\n",r);
   V*z;
   V*L=((V*)KP)+r;
   I k= ((I)1)<<r;
   if(!*L || (V)0x106==*L)
   {
+    O("***** adding memory *****\n");
     U(z=amem(k,r))
     if(k<PG)
     {
@@ -188,10 +198,12 @@ Z V unpool(I r)
     }//Low lanes subdivide pages. no divide op
     *L=z;
   }
-  z=*L;*L=*z;*z=0;
+  O("    *L: %p   mUsed: %f   k: %lld   ",*L,mUsed,k); z=*L; *L=*z;
+  O("*z=0;   r: %lld   *z: %p   ",r,*z);fflush(stdout); *z=0; O("done\n");fflush(stdout);
   mUsed+=k; if(mUsed>mMax)mMax=mUsed;
   R z;
 }
+
 
 I cl2(I v) //optimized 64-bit ceil(log_2(I))
 {
@@ -321,7 +333,13 @@ extern K kapn(K *a,V v,I n){R kapn_(a,v,n);}
 extern K kap(K*a,V v){ if(!a)R 0; R (0<(*a)->t)?kapn_(a,v,1):kap1_(a,v); }
 //extern K kap(K*a,V v){R kapn_(a,v,1);}
 
-N newN(){R unpool(lsz(sizeof(Node)));}
+N newN()
+{ O("BEG newN\n");
+  O("~FQ unpool(lsz(sizeof(Node)))      V unpool(I r) <- N newN()      /n");
+  V z=unpool(lsz(sizeof(Node)));
+  O("#FQ newN :: unpool(lsz(sizeof(Node)))\n");
+  R z;}
+
 PDA newPDA(){PDA p=unpool(lsz(sizeof(Pda)));U(p) p->c=alloc(1); if(!p->c){ME;R 0;} R p;}
 I push(PDA p, C c){R appender(&p->c,&p->n,&c,1);}
 C    peek(PDA p){I n=p->n; R n?p->c[n-1]:0;}
@@ -329,7 +347,14 @@ C     pop(PDA p){R p->n>0?p->c[--(p->n)]:0;}
 C  bottom(PDA p){R p->n>0?p->c[0]:0;}
 void pdafree(PDA p){free(p->c); repool(p,lsz(sizeof(PDA)));}
 
-K Ki(I x){K z=newK(1,1);*kI(z)=x;R z;}
+K Ki(I x)
+{ O("BEG Ki   x: %lld\n",x);
+  O("~FB newK(1,1)      K newK(I t, I n) <- K Ki(I x)      ");
+  K z=newK(1,1);
+  O("#FB Ki :: newK(I t, I n)\n");
+  *kI(z)=x;
+  R z; }
+
 K Kf(F x){K z=newK(2,1);*kF(z)=x;R z;}
 K Kc(C x){K z=newK(3,1);*kC(z)=x;R z;}
 K Ks(S x){U(x) K z=newK(4,1);*kS(z)=x;R z;}//KDB+ >= 2.4 tries interning [sp()]  by default when generating sym atoms
