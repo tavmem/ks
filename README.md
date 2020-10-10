@@ -19,11 +19,16 @@ rlwrap -n ./k > ggg
 (.((`a;1);(`b;2)))(,`a)
 \\
 ```
-ps.k expects to find the output file ```ggg```
+The next step expects to find the output file ```ggg```
 
-Then, the final 2 commands, which are also done in the ~/ks directory:
+The final 2 commands (in Linux), are also done in the ~/ks directory:
 ```
 rlwrap -n ~/kona/k ps
+\\
+```
+In Windows
+```
+rlwrap -n ~/kona/k psw
 \\
 ```
 You get 2 results:
