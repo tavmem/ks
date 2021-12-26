@@ -117,20 +117,18 @@ Z K*denameRecurse(K*p,S t,I create) {
   K e=0;
   if(create) { O("~CN lookupEntryOrCreate(p,k)      K lookupEntryOrCreate(K *p,S k) <- K* denameRecurse(K *p,S t,I create)      ");
                e=lookupEntryOrCreate(p,k);
-               O("#CN denameRecurse :: lookupEntryOrCreate(p,k)\n");   //O("sd(KTREE):");sd(KTREE);
-               O("   CN: &e: %p      sd_(e,0): ",&e);sd_(e,0);
+               O("#CN denameRecurse :: lookupEntryOrCreate(p,k)  e: %p      sd_(e,0): ",&e); sd_(e,0);   //O("sd(KTREE):");sd(KTREE);
+               //O("   CN: &e: %p      sd_(e,0): ",&e);sd_(e,0);
                P(!e,(K*)ME) }
   else { K a=*p; if(5==a->t)e=DE(a,k); P(!e,&NIL) }
   if('.'==*t && (!t[1] || '.'==t[1])) { t++; p=EAP(e); }    //attribute dict
   else { O("~CL EVP(e)      K* EVP(K e) <- K* denameRecurse(K *p,S t,I create)      BEG EVP\n");
          O("    &e: %p      sd_(e,0): ",&e);sd_(e,0);
          p=EVP(e);
-         O("#CL denameRecurse :: EVP(e)\n"); } //value
-         O("   CL:  p: %p      sd_(*p,1):",p);sd_(*p,1);
+         O("#CL denameRecurse :: EVP(e)  p: %p      sd_(*p,1):",p); sd_(*p,1); } //value
   O("~CM denameRecurse(p,t,create)      K* denameRecurse(K*p,S t,I create) <- K* denameRecurse(K*p,S t,I create)      ");
-  K* z=denameRecurse(p,t,create);
-  O("#CM denameRecurse :: denameRecurse(p,t,create)\n");
-  O("   CM:  z: %p      sd_(*z,0):",p);sd_(*z,0);
+  K*z=denameRecurse(p,t,create);
+  O("#CM denameRecurse :: denameRecurse(p,t,create)  z: %p      sd_(*z,0): ",p); sd_(*z,0);
   R z; }
 
 K*denameD(K*d, S t, I create) {
@@ -138,22 +136,21 @@ K*denameD(K*d, S t, I create) {
   O("    d: %p      t: %s      create: %lld      &KTREE: %p\n",d,t,create,&KTREE);
   if(!simpleString(t)) R 0; //some kind of error
   O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      K* denameRecurse(K *p,S t,I create) <- K* denameD(K *d,S t,I create)      ");
-  K* v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
-  O("#CK denameD :: denameRecurse('.'==*t||!*t?&KTREE:d,t,create)\n");
-  O("   CK:"); O("  v: %p   sd_(*v,0):",v); if(v)sd_(*v,0); else O("\n");
+  K*v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
+  O("#CK denameD :: denameRecurse('.'==*t||!*t?&KTREE:d,t,create)  v: %p   sd_(*v,0):",v); if(v)sd_(*v,0); else O("  NOT v\n");
   R v; }
 
 K*denameS(S dir_string, S t, I create) {
   O("BEG denameS\n");    //duplicates '.' functionality in denameD to avoid dictionary initialization
   O("    dir_string: %s      t: %s      create: %lld\n",dir_string,t,create);
-  K* z;
+  K*z;
   if('.'==*t||!*t)z=&KTREE;
   else { O("~CJ denameD(&KTREE,dir_string,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)      ");
          z=denameD(&KTREE,dir_string,create);
          O("#CJ denameS :: denameD(&KTREE,dir_string,create)\n"); }
   O("~CO denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)     ");
   K*v= denameD(z,t,create);
-  O("#CO denameS :: denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)\n");
+  O("#CO denameS :: denameD('.'==*t||!*t?&KTREE:denameD(&KTREE,dir_string,create),t,create)  v: %p   sd_(*v,0):",v); if(v)sd_(*v,0); else O("  NOT v\n");
   R v; }
 
 //K* denameBig(K dir_sym,K name_sym){R denameS(*kS(dir_sym),*kS(name_sym));} //[unnecessary?] wrapper for K-object inputs

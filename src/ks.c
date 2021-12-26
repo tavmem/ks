@@ -30,11 +30,11 @@ S sp(S k)//symbol from phrase: string interning, Ks(sp("aaa")). This should be c
   while(q)
   { O("~FN SC(k,p->k)      I SC(S a,S b) <- S sp(S k)      ");
     a=SC(k,p->k);
-    O("#FN sp :: SC(k,p->k)\n");
+    O("#FN sp :: SC(k,p->k)  a: %lld\n",a);
     if(!a){R p->k;}//In the usual tree put: p->k=k,p->v=v before returning
     O("~FO LINK(p,a)      LINK(n,x) <- S sp(S k)      \n");
     q=LINK(p,a);
-    O("#FO sp :: LINK(p,a)\n");
+    O("#FO sp :: LINK(p,a)  q: %p\n",q);
     if(!q)
     { O("~FP newN()      N newN() <- S sp(S k)      ");
       q=newN();

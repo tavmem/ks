@@ -264,9 +264,7 @@ K wd(S s, int n)
   lineA=s; fdc=0;
   O("~CZ denameD(&KTREE,d_,1)      K* denameD(K *d,S t,I create) <-  K wd(S s, int n)      ");
   K* z=denameD(&KTREE,d_,1);
-  O("#CZ wd :: denameD(&KTREE,d_,1)\n");
-  O("   CZ:                   "); O("  z: %p                       sd_(*z,0):",z); if(z)sd_(*z,0); else O("\n");
-  //if(kK(KTREE)[0]){ O("        &kK(kK(KTREE)[0])[1]: %p      sd(kK(kK(KTREE)[0])[1]):",&kK(KTREE)[0]); sd(kK(kK(KTREE)[0])[1]); O("\n"); }
+  O("#CZ wd :: denameD(&KTREE,d_,1)  z: %p   sd_(*z,0):",z); if(z)sd_(*z,0); else O("  NOT z\n");
   O("~BS wd_(s,n, z,0)      K wd_(S s, int n, K *dict, K func) <- K wd(S s, int n)      ");
   K res=wd_(s,n, z,0);
   O("#BS wd :: wd_(s,n, denameD(&KTREE,d_,1),0)      sd(res):\n"); O(" %p",&res); sd(res);
@@ -617,7 +615,9 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                         O("s ------------------------------------------------------------------------------------\n");
                         O("s: %s\n",s);
                         O("u: %s\n",u);
+                        O("~FX *denameS("".k"",u,0)      K* denameS(S dir_string, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func)");
                         h=*denameS(".k",u,0);
+                        O("#FX capture :: *denameS("".k"",u,0)\n");
                         if(7==h->t){ hh=match( (K)kV(h)[CODE] , (K)kV(func)[CODE] ); O("sd(h[CODE]):");sd_( (K)kV(h)[CODE] ,2); }
                         O("......................................................................................\n");
                         if( dict==(K*)kV(func)+PARAMS){ O("n2a\n"); V q=newEntry(u); U(q)  M(q,kap( dict,&q)) z=EV(q); cd(q); }
