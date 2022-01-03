@@ -250,14 +250,16 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
   O("f: %p      stdin: %p      *a: %s      *n: %lld      p: %p\n",f,stdin,*a,*n,p);
   if(!*p)O("!*p\n");
   else O("(*p)->i: %lld    (*p)->s: %lld    (*p)->n: %lld    (*)p->c: %s\n",(*p)->i,(*p)->s,(*p)->n,(*p)->c);
-  if(lineA)O("lineA: %s\n",lineA); if(lineB)O("lineB: %s\n",lineB); O("fCheck: %lld\n",fCheck);
+  if(lineA)O("lineA: %s\n",lineA);
+  if(lineB)O("lineB: %s\n",lineB);
+  O("fCheck: %lld\n",fCheck);
   S s=0; I b=0,c=0,m=0,o=1,q=1; K k; F d; fbr=fer=feci=0; fam=1;
   if(-1==(c=getline_(&s,&m,f))) GC;
   if(fCheck && 1==strlen(s) && s[0]=='\n')
   { while(1==strlen(s) && s[0]=='\n')
     { prompt(b+fCheck);
       if(-1==(c=getline_(&s,&m,f))) GC; } }
-  O("s: %s\n",s);  O("cdp: %s\n",cdp);
+  O("s: %s\n",s); O("cdp: %s      fln: %lld      s[0]: %c\n",cdp,fln,s[0]);
   if(fln&&(s[0]=='#' && s[1]=='!')) GC;
   if(fCheck && s[0]==':' && (lineA || flc))
   { I i,j,jj;
