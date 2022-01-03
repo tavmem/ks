@@ -98,8 +98,7 @@ K lookupEntryOrCreate(K *p, S k) {    //****only *dict or *_n are passed to here
 }
 
 Z K*denameRecurse(K*p,S t,I create) {
-  O("BEG denameRecurse\n");
-  O("      p: %p      t: %s      create: %lld      ",p,t,create); O("sd_(*p,0):");sd_(*p,0);
+  O("BEG denameRecurse      p: %p      t: %s      create: %lld      ",p,t,create); O("sd_(*p,0):");sd_(*p,0);
   //O("sd(*p):");sd(*p);
   if(!*t)R p;
   if('.'==*t)t++;
@@ -132,17 +131,15 @@ Z K*denameRecurse(K*p,S t,I create) {
   R z; }
 
 K*denameD(K*d, S t, I create) {
-  O("BEG denameD\n");
-  O("    d: %p      t: %s      create: %lld      &KTREE: %p\n",d,t,create,&KTREE);
+  O("BEG denameD      d: %p      t: %s      create: %lld      &KTREE: %p\n",d,t,create,&KTREE);
   if(!simpleString(t)) R 0; //some kind of error
   O("~CK denameRecurse('.'==*t||!*t?&KTREE:d,t,create)      K* denameRecurse(K *p,S t,I create) <- K* denameD(K *d,S t,I create)      ");
   K*v=denameRecurse('.'==*t||!*t?&KTREE:d,t,create);
   O("#CK denameD :: denameRecurse('.'==*t||!*t?&KTREE:d,t,create)  v: %p   sd_(*v,0):",v); if(v)sd_(*v,0); else O("  NOT v\n");
   R v; }
 
-K*denameS(S dir_string, S t, I create) {
-  O("BEG denameS\n");    //duplicates '.' functionality in denameD to avoid dictionary initialization
-  O("    dir_string: %s      t: %s      create: %lld\n",dir_string,t,create);
+K*denameS(S dir_string, S t, I create) {  //duplicates '.' functionality in denameD to avoid dictionary initialization
+  O("BEG denameS      dir_string: %s      t: %s      create: %lld\n",dir_string,t,create);
   K*z;
   if('.'==*t||!*t)z=&KTREE;
   else { O("~CJ denameD(&KTREE,dir_string,create)      K* denameD(K*d, S t, I create) <- K* denameS(S dir_string, S t, I create)      ");
@@ -158,16 +155,17 @@ K*denameS(S dir_string, S t, I create) {
 //K* lookupEVOrCreate(K *p, S k){K x=lookupEntryOrCreate(p,k); R x?EVP(x):0; } //mm/o
 K*lookupEVOrCreate(K *p, S k){
   O("BEG lookupEVOrCreate\n");
-   O("~CT lookupEntryOrCreate(p,k)      K lookupEntryOrCreate(K *p, S k) <- K* lookupEVOrCreate(K *p, S k)      ");
-   K x=lookupEntryOrCreate(p,k);
-   O("#CT lookupEVOrCreate :: K x=lookupEntryOrCreate(p,k)\n");
-   //R x?EVP(x):0;
-   if(x){ O("~CU EVP(x)      K* EVP(K e) <- K* lookupEVOrCreate(K *p, S k)      ");
-          K* z=EVP(x);
-          O("#CU lookupEVOrCreate :: K* z=EVP(x)\n");
-          R z; }
-   else R 0;
- } //mm/o
+  O("~CT lookupEntryOrCreate(p,k)      K lookupEntryOrCreate(K *p, S k) <- K* lookupEVOrCreate(K *p, S k)      ");
+  K x=lookupEntryOrCreate(p,k);
+  O("#CT lookupEVOrCreate :: K x=lookupEntryOrCreate(p,k)\n");
+  //R x?EVP(x):0;
+  if(x){ O("~CU EVP(x)      K* EVP(K e) <- K* lookupEVOrCreate(K *p, S k)      ");
+         K* z=EVP(x);
+         O("#CU lookupEVOrCreate :: K* z=EVP(x)\n");
+         R z; }
+  else R 0;
+} //mm/o
+
 K lookup(K a, S b){K x=DE(a,b); R x?EV(x):_n();}
 Z I isVerbDyadic(K x,V v){R xt==7 && kW(x)[0]==v && !kW(x)[1];}
 I isColonDyadic(K x){R isVerbDyadic(x,offsetColon);}

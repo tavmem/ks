@@ -458,8 +458,7 @@ K* inKtree(K *d, S t, I create)
 I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
 { //IN string, string length, pos in string, markings;
   //OUT words, current #words; IN locals-storage, names-storage, charfunc/NULL
-  O("BEG capture\n"); O("    s: %s\n    n: %lld    k: %lld    *m: %lld    *w: %p    *d: %lld\n",s,n,k,*m,*w,*d);
-  O("    *locals:");sd(*locals);
+  O("BEG capture\n"); O("    s: %s\n    n: %lld    k: %lld    *m: %lld    *w: %p    *d: %lld",s,n,k,*m,*w,*d); O("    *locals:");sd(*locals);
   if(dict){O("    dict: %p      sd_(*dict,0):",dict); sd_(*dict,0);}
   O("    func:"); if(func)sd_(func,2); else O("\n");
   if(fll && fll!=n)fll=-1;
@@ -609,17 +608,12 @@ I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict, K func)
                           // see "getrusage" or http://stackoverflow.com/questions/53827/checking-available-stack-size-in-c
                         else{ O("n1b   "); z=((K(*)())vn_[charpos(n_s,u[1])])(); }
                       else if(func)
-                      { O("n2      u: %s     in if(func)\n ",u);
-                        O("func *********************************************************************************\n");
-                        sd((K)kV(func)[CODE]);
-                        O("s ------------------------------------------------------------------------------------\n");
-                        O("s: %s\n",s);
-                        O("u: %s\n",u);
+                      { O("func: ");sd((K)kV(func)[CODE]);
+                        if((u[0]=='_') && u[1]!='n')R 0;
                         O("~FX *denameS("".k"",u,0)      K* denameS(S dir_string, S t, I create) <- I capture(S s, I n, I k, I *m, V *w, I *d, K *locals, K *dict,K func)");
                         h=*denameS(".k",u,0);
                         O("#FX capture :: *denameS("".k"",u,0)\n");
                         if(7==h->t){ hh=match( (K)kV(h)[CODE] , (K)kV(func)[CODE] ); O("sd(h[CODE]):");sd_( (K)kV(h)[CODE] ,2); }
-                        O("......................................................................................\n");
                         if( dict==(K*)kV(func)+PARAMS){ O("n2a\n"); V q=newEntry(u); U(q)  M(q,kap( dict,&q)) z=EV(q); cd(q); }
                         else if((q=DE(*dict,u)))
                         { O("n2b      sd_(*dict,9):");sd_(*dict,9); O("sd_(q,9):");sd_(q,9);
