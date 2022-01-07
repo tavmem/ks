@@ -261,7 +261,7 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
       if(-1==(c=getline_(&s,&m,f))) GC; } }
   O("s: %s\n",s); O("cdp: %s      fln: %lld      s[0]: %c\n",cdp,fln,s[0]);
   if(fln&&(s[0]=='#' && s[1]=='!')) GC;
-  if(fCheck && s[0]==':' && (lineA || flc))
+  if(fCheck && s[0]==':' && (strstr(s,"`\"")==NULL) && (lineA || flc))
   { I i,j,jj;
     if(*a)
     { for(j=0; j<10; j++)if(cdp[j]==*ofnc)break;
