@@ -278,7 +278,8 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   if(!s) R 0;
   if(strstr(s,":\\t")) { show(kerr("\\t  syntax")); R 0; }
   I z=syntaxChk(s); if(z)O("syntaxErrror: %lld\n",z); if(z==999)R NE; if(z) R SYE;
-  if('\\'==s[0] && fbs){fbs=0; R backslash(s,n, dict);}
+  I i=0;while(i<n && isspace(s[i]))i++; if('\\'==s[i]) R backslash(s+i,n,dict);
+    //isspace lets \n through... odd but probably fine
   PDA p=0;
   O("~DJ newK(-1,1+n)   K newK(I t, I n) -- K wd_(S s, int n, K* dict, K func)   ");
   K km=newK(-1,1+n);
