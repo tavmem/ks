@@ -305,7 +305,9 @@ I line(FILE*f, S*a, I*n, PDA*p)       //just starting or just executed: *a=*n=*p
   if(v==1) { fCmplt=1; goto done; }         //generally incomplete
   if(v==0) fCmplt=0;
   if(n && '\n'==(*a)[*n-1]) (*a)[--*n]=0;   //chop for getline
+  O("~FY trim(*a)      Z void trim(S s) <- I line(FILE*f, S*a, I*n, PDA*p)\n");
   trim(*a); //remove leading blanks
+  O("#FY line :: trim(*a)\n");
   *n=strlen(*a); //strlen might have been changed in 'trim' or in 'recur'
   if(pthread_mutex_lock(&execute_mutex)){
     perror("Lock mutex in line()"); abort();}

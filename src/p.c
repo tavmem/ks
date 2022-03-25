@@ -207,8 +207,7 @@ Z I overcount(I*m,I n)
   R c; }
 
 Z I syntaxChk(S s)               //TODO: refactor the syntax check as a single pass
-{ O("BEG syntaxChk\n");
-  if(s[0]=='\t' || s[0]=='\014') R 5;
+{ if(s[0]=='\t' || s[0]=='\014') R 5;
   I n=strlen(s);
   if(n==1){ if(s[0]=='\'')R 10; else R 0; }
   I i,j,k=0;
@@ -243,7 +242,6 @@ Z I syntaxChk(S s)               //TODO: refactor the syntax check as a single p
     if((isalpha(s[i]) || s[i]=='`') && s[i-1]==':' && s[i-2]==':' && s[i-3]==':') R 142; }
   if(n>3) for(i=2;i<n-1;++i){if(s[i]=='/' && s[i-1]==':' && s[i-2]=='/' && s[i+1]!=':') R 150; }
   // if(n>5 && s[n-1]==':' && s[n-2]!=':' && s[n-3]==':') R 160;  //commented out to fix issue #590 syntax error
-  O("END syntaxChk\n");
   R k; }
 
 I mark(I*m,I k,I t){ DO(k, m[i]=i?t:-t) R k; }
@@ -277,7 +275,12 @@ K wd_(S s, int n, K*dict, K func) //parse: s input string, n length ;
   O("    dict: %p      sd_(*dict,0):",dict); if(dict)sd_(*dict,0); else O("\n");
   if(!s) R 0;
   if(strstr(s,":\\t")) { show(kerr("\\t  syntax")); R 0; }
-  I z=syntaxChk(s); if(z)O("syntaxErrror: %lld\n",z); if(z==999)R NE; if(z) R SYE;
+  O("~FZ syntaxChk(s)      Z I syntaxChk(S s) <- K wd_(S s, int n, K*dict, K func)\n");
+  I z=syntaxChk(s);
+  O("#FZ wd_ :: syntaxChk(s)\n");
+  if(z)O("syntaxErrror: %lld\n",z);
+  if(z==999)R NE;
+  if(z) R SYE;
   I i=0;while(i<n && isspace(s[i]))i++; if('\\'==s[i]) R backslash(s+i,n,dict);
     //isspace lets \n through... odd but probably fine
   PDA p=0;
