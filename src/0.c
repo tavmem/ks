@@ -529,6 +529,7 @@ K _1m(K x) {    //Keeps binary files mapped
   //See 'scratch.txt' for an Arthur implementation of this
 
   //Largely Copy/pasted from various I/O functions
+  O("beg _lm\n");
   P(4!=xt && 3!=ABS(xt),TE)
 
   S m=CSK(x); //looks for .K or .L extensions first
@@ -551,6 +552,7 @@ K _1m(K x) {    //Keeps binary files mapped
 
   S v;
   //These mmap arguments are present in Arthur's code. WRITE+PRIVATE lets reference count be modified without affecting file
+  O("_1m    mmap(address:0,   length:%lld,   PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,  file:%lld   offset:0\n)",s,f);
   if(MAP_FAILED==(v=mmap(0,s,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,f,0)))R SE;
 
   //TODO: verify that the file is valid K data. For -1,-2,-3 types (at least) you can avoid scanning the whole thing and check size
@@ -562,6 +564,7 @@ K _1m(K x) {    //Keeps binary files mapped
 }
 
 Z K _1m_r(I f,V fixed, V v,V aft,I*b) {   //File descriptor, moving * into mmap, fixed * to last mmapped+1, bytes read
+  O("beg _lm_r\n");
   I s=aft-v; //subtle but signed not big enough to hold max difference here
   if(s < 4*sizeof(I)) R NE; // file is malformed
 
@@ -587,6 +590,7 @@ Z K _1m_r(I f,V fixed, V v,V aft,I*b) {   //File descriptor, moving * into mmap,
     length+=mod;
     offset-=mod;
 
+    O("_1m_r  mmap(addfress:0,   length:%lld,   PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,  file:%lld   offset:%lld)\n",length,f,offset);
     if(MAP_FAILED==(u=mmap(0,length,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,f,offset))){R SE;}
     mMap+=length;
     mUsed+=length;if(mUsed>mMax)mMax=mUsed;
@@ -603,6 +607,7 @@ Z K _1m_r(I f,V fixed, V v,V aft,I*b) {   //File descriptor, moving * into mmap,
 }
 
 K _1d(K x,K y) {
+  O("beg _ld\n");
   I t=x->t;
   if(4==t || -3==t)R _1d_write(x,y,0); //char-vector but not char-atom
   if(!t)R _1d_read(x,y);
@@ -613,6 +618,7 @@ K _1d(K x,K y) {
 Z K _1d_write(K x,K y,I dosync) {
   //Note: all file objects must be at least 4*sizeof(I) bytes...fixes bugs in K3.2, too
   //K3.2 Bug - "a"1:`a;2:"a" or 1:"a" - wsfull, tries to read sym but didn't write enough bytes?
+  O("beg _ld_write\n");
   I n=disk(y);
 
   //Copy-pasted from 2:
@@ -630,6 +636,7 @@ Z K _1d_write(K x,K y,I dosync) {
   P(ftruncate(f,n),SE)
   //lfop: see 0: write for possible way to do ftruncate etc. on Windows
   S v;
+  O("_1d_write  mmap(addfress:0,   length:%lld,   PROT_WRITE,MAP_SHARED,   file:%lld   offset:0)\n",n,f);
   if(MAP_FAILED==(v=mmap(0,n,PROT_WRITE,MAP_SHARED,f,0)))R SE; // should this be MAP_PRIVATE|MAP_NORESERVE ?
   I r=close(f); if(r)R FE;
 
@@ -642,6 +649,7 @@ Z K _1d_write(K x,K y,I dosync) {
 }
 
 I wrep(K x,V v,I y) {   //write representation. see rep(). y in {0,1}->{net, disk}
+  O("beg wrep\n");
   I t=xt, n=xn;
   I* w=(I*)v;
 
