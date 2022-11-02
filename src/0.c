@@ -529,7 +529,8 @@ K _1m(K x) {    //Keeps binary files mapped
   //See 'scratch.txt' for an Arthur implementation of this
 
   //Largely Copy/pasted from various I/O functions
-  O("beg _lm\n");
+  O("BEG _1m\n");
+  O("x:");sd(x);
   P(4!=xt && 3!=ABS(xt),TE)
 
   S m=CSK(x); //looks for .K or .L extensions first
@@ -540,6 +541,7 @@ K _1m(K x) {    //Keeps binary files mapped
 
   struct stat c; //lfop windows: GetFileSizeEx
 
+  O("e: %s\n",e);
   I f=open(e,O_RDWR); //Try the extended version of the filename first
   if(f>=0) stat(e,&c);
   else {f=open(m,O_RDWR); stat(m,&c);} //Then try the plain version
@@ -552,19 +554,21 @@ K _1m(K x) {    //Keeps binary files mapped
 
   S v;
   //These mmap arguments are present in Arthur's code. WRITE+PRIVATE lets reference count be modified without affecting file
-  O("_1m    mmap(address:0,   length:%lld,   PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,  file:%lld   offset:0\n)",s,f);
+  O("_1m    mmap(address:0,   length: %lld,   PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,  file: %lld   offset:0)\n",s,f);
   if(MAP_FAILED==(v=mmap(0,s,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,f,0)))R SE;
 
   //TODO: verify that the file is valid K data. For -1,-2,-3 types (at least) you can avoid scanning the whole thing and check size
   I b=0;
+  O("~GC _1m_r(f,v,v,v+s,&b)      Z K _1m_r(I f,V fixed, V v,V aft,I*b) <- K _1m(K x)       ");
   K z = _1m_r(f,v,v,v+s,&b);
+  O("#GC _1m :: _1m_r(I f,V fixed, V v,V aft,I*b)\n");
   r=close(f); if(r)R FE;
   r=munmap(v,s); if(r)R UE;
   R z;
 }
 
 Z K _1m_r(I f,V fixed, V v,V aft,I*b) {   //File descriptor, moving * into mmap, fixed * to last mmapped+1, bytes read
-  O("beg _lm_r\n");
+  O("BEG _1m_r\n");
   I s=aft-v; //subtle but signed not big enough to hold max difference here
   if(s < 4*sizeof(I)) R NE; // file is malformed
 
@@ -592,6 +596,7 @@ Z K _1m_r(I f,V fixed, V v,V aft,I*b) {   //File descriptor, moving * into mmap,
 
     O("_1m_r  mmap(addfress:0,   length:%lld,   PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,  file:%lld   offset:%lld)\n",length,f,offset);
     if(MAP_FAILED==(u=mmap(0,length,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_NORESERVE,f,offset))){R SE;}
+
     mMap+=length;
     mUsed+=length;if(mUsed>mMax)mMax=mUsed;
 
@@ -607,9 +612,15 @@ Z K _1m_r(I f,V fixed, V v,V aft,I*b) {   //File descriptor, moving * into mmap,
 }
 
 K _1d(K x,K y) {
-  O("beg _ld\n");
+  O("BEG _1d\n");
+  O("x:");sd(x); O("y:");sd(y);
   I t=x->t;
-  if(4==t || -3==t)R _1d_write(x,y,0); //char-vector but not char-atom
+  if(4==t || -3==t){
+    O("~GB _1d_write(x,y,0)      Z K _1d_write(K x,K y,I dosync) <- K _1d(K x,K y)      ");
+    I r=remove("file.K"); O("r: %lld\n",r);
+    K z=_1d_write(x,y,0);
+    O("#GB _1d :: _1d_write(K x,K y,I dosync)\n");
+    R z; } //char-vector but not char-atom
   if(!t)R _1d_read(x,y);
   if(3==t)R _1d_char(x,y);
   R TE; }
@@ -618,7 +629,8 @@ K _1d(K x,K y) {
 Z K _1d_write(K x,K y,I dosync) {
   //Note: all file objects must be at least 4*sizeof(I) bytes...fixes bugs in K3.2, too
   //K3.2 Bug - "a"1:`a;2:"a" or 1:"a" - wsfull, tries to read sym but didn't write enough bytes?
-  O("beg _ld_write\n");
+  O("BEG _1d_write\n");
+  O("dosync: %lld    x:",dosync);sd(x); O("y:");sd(y);
   I n=disk(y);
 
   //Copy-pasted from 2:
@@ -640,7 +652,9 @@ Z K _1d_write(K x,K y,I dosync) {
   if(MAP_FAILED==(v=mmap(0,n,PROT_WRITE,MAP_SHARED,f,0)))R SE; // should this be MAP_PRIVATE|MAP_NORESERVE ?
   I r=close(f); if(r)R FE;
 
+  O("~GA _wrep(y,v,1)      I wrep(K x,V v,I y) <- Z K _1d_write(K x,K y,I dosync)      ");
   wrep(y,v,1);
+  O("#GA _1d_write :: wrep(K x,V v,I y)\n");
 
   if(dosync)msync(v,n,MS_SYNC|MS_INVALIDATE); //slow,but necessary
   r=munmap(v,n); if(r)R UE;
@@ -649,7 +663,8 @@ Z K _1d_write(K x,K y,I dosync) {
 }
 
 I wrep(K x,V v,I y) {   //write representation. see rep(). y in {0,1}->{net, disk}
-  O("beg wrep\n");
+  O("BEG wrep\n");
+  O("y: %lld   v: %p   x:",y,v);sd(x);
   I t=xt, n=xn;
   I* w=(I*)v;
 

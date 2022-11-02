@@ -187,7 +187,7 @@ Z V unpool(I r)
   V*z;
   V*L=((V*)KP)+r;
   I k= ((I)1)<<r;
-  if(!*L || (V)0x106==*L)
+  if(!*L || (V)0x200>*L)
   {
     O("***** adding memory *****\n");
     U(z=amem(k,r))
